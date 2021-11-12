@@ -6,17 +6,19 @@ class CustomButton extends StatelessWidget {
   final void Function() onPressed;
   final Color backgroundColor;
   final Color textColor;
+  final bool disableElevation;
   const CustomButton({
     Key? key,
     required this.text,
     required this.onPressed,
     this.backgroundColor = authPrimaryColor,
     this.textColor = Colors.black,
+    this.disableElevation = false,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
+    return MaterialButton(
       onPressed: onPressed,
       child: Text(
         text,
@@ -25,10 +27,10 @@ class CustomButton extends StatelessWidget {
           fontWeight: FontWeight.bold,
         ),
       ),
-      style: TextButton.styleFrom(
-        padding: const EdgeInsets.all(15.0),
-        backgroundColor: backgroundColor,
-      ),
+      padding: const EdgeInsets.all(15.0),
+      color: backgroundColor,
+      elevation: disableElevation ? 0 : 2,
+      highlightElevation: disableElevation ? 0 : 8,
     );
   }
 }

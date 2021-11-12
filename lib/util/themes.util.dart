@@ -2,13 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 const Color inputFieldColor = Color(0xFFEDEDED);
-const Color backgroundColor = Color(0xFFFCFCFC);
+const Color backgroundColor = Color(0xFFF6F6F6);
 const Color textColor = Color(0xFF545D6E);
 const Color authPrimaryColor = Color(0xFFF5EE50);
 
 class Themes {
   static ThemeData get lightTheme => ThemeData(
         scaffoldBackgroundColor: backgroundColor,
+        appBarTheme: const AppBarTheme(
+          color: Color(0xFFEFEFEF),
+          elevation: 0,
+          titleTextStyle: TextStyle(
+            color: textColor,
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+          ),
+        ),
         iconTheme: const IconThemeData(
           color: textColor,
         ),

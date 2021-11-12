@@ -4,5 +4,5 @@ class Screen {
   static String get success => '/success';
   static String get dashboard => 'dashboard';
   static String get controller => '/controller';
-  static String get settings => '/settings';
+  static String get deviceSettings => '/deviceSettings';
 }
