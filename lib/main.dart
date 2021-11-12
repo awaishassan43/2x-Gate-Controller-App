@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:iot/enum/route.enum.dart';
 import 'package:iot/screens/login/login.screen.dart';
+import 'package:iot/screens/signup/signup.screen.dart';
+import 'package:iot/screens/success/success.screen.dart';
+import 'package:iot/util/themes.util.dart';
 
 void main() {
   runApp(const MyApp());
@@ -12,10 +15,14 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(),
+      theme: Themes.lightTheme,
+      themeMode: ThemeMode.light,
       routes: {
         Screen.login: (context) => const LoginScreen(),
+        Screen.signup: (context) => const SignupScreen(),
+        Screen.success: (context) => const SuccessScreen(),
       },
+      initialRoute: Screen.success,
     );
   }
 }
