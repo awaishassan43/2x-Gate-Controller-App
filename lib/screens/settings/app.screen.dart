@@ -1,31 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:iot/components/button.component.dart';
-import 'package:iot/util/extensions.util.dart';
 import 'package:iot/screens/settings/components/item.component.dart';
 import 'package:iot/screens/settings/components/section.component.dart';
 
-class DeviceSettings extends StatelessWidget {
-  const DeviceSettings({Key? key}) : super(key: key);
+class AppSettings extends StatelessWidget {
+  const AppSettings({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    const TextStyle netTextStyle = TextStyle(
-      fontWeight: FontWeight.bold,
-      fontSize: 12,
-      color: Colors.black26,
-    );
-
-    const TextStyle trailingTextStyle = TextStyle(
-      fontWeight: FontWeight.bold,
-      fontSize: 14,
-      color: Colors.black87,
-    );
-
-    final DateTime today = DateTime.now();
-
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Device Settings"),
+        title: const Text("App Settings"),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -34,41 +19,53 @@ class DeviceSettings extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Section(
-              header: "General",
+              header: "Profile",
               children: [
+                const SectionItem(
+                  title: "Email",
+                  trailingText: "google@gmail.com",
+                ),
                 SectionItem(
-                  title: "Controller Name",
-                  trailingText: "Gate Front",
+                  title: "Name",
+                  trailingText: "Tom Cruise",
                   onEdit: () {},
+                ),
+                SectionItem(
+                  title: "Phone",
+                  onEdit: () {},
+                  trailingText: "+1 0123456789",
+                ),
+                SectionItem(
+                  title: "Password",
+                  showChevron: true,
+                  onTap: () {},
                   showSeparator: false,
                 ),
               ],
             ),
             Section(
-              header: "Relay 1",
+              header: "Upgrade",
               children: [
                 SectionItem(
-                  title: "Name",
-                  subtitleText: "Automatically close the door at a specified time",
-                  trailingText: "Gate One",
-                  onEdit: () {},
+                  title: "Upgrade to Premium",
+                  subtitleText: "Add multiple devices, Activate multiple features",
+                  showChevron: true,
+                  onTap: () {},
+                  showSeparator: false,
                 ),
+              ],
+            ),
+            Section(
+              header: "Settings",
+              children: [
                 SectionItem(
-                  title: "Output Time",
-                  subtitleText: "Duration",
+                  title: "Temperature Unit",
+                  trailingText: "Celcius",
+                  showChevron: true,
                   onTap: () {},
                 ),
-                const SectionItem(
-                  title: "External Input",
-                  subtitleText: "Select door sensor input",
-                ),
-                const SectionItem(
-                  title: "Auto Close",
-                  subtitleText: "Automatically close the dooar at a specified time",
-                ),
                 SectionItem(
-                  title: "Scheduled",
-                  subtitleText: "Open and close the door at a specified time",
+                  title: "24-Hour Time",
                   trailing: Switch(
                     value: false,
                     onChanged: (value) {},
@@ -78,97 +75,67 @@ class DeviceSettings extends StatelessWidget {
               ],
             ),
             Section(
-              header: "Info",
+              header: "Share",
+              subHeader: "[Premium Feature]",
               children: [
                 SectionItem(
-                  title: "Firmware",
+                  title: "Family",
+                  trailingText: "View",
+                  showChevron: true,
                   onTap: () {},
-                  trailing: Row(
-                    children: const [
-                      Text(
-                        "v1.1",
-                        style: trailingTextStyle,
-                      ),
-                      Icon(
-                        Icons.chevron_right_rounded,
-                        size: 30,
-                      ),
-                    ],
-                  ),
                 ),
                 SectionItem(
-                  title: "Date",
-                  trailingText: "${today.day} ${today.getMonth} ${today.year}",
+                  title: "Guest",
+                  trailingText: "View",
+                  onTap: () {},
+                  showChevron: true,
                 ),
                 SectionItem(
-                  title: "Time",
-                  trailingText: "${today.hour}:${today.minute}",
-                ),
-                SectionItem(
-                  title: "Network",
-                  subtitle: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: const [
-                          Text("Strength", style: netTextStyle),
-                          Text("Good", style: netTextStyle),
-                        ],
-                      ),
-                      const SizedBox(height: 3.5),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: const [
-                          Text("Mac ID", style: netTextStyle),
-                          Text("16f4:12gh:1234", style: netTextStyle),
-                        ],
-                      ),
-                      const SizedBox(height: 3.5),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: const [
-                          Text(
-                            "IP Address",
-                            style: netTextStyle,
-                          ),
-                          Text(
-                            "192.168.1.1",
-                            style: netTextStyle,
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+                  title: "Add User",
+                  showChevron: true,
+                  onTap: () {},
+                  showSeparator: false,
                 ),
               ],
             ),
             Section(
-              header: "General",
               children: [
                 SectionItem(
-                  title: "User Guide",
-                  trailing: const Icon(Icons.chevron_right_rounded),
+                  title: "Terms of Use",
                   onTap: () {},
+                  trailingText: "View",
+                  showChevron: true,
                 ),
                 SectionItem(
-                  title: "FAQ",
-                  trailing: const Icon(Icons.chevron_right_rounded),
+                  title: "Privacy Policy",
                   onTap: () {},
+                  showChevron: true,
+                  trailingText: "View",
+                ),
+                SectionItem(
+                  title: "Faq",
+                  onTap: () {},
+                  showChevron: true,
+                ),
+                SectionItem(
+                  title: "Feedback",
+                  onTap: () {},
+                  showChevron: true,
+                ),
+                SectionItem(
+                  title: "App Version",
+                  onTap: () {},
+                  trailingText: "v1.2",
+                  showSeparator: false,
+                  showChevron: true,
                 ),
               ],
             ),
-            const SizedBox(height: 40),
+            const SizedBox(height: 30),
             CustomButton(
-              text: "Reboot",
+              text: "Sign Out",
               onPressed: () {},
-              backgroundColor: Colors.white,
-              disableElevation: true,
-            ),
-            const SizedBox(height: 15),
-            CustomButton(
-              text: "Delete Device",
-              onPressed: () {},
-              textColor: Colors.red,
+              textColor: Colors.blue,
               backgroundColor: Colors.white,
               disableElevation: true,
             ),

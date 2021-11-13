@@ -9,6 +9,7 @@ class SectionItem extends StatelessWidget {
   final void Function()? onEdit;
   final void Function()? onTap;
   final bool showSeparator;
+  final bool showChevron;
   const SectionItem({
     Key? key,
     required this.title,
@@ -19,6 +20,7 @@ class SectionItem extends StatelessWidget {
     this.onTap,
     this.trailingText,
     this.showSeparator = true,
+    this.showChevron = false,
   })  : assert((trailing != null || trailingText != null) || (trailing == null && trailingText == null)),
         assert((trailing != null || trailingText != null) || (trailing == null && trailingText == null)),
         super(key: key);
@@ -110,7 +112,13 @@ class SectionItem extends StatelessWidget {
                           Icons.edit,
                           size: 20,
                         ),
-                      )
+                      ),
+                    if (showChevron)
+                      const Icon(
+                        Icons.chevron_right_rounded,
+                        size: 28,
+                        color: Colors.black45,
+                      ),
                   ],
                 ),
                 /**
