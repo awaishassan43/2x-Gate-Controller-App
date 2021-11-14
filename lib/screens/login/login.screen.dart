@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:iot/components/button.component.dart';
 import 'package:iot/components/input.component.dart';
 import 'package:iot/components/link.component.dart';
+import 'package:iot/enum/route.enum.dart';
 import 'package:iot/util/constants.util.dart';
 import 'package:iot/util/functions.util.dart';
 import 'package:iot/util/themes.util.dart';
@@ -143,7 +144,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         CustomButton(
                           text: "Login",
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.pushNamedAndRemoveUntil(context, Screen.dashboard, (route) => false);
+                          },
                         ),
                       ],
                     ),
@@ -171,7 +174,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 5),
                 CustomButton(
                   text: "Create an Account",
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.of(context).pushReplacementNamed(Screen.signup);
+                  },
                   backgroundColor: Colors.black,
                   textColor: Colors.white,
                 ),

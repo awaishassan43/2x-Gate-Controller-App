@@ -180,7 +180,9 @@ class _SignupScreenState extends State<SignupScreen> {
                         ),
                         CustomButton(
                           text: "Register",
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.pushNamedAndRemoveUntil(context, Screen.success, (route) => false);
+                          },
                         ),
                       ],
                     ),
@@ -206,7 +208,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       const SizedBox(width: 5),
                       LinkButton(
                         onPressed: () {
-                          Navigator.of(context).pushReplacementNamed(Screen.login);
+                          Navigator.pushNamedAndRemoveUntil(context, Screen.login, (route) => false);
                         },
                         text: "Login",
                         color: Colors.blue,

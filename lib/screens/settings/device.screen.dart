@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:iot/components/button.component.dart';
+import 'package:iot/models/device.model.dart';
 import 'package:iot/util/extensions.util.dart';
 import 'package:iot/screens/settings/components/item.component.dart';
 import 'package:iot/screens/settings/components/section.component.dart';
 
 class DeviceSettings extends StatelessWidget {
-  const DeviceSettings({Key? key}) : super(key: key);
+  final Device device;
+  const DeviceSettings({
+    Key? key,
+    required this.device,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -13,12 +18,6 @@ class DeviceSettings extends StatelessWidget {
       fontWeight: FontWeight.bold,
       fontSize: 12,
       color: Colors.black26,
-    );
-
-    const TextStyle trailingTextStyle = TextStyle(
-      fontWeight: FontWeight.bold,
-      fontSize: 14,
-      color: Colors.black87,
     );
 
     final DateTime today = DateTime.now();

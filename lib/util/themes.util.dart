@@ -17,6 +17,9 @@ class Themes {
             fontWeight: FontWeight.bold,
             fontSize: 16,
           ),
+          iconTheme: IconThemeData(
+            color: textColor,
+          ),
         ),
         iconTheme: const IconThemeData(
           color: textColor,
