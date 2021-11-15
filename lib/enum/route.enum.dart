@@ -1,4 +1,5 @@
 class Screen {
+  // Specific screens
   static String get login => '/login';
   static String get signup => '/signup';
   static String get success => '/success';
@@ -8,6 +9,9 @@ class Screen {
   static String get appSettings => '/appSettings';
   static String get device => '/device';
   static String get resetPassword => '/resetPassword';
-  static String get temperatureUnit => '/temperatureUnit';
   static String get feedback => '/feedback';
+
+  // General purpose screens
+  static String get editor => '/editor';
+  static String get temperatureUnit => '/temperatureUnit';
 }

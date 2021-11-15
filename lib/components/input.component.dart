@@ -6,6 +6,7 @@ class CustomInput extends StatefulWidget {
   final TextEditingController controller;
   final Widget? action;
   final bool isPassword;
+  final bool autoFocus;
   const CustomInput({
     Key? key,
     this.icon,
@@ -13,6 +14,7 @@ class CustomInput extends StatefulWidget {
     required this.controller,
     this.action,
     this.isPassword = false,
+    this.autoFocus = false,
   })  : assert((action == null && isPassword) || (action != null && !isPassword) || (action == null && !isPassword)),
         super(key: key);
 
@@ -32,6 +34,8 @@ class _CustomInputState extends State<CustomInput> {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      controller: widget.controller,
+      autofocus: widget.autoFocus,
       obscureText: isHidden,
       decoration: InputDecoration(
         contentPadding: EdgeInsets.all(widget.icon == null ? 12.5 : 0),

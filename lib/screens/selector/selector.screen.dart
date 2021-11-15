@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:iot/components/selector.component.dart';
+import 'package:iot/screens/selector/components/selector.component.dart';
 
 class SelectorScreen extends StatelessWidget {
   final String title;

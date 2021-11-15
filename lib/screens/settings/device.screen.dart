@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:iot/components/button.component.dart';
 import 'package:iot/models/device.model.dart';
+import 'package:iot/screens/selector/selector.screen.dart';
 import 'package:iot/util/extensions.util.dart';
 import 'package:iot/screens/settings/components/item.component.dart';
 import 'package:iot/screens/settings/components/section.component.dart';
@@ -55,16 +56,51 @@ class DeviceSettings extends StatelessWidget {
                 SectionItem(
                   title: "Output Time",
                   subtitleText: "Duration",
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) {
+                        return const SelectorScreen(
+                          title: "Output Time",
+                          options: ["0.5 seconds", "5 seconds", "5 minutes", "30 minutes"],
+                          selectedOption: "5 seconds",
+                        );
+                      }),
+                    );
+                  },
                 ),
-                const SectionItem(
+                SectionItem(
                   title: "External Input",
                   subtitleText: "Select door sensor input",
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) {
+                        return const SelectorScreen(
+                          title: "Door Sensor Input",
+                          options: ["External Input 1", "None"],
+                          selectedOption: "External Input 1",
+                        );
+                      }),
+                    );
+                  },
                 ),
-                const SectionItem(
+                SectionItem(
                   title: "Auto Close",
                   subtitleText: "Automatically close the dooar at a specified time",
                   trailingText: "30 Seconds",
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) {
+                        return const SelectorScreen(
+                          title: "Auto Close",
+                          options: ["30 seconds", "1 minutes", "2 minutes", "5 minutes", "None"],
+                          selectedOption: "30 seconds",
+                        );
+                      }),
+                    );
+                  },
                 ),
                 SectionItem(
                   title: "Scheduled",
@@ -89,16 +125,51 @@ class DeviceSettings extends StatelessWidget {
                 SectionItem(
                   title: "Output Time",
                   subtitleText: "Duration",
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) {
+                        return const SelectorScreen(
+                          title: "Output Time",
+                          options: ["0.5 seconds", "5 seconds", "5 minutes", "30 minutes"],
+                          selectedOption: "5 seconds",
+                        );
+                      }),
+                    );
+                  },
                 ),
-                const SectionItem(
+                SectionItem(
                   title: "External Input",
                   subtitleText: "Select door sensor input",
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) {
+                        return const SelectorScreen(
+                          title: "Door Sensor Input",
+                          options: ["External Input 1", "None"],
+                          selectedOption: "External Input 1",
+                        );
+                      }),
+                    );
+                  },
                 ),
-                const SectionItem(
+                SectionItem(
                   title: "Auto Close",
                   subtitleText: "Automatically close the dooar at a specified time",
                   trailingText: "30 Seconds",
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) {
+                        return const SelectorScreen(
+                          title: "Auto Close",
+                          options: ["30 seconds", "1 minutes", "2 minutes", "5 minutes", "None"],
+                          selectedOption: "30 seconds",
+                        );
+                      }),
+                    );
+                  },
                 ),
                 SectionItem(
                   title: "Scheduled",

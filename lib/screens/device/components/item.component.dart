@@ -13,7 +13,7 @@ class BottomSectionItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color color = Colors.black45;
+    const Color color = Colors.black45;
 
     return MaterialButton(
       onPressed: onPressed,
@@ -33,7 +33,7 @@ class BottomSectionItem extends StatelessWidget {
           const SizedBox(width: 2.5),
           Text(
             text,
-            style: TextStyle(
+            style: const TextStyle(
               color: color,
               fontSize: 15,
               fontWeight: FontWeight.bold,

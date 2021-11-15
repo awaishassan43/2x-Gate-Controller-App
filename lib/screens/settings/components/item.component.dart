@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:iot/enum/route.enum.dart';
+import 'package:iot/screens/editor/editor.screen.dart';
 
 class SectionItem extends StatelessWidget {
   final String title;
@@ -104,7 +106,15 @@ class SectionItem extends StatelessWidget {
                     if (trailing != null) trailing!,
                     if (onEdit != null)
                       IconButton(
-                        onPressed: onEdit,
+                        onPressed: () {
+                          if (trailingText == null) {
+                            return;
+                          }
+
+                          Navigator.push(context, MaterialPageRoute(builder: (context) {
+                            return EditorScreen(initialValue: trailingText!, heading: title);
+                          }));
+                        },
                         constraints: const BoxConstraints(
                           maxHeight: 40,
                           maxWidth: 40,

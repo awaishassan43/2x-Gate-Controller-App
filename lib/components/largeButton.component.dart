@@ -13,6 +13,7 @@ class LargeButton extends StatelessWidget {
   final double iconSize;
   final double outerSize;
   final double innerSize;
+  final bool disableElevation;
   const LargeButton({
     Key? key,
     required this.icon,
@@ -26,16 +27,17 @@ class LargeButton extends StatelessWidget {
     this.iconSize = 80,
     this.outerSize = 200,
     this.innerSize = 115,
+    this.disableElevation = true,
   })  : assert(outerSize > innerSize && innerSize > iconSize),
         super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    const List<BoxShadow> shadow = [
+    final List<BoxShadow> shadow = [
       BoxShadow(
         color: Colors.black26,
-        spreadRadius: 0.5,
-        blurRadius: 7.5,
+        spreadRadius: 0,
+        blurRadius: disableElevation ? 2.5 : 7.5,
       ),
     ];
 

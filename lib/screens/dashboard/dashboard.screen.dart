@@ -56,6 +56,9 @@ class Dashboard extends StatelessWidget {
                 relays: [
                   Relay(name: "Gate Front", isOpen: false),
                   Relay(name: "Gate Back", isOpen: true),
+                  Relay(name: "Gate Front", isOpen: false),
+                  Relay(name: "Gate Back", isOpen: true),
+                  Relay(name: "Gate Front", isOpen: false),
                 ],
               ),
             ),

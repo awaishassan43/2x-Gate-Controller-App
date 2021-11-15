@@ -37,25 +37,23 @@ class MyApp extends StatelessWidget {
         Screen.feedback: (context) => const FeedbackScreen(),
       },
       onGenerateRoute: (settings) {
-        if (settings.name == Screen.device) {
-          return MaterialPageRoute(builder: (context) {
+        return MaterialPageRoute(builder: (context) {
+          if (settings.name == Screen.device) {
             final Device device = settings.arguments as Device;
             return DeviceScreen(device: device);
-          });
-        } else if (settings.name == Screen.deviceSettings) {
-          return MaterialPageRoute(builder: (context) {
+          } else if (settings.name == Screen.deviceSettings) {
             final Device device = settings.arguments as Device;
             return DeviceSettings(device: device);
-          });
-        } else if (settings.name == Screen.temperatureUnit) {
-          return MaterialPageRoute(builder: (context) {
+          } else if (settings.name == Screen.temperatureUnit) {
             return const SelectorScreen(
               title: "Temperature Unit",
               options: ["Celcius", "Farenheit"],
               selectedOption: "Celcius",
             );
-          });
-        }
+          } else {
+            return Container();
+          }
+        });
       },
       initialRoute: Screen.dashboard,
     );

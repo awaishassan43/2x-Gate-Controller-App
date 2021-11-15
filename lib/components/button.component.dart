@@ -8,6 +8,7 @@ class CustomButton extends StatelessWidget {
   final Color textColor;
   final bool disableElevation;
   final double borderRadius;
+  final double padding;
   const CustomButton({
     Key? key,
     required this.text,
@@ -16,6 +17,7 @@ class CustomButton extends StatelessWidget {
     this.textColor = Colors.black,
     this.disableElevation = false,
     this.borderRadius = 5,
+    this.padding = 15.0,
   }) : super(key: key);
 
   @override
@@ -32,7 +34,7 @@ class CustomButton extends StatelessWidget {
           fontWeight: FontWeight.bold,
         ),
       ),
-      padding: const EdgeInsets.all(15.0),
+      padding: EdgeInsets.all(padding),
       color: backgroundColor,
       elevation: disableElevation ? 0 : 2,
       highlightElevation: disableElevation ? 0 : 8,
