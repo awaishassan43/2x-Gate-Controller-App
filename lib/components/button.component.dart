@@ -7,6 +7,7 @@ class CustomButton extends StatelessWidget {
   final Color backgroundColor;
   final Color textColor;
   final bool disableElevation;
+  final double borderRadius;
   const CustomButton({
     Key? key,
     required this.text,
@@ -14,11 +15,15 @@ class CustomButton extends StatelessWidget {
     this.backgroundColor = authPrimaryColor,
     this.textColor = Colors.black,
     this.disableElevation = false,
+    this.borderRadius = 5,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return MaterialButton(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(borderRadius),
+      ),
       onPressed: onPressed,
       child: Text(
         text,

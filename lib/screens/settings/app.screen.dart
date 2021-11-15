@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:iot/components/button.component.dart';
+import 'package:iot/enum/route.enum.dart';
 import 'package:iot/screens/settings/components/item.component.dart';
 import 'package:iot/screens/settings/components/section.component.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class AppSettings extends StatelessWidget {
   const AppSettings({Key? key}) : super(key: key);
@@ -38,7 +40,9 @@ class AppSettings extends StatelessWidget {
                 SectionItem(
                   title: "Password",
                   showChevron: true,
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.pushNamed(context, Screen.resetPassword);
+                  },
                   showSeparator: false,
                 ),
               ],
@@ -62,7 +66,9 @@ class AppSettings extends StatelessWidget {
                   title: "Temperature Unit",
                   trailingText: "Celcius",
                   showChevron: true,
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.pushNamed(context, Screen.temperatureUnit);
+                  },
                 ),
                 SectionItem(
                   title: "24-Hour Time",
@@ -119,15 +125,25 @@ class AppSettings extends StatelessWidget {
                 ),
                 SectionItem(
                   title: "Feedback",
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.pushNamed(context, Screen.feedback);
+                  },
                   showChevron: true,
                 ),
-                SectionItem(
-                  title: "App Version",
-                  onTap: () {},
-                  trailingText: "v1.2",
-                  showSeparator: false,
-                  showChevron: true,
+                FutureBuilder(
+                  future: PackageInfo.fromPlatform(),
+                  builder: (BuildContext context, AsyncSnapshot<PackageInfo> snapshot) {
+                    return SectionItem(
+                      title: "App Version",
+                      onTap: () {},
+                      trailingText: snapshot.connectionState != ConnectionState.done
+                          ? "Loading..."
+                          : !snapshot.hasData || snapshot.hasError || snapshot.data == null
+                              ? ""
+                              : "v${snapshot.data!.version}",
+                      showSeparator: false,
+                    );
+                  },
                 ),
               ],
             ),

@@ -7,4 +7,7 @@ class Screen {
   static String get deviceSettings => '/deviceSettings';
   static String get appSettings => '/appSettings';
   static String get device => '/device';
+  static String get resetPassword => '/resetPassword';
+  static String get temperatureUnit => '/temperatureUnit';
+  static String get feedback => '/feedback';
 }

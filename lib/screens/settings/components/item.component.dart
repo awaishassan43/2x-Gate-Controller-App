@@ -37,6 +37,7 @@ class SectionItem extends StatelessWidget {
          */
         MaterialButton(
           onPressed: onTap,
+          height: 50,
           elevation: 0,
           focusElevation: 0,
           disabledElevation: 0,
