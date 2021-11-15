@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:iot/enum/route.enum.dart';
 import 'package:iot/screens/editor/editor.screen.dart';
 
 class SectionItem extends StatelessWidget {
