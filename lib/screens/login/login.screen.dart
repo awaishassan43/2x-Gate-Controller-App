@@ -1,7 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:iot/components/button.component.dart';
 import 'package:iot/components/input.component.dart';
 import 'package:iot/components/link.component.dart';
+import 'package:iot/controllers/user.controller.dart';
 import 'package:iot/enum/route.enum.dart';
 import 'package:iot/util/constants.util.dart';
 import 'package:iot/util/functions.util.dart';
@@ -18,7 +20,11 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   late TextEditingController email;
   late TextEditingController password;
-  bool isAgreed = false;
+  String emailError = '';
+  String passwordError = '';
+  String tosError = '';
+  String formError = '';
+  bool isAgreed = true;
 
   final GlobalKey<FormFieldState> formKey = GlobalKey<FormFieldState>();
 
@@ -37,6 +43,93 @@ class _LoginScreenState extends State<LoginScreen> {
     super.initState();
     email = TextEditingController();
     password = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    email.dispose();
+    password.dispose();
+  }
+
+  bool validateEmail() {
+    if (email.text == "") {
+      setState(() {
+        emailError = "Email cannot be empty!";
+      });
+
+      return false;
+    }
+
+    if (emailError != '') {
+      setState(() {
+        emailError = '';
+      });
+    }
+
+    return true;
+  }
+
+  bool validatePassword() {
+    if (password.text == "") {
+      setState(() {
+        passwordError = "Password cannot be empty!";
+      });
+      return false;
+    }
+
+    if (passwordError != '') {
+      setState(() {
+        passwordError = '';
+      });
+    }
+    return true;
+  }
+
+  bool validateTOS() {
+    if (!isAgreed) {
+      setState(() {
+        tosError = "You need to agree to Terms of Service to continue";
+      });
+
+      return false;
+    }
+
+    if (tosError != '') {
+      setState(() {
+        tosError = '';
+      });
+    }
+
+    return true;
+  }
+
+  Future<void> login(BuildContext context) async {
+    try {
+      final bool isEmailValid = validateEmail();
+      final bool isPasswordValid = validatePassword();
+      final bool isTOSAgreed = validateTOS();
+
+      if (!isEmailValid || !isPasswordValid || !isTOSAgreed) {
+        return;
+      }
+
+      final bool success = await userController.login(email.text, password.text);
+
+      if (!success) {
+        throw Exception("Failed to login");
+      }
+
+      Navigator.pushNamedAndRemoveUntil(context, Screen.dashboard, (route) => false);
+    } on FirebaseAuthException catch (_) {
+      setState(() {
+        formError = 'Invalid credentials';
+      });
+    } catch (e) {
+      setState(() {
+        formError = e.toString();
+      });
+    }
   }
 
   @override
@@ -90,8 +183,21 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                         ),
                         const SizedBox(height: 20),
+                        if (formError != '')
+                          Padding(
+                            padding: const EdgeInsets.all(20.0),
+                            child: Text(
+                              formError,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                color: Colors.red,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
                         CustomInput(
                           icon: Icons.person,
+                          error: emailError,
                           label: "Email Address",
                           controller: email,
                         ),
@@ -100,7 +206,11 @@ class _LoginScreenState extends State<LoginScreen> {
                           icon: Icons.lock,
                           label: "Password",
                           isPassword: true,
+                          error: passwordError,
                           controller: password,
+                          onDone: () {
+                            login(context);
+                          },
                         ),
                         const SizedBox(height: 12.5),
                         Align(
@@ -111,6 +221,20 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                         const SizedBox(height: 50),
+                        if (tosError != '')
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20.0,
+                            ),
+                            child: Text(
+                              tosError,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontSize: 13,
+                                color: Colors.red,
+                              ),
+                            ),
+                          ),
                         GestureDetector(
                           onTap: () {
                             setState(() {
@@ -145,7 +269,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         CustomButton(
                           text: "Login",
                           onPressed: () {
-                            Navigator.pushNamedAndRemoveUntil(context, Screen.dashboard, (route) => false);
+                            login(context);
                           },
                         ),
                       ],

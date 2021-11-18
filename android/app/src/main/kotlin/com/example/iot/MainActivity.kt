@@ -1,4 +1,4 @@
-package com.example.iot
+package com.iot.gatecontroller
 
 import io.flutter.embedding.android.FlutterActivity
 

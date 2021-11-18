@@ -1,41 +1,41 @@
 {
   "project_info": {
-    "project_number": "502934451066",
-    "project_id": "iotproject-89f37",
-    "storage_bucket": "iotproject-89f37.appspot.com"
+    "project_number": "989633882204",
+    "project_id": "gate-controller-71987",
+    "storage_bucket": "gate-controller-71987.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:502934451066:android:17c33515098ca617c0dcc3",
+        "mobilesdk_app_id": "1:989633882204:android:5eff4903a93cd0bdfb1e99",
         "android_client_info": {
-          "package_name": "com.example.iot"
+          "package_name": "com.iot.gatecontroller"
         }
       },
       "oauth_client": [
         {
-          "client_id": "502934451066-l2pduj5ridlk8o9lopdabttji1mg35nn.apps.googleusercontent.com",
+          "client_id": "989633882204-2u5cl9d7j1b4cdm6hr5ner68k2sard1m.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.example.iot",
+            "package_name": "com.iot.gatecontroller",
             "certificate_hash": "38637a4bc8d9ac6ae281165f3ef7e940a505e667"
           }
         },
         {
-          "client_id": "502934451066-5e236skvaaou1enf0b1ai78kcp35mqk8.apps.googleusercontent.com",
+          "client_id": "989633882204-9umil89pudqe4b9dqgj8iepe0jmspdg1.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBtnrUASR-62L6BCopK-RtEiJ1tFuN_zHw"
+          "current_key": "AIzaSyCdf6ToO6g7QL6TjrmNlb5SRhhQD_9ru-s"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "502934451066-5e236skvaaou1enf0b1ai78kcp35mqk8.apps.googleusercontent.com",
+              "client_id": "989633882204-9umil89pudqe4b9dqgj8iepe0jmspdg1.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
