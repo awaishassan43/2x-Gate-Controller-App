@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:iot/components/button.component.dart';
+import 'package:iot/controllers/user.controller.dart';
 import 'package:iot/enum/route.enum.dart';
+import 'package:iot/models/profile.model.dart';
 import 'package:iot/screens/settings/components/item.component.dart';
 import 'package:iot/screens/settings/components/section.component.dart';
+import 'package:iot/util/functions.util.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:provider/provider.dart';
 
 class AppSettings extends StatelessWidget {
   const AppSettings({Key? key}) : super(key: key);
@@ -20,33 +24,37 @@ class AppSettings extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Section(
-              header: "Profile",
-              children: [
-                const SectionItem(
-                  title: "Email",
-                  trailingText: "google@gmail.com",
-                ),
-                SectionItem(
-                  title: "Name",
-                  trailingText: "Tom Cruise",
-                  onEdit: () {},
-                ),
-                SectionItem(
-                  title: "Phone",
-                  onEdit: () {},
-                  trailingText: "+1 0123456789",
-                ),
-                SectionItem(
-                  title: "Password",
-                  showChevron: true,
-                  onTap: () {
-                    Navigator.pushNamed(context, Screen.resetPassword);
-                  },
-                  showSeparator: false,
-                ),
-              ],
-            ),
+            Selector<UserController, Profile>(
+                selector: (context, controller) => controller.profile!,
+                builder: (context, profile, _) {
+                  return Section(
+                    header: "Profile",
+                    children: [
+                      SectionItem(
+                        title: "Email",
+                        trailingText: profile.email,
+                      ),
+                      SectionItem(
+                        title: "Name",
+                        trailingText: profile.firstName + " " + profile.lastName,
+                        onEdit: () {},
+                      ),
+                      SectionItem(
+                        title: "Phone",
+                        onEdit: () {},
+                        trailingText: "+" + profile.code + " " + profile.phone,
+                      ),
+                      SectionItem(
+                        title: "Password",
+                        showChevron: true,
+                        onTap: () {
+                          Navigator.pushNamed(context, Screen.resetPassword);
+                        },
+                        showSeparator: false,
+                      ),
+                    ],
+                  );
+                }),
             Section(
               header: "Upgrade",
               children: [
@@ -150,7 +158,14 @@ class AppSettings extends StatelessWidget {
             const SizedBox(height: 30),
             CustomButton(
               text: "Sign Out",
-              onPressed: () {},
+              onPressed: () async {
+                try {
+                  await Provider.of<UserController>(context, listen: false).logout();
+                  Navigator.pushNamedAndRemoveUntil(context, Screen.login, (route) => false);
+                } catch (e) {
+                  showMessage(context, "Failed to logout");
+                }
+              },
               textColor: Colors.blue,
               backgroundColor: Colors.white,
               disableElevation: true,

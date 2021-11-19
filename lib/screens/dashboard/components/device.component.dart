@@ -73,7 +73,6 @@ class DeviceComponent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const iconColor = Color(0xFF1a8dff);
     final double temperature = device.temperature;
     final double humidity = device.humidity;
     final String deviceName = device.name;
@@ -122,9 +121,13 @@ class DeviceComponent extends StatelessWidget {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(5),
                         ),
-                        child: const Icon(
-                          Icons.device_thermostat,
-                          color: iconColor,
+                        child: Padding(
+                          padding: const EdgeInsets.all(3.5),
+                          child: Image.asset(
+                            'assets/icons/temp.png',
+                            width: 18,
+                            height: 18,
+                          ),
                         ),
                       ),
                       RichText(
@@ -156,13 +159,17 @@ class DeviceComponent extends StatelessWidget {
                     children: [
                       Card(
                         color: Colors.white,
-                        elevation: 3,
+                        elevation: 5,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(5),
                         ),
-                        child: const Icon(
-                          Icons.water_rounded,
-                          color: iconColor,
+                        child: Padding(
+                          padding: const EdgeInsets.all(3.5),
+                          child: Image.asset(
+                            'assets/icons/humidity.png',
+                            width: 18,
+                            height: 18,
+                          ),
                         ),
                       ),
                       RichText(

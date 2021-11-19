@@ -4,28 +4,47 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:iot/models/profile.model.dart';
 
-class _UserControllerClass {
+class UserController extends ChangeNotifier {
   late final FirebaseAuth auth;
   late final CollectionReference users;
-  static _UserControllerClass? instance;
   Profile? profile;
 
-  static _UserControllerClass getInstance() {
-    if (instance == null) {
-      final _UserControllerClass newInstance = _UserControllerClass();
-      instance = newInstance;
+  Future<bool> init() async {
+    try {
+      WidgetsFlutterBinding.ensureInitialized();
 
-      return newInstance;
+      // Initializing firebase and collections
+      await Firebase.initializeApp();
+      auth = FirebaseAuth.instance;
+      users = FirebaseFirestore.instance.collection('users');
+
+      // Getting logged in user
+      final bool isLoggedIn = await getLoggedInUser();
+      return isLoggedIn;
+    } catch (e) {
+      rethrow;
     }
-
-    return instance!;
   }
 
-  Future<void> init() async {
-    WidgetsFlutterBinding.ensureInitialized();
-    await Firebase.initializeApp();
-    auth = FirebaseAuth.instance;
-    users = FirebaseFirestore.instance.collection('users');
+  Future<bool> getLoggedInUser() async {
+    try {
+      final User? user = FirebaseAuth.instance.currentUser;
+
+      if (user != null) {
+        final QuerySnapshot<Object?> querySnapshot = await users.where('userID', isEqualTo: user.uid).limit(1).get();
+
+        if (querySnapshot.docs.isEmpty || !querySnapshot.docs.first.exists) {
+          throw Exception("User profile does not exist");
+        }
+
+        getProfile(querySnapshot.docs.first.reference);
+        return true;
+      }
+
+      return false;
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Future<bool> login(String email, String password) async {
@@ -89,9 +108,18 @@ class _UserControllerClass {
 
   getProfile(DocumentReference<Object?> reference) async {
     reference.snapshots().listen((snapshot) {
-      print("Received snapshot: ${snapshot.data}");
+      Map<String, dynamic> profileData = snapshot.data() as Map<String, dynamic>;
+      profileData['email'] = auth.currentUser!.email;
+      profile = Profile.fromMap(profileData);
+      notifyListeners();
     });
   }
-}
 
-final userController = _UserControllerClass.getInstance();
+  Future<void> logout() async {
+    try {
+      await auth.signOut();
+    } catch (e) {
+      rethrow;
+    }
+  }
+}

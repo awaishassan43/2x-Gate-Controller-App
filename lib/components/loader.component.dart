@@ -5,7 +5,8 @@ class Loader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    return Container(
+      color: Colors.white70,
       height: double.maxFinite,
       width: double.maxFinite,
       child: Center(

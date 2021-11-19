@@ -13,12 +13,12 @@ class Themes {
           color: Color(0xFFEFEFEF),
           elevation: 0,
           titleTextStyle: TextStyle(
-            color: textColor,
+            color: Colors.black87,
             fontWeight: FontWeight.bold,
             fontSize: 16,
           ),
           iconTheme: IconThemeData(
-            color: textColor,
+            color: Colors.black87,
           ),
         ),
         iconTheme: const IconThemeData(
@@ -27,7 +27,7 @@ class Themes {
         checkboxTheme: CheckboxThemeData(
           fillColor: MaterialStateProperty.all(textColor),
         ),
-        fontFamily: GoogleFonts.montserrat().fontFamily,
+        fontFamily: GoogleFonts.roboto().fontFamily,
         inputDecorationTheme: const InputDecorationTheme(
           fillColor: inputFieldColor,
           filled: true,

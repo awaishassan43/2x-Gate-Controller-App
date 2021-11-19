@@ -2,19 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:iot/enum/route.enum.dart';
 import 'package:iot/models/device.model.dart';
 import 'package:iot/screens/dashboard/components/device.component.dart';
-import 'package:iot/util/themes.util.dart';
-
-// const List<Device> devices = [
-//   {
-//     "name": "Main gate",
-//     "temperature": "75",
-//     "humidity": "45",
-//     "relays": [
-//       {"name": "Gate Front", "state": 1},
-//       {"name": "Gate Back", "state": 0}
-//     ]
-//   }
-// ];
 
 class Dashboard extends StatelessWidget {
   const Dashboard({Key? key}) : super(key: key);
@@ -26,7 +13,6 @@ class Dashboard extends StatelessWidget {
         title: const Text(
           "Dashboard",
           style: TextStyle(
-            color: textColor,
             fontSize: 24,
             fontWeight: FontWeight.bold,
           ),
@@ -56,9 +42,6 @@ class Dashboard extends StatelessWidget {
                 relays: [
                   Relay(name: "Gate Front", isOpen: false),
                   Relay(name: "Gate Back", isOpen: true),
-                  Relay(name: "Gate Front", isOpen: false),
-                  Relay(name: "Gate Back", isOpen: true),
-                  Relay(name: "Gate Front", isOpen: false),
                 ],
               ),
             ),

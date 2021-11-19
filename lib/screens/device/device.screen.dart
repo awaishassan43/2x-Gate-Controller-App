@@ -38,9 +38,20 @@ class DeviceScreen extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        DeviceSensor(sensorName: "Temperature", value: temperature.round(), showDegrees: true, unit: "C", icon: Icons.thermostat),
+                        DeviceSensor(
+                          sensorName: "Temperature",
+                          value: temperature.round(),
+                          showDegrees: true,
+                          unit: "C",
+                          icon: 'assets/icons/temp.png',
+                        ),
                         const SizedBox(width: 10),
-                        DeviceSensor(sensorName: "Humidity", value: humidity, showPercent: true, icon: Icons.water_rounded),
+                        DeviceSensor(
+                          sensorName: "Humidity",
+                          value: humidity,
+                          showPercent: true,
+                          icon: 'assets/icons/humidity.png',
+                        ),
                       ],
                     ),
                     ...relays.map((relay) {

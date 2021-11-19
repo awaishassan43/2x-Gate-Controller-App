@@ -41,6 +41,11 @@ class LargeButton extends StatelessWidget {
       ),
     ];
 
+    /**
+     * Note: I know a clipoval would have worked way better than border radius, but the clip oval
+     * clips the shadow as well.... I tried adding margin surrounding clip oval but i can't remember
+     * why i discarded the idea....
+     */
     return Column(
       children: [
         Container(
@@ -88,7 +93,12 @@ class LargeButton extends StatelessWidget {
                 ),
               ),
               Positioned.fill(
-                child: MaterialButton(onPressed: onPressed),
+                child: MaterialButton(
+                  onPressed: onPressed,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5000),
+                  ),
+                ),
               ),
             ],
           ),

@@ -7,7 +7,7 @@ class DeviceSensor extends StatelessWidget {
   final String? unit;
   final bool showDegrees;
   final bool showPercent;
-  final IconData icon;
+  final String icon;
   const DeviceSensor({
     Key? key,
     required this.sensorName,
@@ -41,10 +41,10 @@ class DeviceSensor extends StatelessWidget {
             const SizedBox(height: 15),
             Row(
               children: [
-                Icon(
+                Image.asset(
                   icon,
-                  color: Colors.blue,
-                  size: 24,
+                  height: 24,
+                  width: 24,
                 ),
                 const SizedBox(
                   width: 10,
