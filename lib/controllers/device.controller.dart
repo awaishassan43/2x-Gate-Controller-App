@@ -3,14 +3,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:iot/models/device.model.dart';
 
 class DeviceController extends ChangeNotifier {
-  final String userID;
   String? _message;
   String? _deviceMAC;
   bool _isLoading = false;
+  final List<Device> devices = [];
 
-  DeviceController({required this.userID});
-
-  loadDevices() async {
+  loadDevices({required String userID}) async {
     try {
       final CollectionReference remoteDevices = FirebaseFirestore.instance.collection('devices');
 

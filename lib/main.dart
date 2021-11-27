@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:iot/app.dart';
+import 'package:iot/controllers/device.controller.dart';
 import 'package:iot/controllers/user.controller.dart';
 import 'package:provider/provider.dart';
 
@@ -12,8 +13,11 @@ class GateController extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => UserController(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => UserController()),
+        ChangeNotifierProvider(create: (context) => DeviceController()),
+      ],
       builder: (context, _) {
         return const App();
       },

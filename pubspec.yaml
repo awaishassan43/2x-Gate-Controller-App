@@ -43,6 +43,7 @@ dependencies:
   cloud_firestore: "^3.1.0"
   firebase_auth: ^3.2.0
   wifi_iot: ^0.3.8
+  connectivity_plus: ^2.0.3
 
 dev_dependencies:
   flutter_test:
