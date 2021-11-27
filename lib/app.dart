@@ -4,6 +4,7 @@ import 'package:iot/components/loader.component.dart';
 import 'package:iot/controllers/user.controller.dart';
 import 'package:iot/enum/route.enum.dart';
 import 'package:iot/models/device.model.dart';
+import 'package:iot/screens/add/add.screen.dart';
 import 'package:iot/screens/dashboard/dashboard.screen.dart';
 import 'package:iot/screens/feedback/feedback.component.dart';
 import 'package:iot/screens/login/login.screen.dart';
@@ -65,6 +66,7 @@ class _AppState extends State<App> {
               Screen.dashboard: (context) => const Dashboard(),
               Screen.resetPassword: (context) => const ChangePasswordScreen(),
               Screen.feedback: (context) => const FeedbackScreen(),
+              Screen.addDevice: (context) => const AddDeviceScreen(),
             },
             onGenerateRoute: (settings) {
               return MaterialPageRoute(

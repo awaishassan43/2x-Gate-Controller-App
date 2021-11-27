@@ -10,6 +10,7 @@ class Screen {
   static String get device => '/device';
   static String get resetPassword => '/resetPassword';
   static String get feedback => '/feedback';
+  static String get addDevice => '/addDevice';
 
   // General purpose screens
   static String get editor => '/editor';
