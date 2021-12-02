@@ -22,8 +22,6 @@ class DeviceController extends ChangeNotifier {
           devices[element.id] = element.data();
         }
       }
-
-      devices;
     } catch (e) {
       rethrow;
     }

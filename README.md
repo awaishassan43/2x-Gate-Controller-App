@@ -15,6 +15,6 @@ For help getting started with Flutter, view our
 [online documentation](https://flutter.dev/docs), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
 
-# Extremely important note
-time unit in firebase - seconds
-so the same is expected from device.... and the mobile will send the same
+# Default units
+- Temperature: Celcius
+- Time: Seconds

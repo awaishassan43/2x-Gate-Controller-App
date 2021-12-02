@@ -37,6 +37,7 @@ class UserController extends ChangeNotifier {
       (data['devices'] as List<dynamic>).cast<String>().add(deviceID);
 
       await profileRef!.reference.set(data);
+      notifyListeners();
     } catch (e) {
       rethrow;
     }
@@ -49,9 +50,10 @@ class UserController extends ChangeNotifier {
       }
 
       final Map<String, dynamic> data = profileRef!.data()! as Map<String, dynamic>;
-      (data['devices'] as List<String>).remove(deviceID);
+      (data['devices'] as List<dynamic>).cast<String>().remove(deviceID);
 
       await profileRef!.reference.set(data);
+      notifyListeners();
     } catch (e) {
       rethrow;
     }
