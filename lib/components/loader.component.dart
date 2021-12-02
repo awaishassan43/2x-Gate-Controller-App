@@ -2,14 +2,19 @@ import 'package:flutter/material.dart';
 
 class Loader extends StatelessWidget {
   final String? message;
-  const Loader({Key? key, this.message}) : super(key: key);
+  final bool stretched;
+  const Loader({
+    Key? key,
+    this.message,
+    this.stretched = true,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
       color: Colors.white70,
-      height: double.infinity,
-      width: double.infinity,
+      height: stretched ? double.infinity : null,
+      width: stretched ? double.infinity : null,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [

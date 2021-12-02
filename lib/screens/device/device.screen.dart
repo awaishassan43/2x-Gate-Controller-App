@@ -14,8 +14,8 @@ class DeviceScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double temperature = device.temperature;
-    final double humidity = device.humidity;
+    final String temperature = device.temperature == null ? '...' : device.temperature!.round().toString();
+    final String humidity = device.humidity == null ? '...' : device.humidity!.toStringAsFixed(1);
     final String deviceName = device.name;
     final List<Relay> relays = device.relays;
 
@@ -40,7 +40,7 @@ class DeviceScreen extends StatelessWidget {
                       children: [
                         DeviceSensor(
                           sensorName: "Temperature",
-                          value: temperature.round(),
+                          value: temperature,
                           showDegrees: true,
                           unit: "C",
                           icon: 'assets/icons/temp.png',

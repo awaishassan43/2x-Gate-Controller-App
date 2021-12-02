@@ -4,6 +4,7 @@ class Profile {
   final String lastName;
   final String code;
   final String phone;
+  final List<String> devices;
 
   Profile({
     required this.email,
@@ -11,6 +12,7 @@ class Profile {
     required this.lastName,
     required this.code,
     required this.phone,
+    this.devices = const [],
   });
 
   factory Profile.fromMap(Map<String, dynamic> data) {
@@ -20,6 +22,7 @@ class Profile {
       lastName: data['lastName'],
       code: data['code'],
       phone: data['phone'],
+      devices: (data['devices'] as List<dynamic>).cast<String>(),
     );
   }
 }

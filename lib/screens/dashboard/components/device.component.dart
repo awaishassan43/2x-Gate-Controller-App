@@ -73,8 +73,8 @@ class DeviceComponent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double temperature = device.temperature;
-    final double humidity = device.humidity;
+    final String temperature = device.temperature == null ? '...' : device.temperature!.round().toString();
+    final String humidity = device.humidity == null ? '...' : device.humidity!.toStringAsFixed(1);
     final String deviceName = device.name;
 
     return MaterialButton(
@@ -138,7 +138,7 @@ class DeviceComponent extends StatelessWidget {
                             fontSize: 15,
                           ),
                           children: [
-                            TextSpan(text: temperature.round().toString()),
+                            TextSpan(text: temperature),
                             const TextSpan(text: "\u00b0"),
                             const TextSpan(text: "C"),
                           ],
@@ -180,7 +180,7 @@ class DeviceComponent extends StatelessWidget {
                             fontSize: 15,
                           ),
                           children: [
-                            TextSpan(text: humidity.round().toString()),
+                            TextSpan(text: humidity),
                             const TextSpan(text: "%"),
                           ],
                         ),

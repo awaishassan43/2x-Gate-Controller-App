@@ -3,11 +3,14 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:iot/components/button.component.dart';
 import 'package:iot/components/input.component.dart';
+import 'package:iot/controllers/device.controller.dart';
 import 'package:iot/util/constants.util.dart';
 import 'package:iot/util/functions.util.dart';
+import 'package:provider/provider.dart';
 import 'package:wifi_iot/wifi_iot.dart';
 import 'package:iot/components/loader.component.dart';
 import 'package:http/http.dart' as http;
+import 'package:location/location.dart';
 
 class AddDeviceScreen extends StatefulWidget {
   const AddDeviceScreen({Key? key}) : super(key: key);
@@ -23,7 +26,7 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
   String ssidError = '';
   String passwordError = '';
   bool isLoading = false;
-  String? mac;
+  String? id;
   String? loaderMessage;
   String formError = '';
 
@@ -61,18 +64,28 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
     });
   }
 
-  bool validateField(TextEditingController field) {
-    if (field.text.isEmpty) {
-      return false;
-    }
-
-    return true;
-  }
-
   /// return type indicates whether the device is already connected to the required
   /// wifi or not
   Future<bool> enableWifi(BuildContext context) async {
     try {
+      final PermissionStatus permission = await Location.instance.requestPermission();
+
+      if (permission != PermissionStatus.granted) {
+        throw Exception("This feature requires location permissions to determine the WiFi SSID");
+      } else if (permission == PermissionStatus.deniedForever) {
+        throw Exception("Please allow the location permission to the app from the app settings");
+      }
+
+      bool status = await Location.instance.serviceEnabled();
+
+      if (!status) {
+        status = await Location.instance.requestService();
+
+        if (!status) {
+          throw Exception("This feature requies the location services to be enabled");
+        }
+      }
+
       final bool isWiFiEnabled = await WiFiForIoTPlugin.isEnabled();
 
       if (!isWiFiEnabled) {
@@ -96,15 +109,19 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
         return await enableWifi(context);
       }
 
-      setState(() {
-        loaderMessage = "Getting the SSID of the connected WiFi";
-      });
-
       final String? currentSSID = await WiFiForIoTPlugin.getSSID();
 
-      if (currentSSID != null && currentSSID == deviceSSID) {
-        /// i.e. device is already connected to the required connection
-        return true;
+      if (currentSSID != null) {
+        if (currentSSID == deviceSSID) {
+          /// i.e. device is already connected to the required connection
+          return true;
+        } else {
+          setState(() {
+            loaderMessage = "Device seems to be connected to a different network\nPlease select the respective device from the menu below";
+          });
+
+          return false;
+        }
       } else {
         return false;
       }
@@ -115,12 +132,12 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
 
   Future<void> sendCreds() async {
     try {
-      final Uri url = Uri.parse(deviceURL);
+      final Uri url = Uri.parse(getDeviceURL(ssid.text, password.text));
       final http.Response response = await http.post(url);
-      final String macAddress = response.body;
+      final String deviceID = response.body;
 
       setState(() {
-        mac = macAddress;
+        id = deviceID;
       });
     } catch (e) {
       rethrow;
@@ -150,10 +167,6 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
       final bool isAlreadyConnected = await enableWifi(context);
 
       if (!isAlreadyConnected) {
-        setState(() {
-          loaderMessage = "Unable to determine the SSID\nPlease select the device's WiFi from the menu presented";
-        });
-
         final bool isConnected = await WiFiForIoTPlugin.connect(deviceSSID, password: deviceSSID, security: NetworkSecurity.WPA);
 
         if (!isConnected) {
@@ -167,20 +180,33 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
 
       await sendCreds();
 
-      if (mac != null) {
-        await Future.delayed(const Duration(seconds: 2));
-
-        showMessage(context, "Device added successfully");
-        Navigator.pop(context);
-      } else {
+      if (id == null) {
         throw Exception("Failed to get response from the device");
       }
+
+      await Future.delayed(const Duration(seconds: 2));
+
+      showMessage(context, "Device added successfully");
+      setState(() {
+        isLoading = false;
+      });
+      // Navigator.pop(context);
+
     } catch (e) {
       setState(() {
         isLoading = false;
         loaderMessage = null;
         formError = e.toString();
       });
+    }
+  }
+
+  Future<void> addDevice(BuildContext context) async {
+    try {
+      final Map<String, dynamic> device = {"name": "Device 1", "temperature": 0, "humidity": 0, "relays": []};
+      await Provider.of<DeviceController>(context, listen: false).addDevice(device, context);
+    } catch (e) {
+      rethrow;
     }
   }
 
@@ -258,10 +284,13 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
                   child: CustomButton(
                     text: "Connect",
                     onPressed: () {
-                      connectDevice(context);
+                      // connectDevice(context);
+                      addDevice(context);
                     },
                   ),
                 ),
+                const SizedBox(height: 50),
+                Text("Received response as: $id"),
               ],
             ),
           ),

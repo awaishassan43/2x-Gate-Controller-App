@@ -8,6 +8,7 @@ class UserController extends ChangeNotifier {
   late final FirebaseAuth auth;
   late final CollectionReference users;
   Profile? profile;
+  DocumentSnapshot? profileRef;
 
   Future<bool> init() async {
     try {
@@ -26,6 +27,36 @@ class UserController extends ChangeNotifier {
     }
   }
 
+  Future<void> linkDeviceToUser(String deviceID) async {
+    try {
+      if (profileRef == null) {
+        throw Exception("Failed to get user profile");
+      }
+
+      final Map<String, dynamic> data = profileRef!.data()! as Map<String, dynamic>;
+      (data['devices'] as List<dynamic>).cast<String>().add(deviceID);
+
+      await profileRef!.reference.set(data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> unlinkDeviceFromUser(String deviceID) async {
+    try {
+      if (profile == null) {
+        throw Exception("Failed to get user profile");
+      }
+
+      final Map<String, dynamic> data = profileRef!.data()! as Map<String, dynamic>;
+      (data['devices'] as List<String>).remove(deviceID);
+
+      await profileRef!.reference.set(data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<bool> getLoggedInUser() async {
     try {
       final User? user = FirebaseAuth.instance.currentUser;
@@ -33,11 +64,22 @@ class UserController extends ChangeNotifier {
       if (user != null) {
         final QuerySnapshot<Object?> querySnapshot = await users.where('userID', isEqualTo: user.uid).limit(1).get();
 
-        if (querySnapshot.docs.isEmpty || !querySnapshot.docs.first.exists) {
+        if (querySnapshot.docs.isEmpty) {
           throw Exception("User profile does not exist");
         }
 
-        getProfile(querySnapshot.docs.first.reference);
+        final QueryDocumentSnapshot<Object?> document = querySnapshot.docs.first;
+
+        if (!document.exists || document.data() == null) {
+          throw Exception("User profile does not exist");
+        }
+
+        final Map<String, dynamic> data = document.data()! as Map<String, dynamic>;
+
+        data['email'] = auth.currentUser!.email;
+        profile = Profile.fromMap(data);
+
+        await attachProfileListener(querySnapshot.docs.first.reference);
         return true;
       }
 
@@ -62,7 +104,7 @@ class UserController extends ChangeNotifier {
         throw Exception("User profile does not exist");
       }
 
-      await getProfile(querySnapshot.docs.first.reference);
+      await attachProfileListener(querySnapshot.docs.first.reference);
 
       return true;
     } catch (e) {
@@ -96,9 +138,10 @@ class UserController extends ChangeNotifier {
         "code": callingCode,
         "phone": phone,
         "userID": user.uid,
+        "devices": [],
       });
 
-      await getProfile(reference);
+      await attachProfileListener(reference);
 
       return true;
     } catch (e) {
@@ -106,7 +149,8 @@ class UserController extends ChangeNotifier {
     }
   }
 
-  getProfile(DocumentReference<Object?> reference) async {
+  Future<void> attachProfileListener(DocumentReference<Object?> reference) async {
+    profileRef = await reference.get();
     reference.snapshots().listen((snapshot) {
       Map<String, dynamic> profileData = snapshot.data() as Map<String, dynamic>;
       profileData['email'] = auth.currentUser!.email;
@@ -118,6 +162,8 @@ class UserController extends ChangeNotifier {
   Future<void> logout() async {
     try {
       await auth.signOut();
+      profile = null;
+      profileRef = null;
     } catch (e) {
       rethrow;
     }

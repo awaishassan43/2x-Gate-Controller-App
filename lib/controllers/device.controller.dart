@@ -1,57 +1,65 @@
+import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:iot/models/device.model.dart';
+import 'package:flutter/material.dart';
+import 'package:iot/controllers/user.controller.dart';
+import 'package:provider/provider.dart';
 
 class DeviceController extends ChangeNotifier {
-  String? _message;
-  String? _deviceMAC;
-  bool _isLoading = false;
-  final List<Device> devices = [];
+  final collection = FirebaseFirestore.instance.collection('devices');
+  Map<String, Stream<DocumentSnapshot<Map<String, dynamic>>>> deviceStreams = {};
+  Map<String, Map<String, dynamic>> devices = {};
 
-  loadDevices({required String userID}) async {
+  Future<void> loadDevices({required List<String> deviceIDs}) async {
     try {
-      final CollectionReference remoteDevices = FirebaseFirestore.instance.collection('devices');
+      final QuerySnapshot<Map<String, dynamic>> deviceCollection = await collection.get();
 
-      final QuerySnapshot<Object?> snapshot = await remoteDevices.where('userID', isEqualTo: userID).get();
-      final List<QueryDocumentSnapshot<Object?>> documents = snapshot.docs;
+      if (deviceCollection.docs.isNotEmpty) {
+        final Iterable<QueryDocumentSnapshot<Map<String, dynamic>>> filteredDevices =
+            deviceCollection.docs.where((element) => deviceIDs.contains(element.id));
 
-      if (documents.isNotEmpty) {
-        for (QueryDocumentSnapshot<Object?> document in documents) {
-          if (!document.exists) {
-            return;
-          }
-
-          document.reference.snapshots().listen((event) {
-            print("Device updated: ${event.toString()}");
-          });
-
-          print("Initial device data: ${document.reference.collection('relays').get()}");
-          print(await document.reference.collection('relays').get());
+        for (var element in filteredDevices) {
+          deviceStreams[element.id] = element.reference.snapshots();
+          devices[element.id] = element.data();
         }
       }
+
+      devices;
     } catch (e) {
       rethrow;
     }
   }
 
-  /// message getter and setter
-  String? get message => _message;
-  set message(String? message) {
-    _message = message;
-    notifyListeners();
+  Future<void> addDevice(Map<String, dynamic> device, BuildContext context) async {
+    try {
+      final DocumentReference<Map<String, dynamic>> document = await collection.add(device);
+      deviceStreams[document.id] = document.snapshots();
+      devices[document.id] = device;
+      device["id"] = document.id;
+
+      await Provider.of<UserController>(context, listen: false).linkDeviceToUser(document.id);
+
+      notifyListeners();
+    } catch (e) {
+      rethrow;
+    }
   }
 
-  /// isLoading getter and setter
-  bool get isLoading => _isLoading;
-  set isLoading(bool state) {
-    _isLoading = state;
-    notifyListeners();
+  removeDevice(String deviceID, BuildContext context) async {
+    try {
+      await collection.doc(deviceID).delete();
+      deviceStreams.remove(deviceID);
+      devices.remove(deviceID);
+
+      await Provider.of<UserController>(context, listen: false).unlinkDeviceFromUser(deviceID);
+
+      notifyListeners();
+    } catch (e) {
+      rethrow;
+    }
   }
 
-  /// macaddress getter and setter
-  String? get deviceMAC => _deviceMAC;
-  set deviceMAC(String? value) {
-    _deviceMAC = value;
-    notifyListeners();
+  removeDevices() {
+    devices.clear();
+    deviceStreams.clear();
   }
 }
