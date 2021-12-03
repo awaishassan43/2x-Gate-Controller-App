@@ -4,9 +4,11 @@ class Profile {
   final String lastName;
   final String code;
   final String phone;
+  final String id;
   final List<String> devices;
 
   Profile({
+    required this.id,
     required this.email,
     required this.firstName,
     required this.lastName,
@@ -17,6 +19,7 @@ class Profile {
 
   factory Profile.fromMap(Map<String, dynamic> data) {
     return Profile(
+      id: data['userID'],
       email: data['email'],
       firstName: data['firstName'],
       lastName: data['lastName'],
@@ -24,5 +27,17 @@ class Profile {
       phone: data['phone'],
       devices: (data['devices'] as List<dynamic>).cast<String>(),
     );
+  }
+
+  Map<String, dynamic> toJSON() {
+    return {
+      "email": email,
+      "firstName": firstName,
+      "lastName": lastName,
+      "code": code,
+      "phone": phone,
+      "devices": devices,
+      "userID": id,
+    };
   }
 }

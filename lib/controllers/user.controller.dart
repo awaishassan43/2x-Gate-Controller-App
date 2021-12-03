@@ -22,8 +22,10 @@ class UserController extends ChangeNotifier {
       // Getting logged in user
       final bool isLoggedIn = await getLoggedInUser();
       return isLoggedIn;
+    } on FirebaseException catch (e) {
+      throw "Error occured while initializing the app: ${e.message}";
     } catch (e) {
-      rethrow;
+      throw "Failed to initialize the app: ${e.toString()}";
     }
   }
 
@@ -33,13 +35,15 @@ class UserController extends ChangeNotifier {
         throw Exception("Failed to get user profile");
       }
 
-      final Map<String, dynamic> data = profileRef!.data()! as Map<String, dynamic>;
+      final Map<String, dynamic> data = profile!.toJSON();
       (data['devices'] as List<dynamic>).cast<String>().add(deviceID);
 
       await profileRef!.reference.set(data);
       notifyListeners();
+    } on FirebaseException catch (e) {
+      throw "Error occured while linking the device to user: ${e.message}";
     } catch (e) {
-      rethrow;
+      throw "Failed to link the device to user: ${e.toString()}";
     }
   }
 
@@ -49,13 +53,15 @@ class UserController extends ChangeNotifier {
         throw Exception("Failed to get user profile");
       }
 
-      final Map<String, dynamic> data = profileRef!.data()! as Map<String, dynamic>;
-      (data['devices'] as List<dynamic>).cast<String>().remove(deviceID);
+      final Map<String, dynamic> data = profile!.toJSON();
+      (data["devices"] as List<dynamic>).cast<String>().remove(deviceID);
 
       await profileRef!.reference.set(data);
       notifyListeners();
+    } on FirebaseException catch (e) {
+      throw "Error occured while removing the device from user: ${e.message}";
     } catch (e) {
-      rethrow;
+      throw "Failed to remove the device from user: ${e.toString()}";
     }
   }
 
@@ -78,6 +84,7 @@ class UserController extends ChangeNotifier {
 
         final Map<String, dynamic> data = document.data()! as Map<String, dynamic>;
 
+        data['userID'] = auth.currentUser!.uid;
         data['email'] = auth.currentUser!.email;
         profile = Profile.fromMap(data);
 
@@ -86,8 +93,10 @@ class UserController extends ChangeNotifier {
       }
 
       return false;
+    } on FirebaseException catch (e) {
+      throw "Error occured while getting the user profile: ${e.message}";
     } catch (e) {
-      rethrow;
+      throw "Failed to get the user profile: ${e.toString()}";
     }
   }
 
@@ -109,8 +118,10 @@ class UserController extends ChangeNotifier {
       await attachProfileListener(querySnapshot.docs.first.reference);
 
       return true;
+    } on FirebaseException catch (e) {
+      throw "Error occured while logging in the user: ${e.message}";
     } catch (e) {
-      rethrow;
+      throw "Failed to login the user: ${e.toString()}";
     }
   }
 
@@ -146,19 +157,25 @@ class UserController extends ChangeNotifier {
       await attachProfileListener(reference);
 
       return true;
+    } on FirebaseException catch (e) {
+      throw "Error occured while registering the user: ${e.message}";
     } catch (e) {
-      rethrow;
+      throw "Failed to register the user: ${e.toString()}";
     }
   }
 
   Future<void> attachProfileListener(DocumentReference<Object?> reference) async {
-    profileRef = await reference.get();
-    reference.snapshots().listen((snapshot) {
-      Map<String, dynamic> profileData = snapshot.data() as Map<String, dynamic>;
-      profileData['email'] = auth.currentUser!.email;
-      profile = Profile.fromMap(profileData);
-      notifyListeners();
-    });
+    try {
+      profileRef = await reference.get();
+      reference.snapshots().listen((snapshot) {
+        Map<String, dynamic> profileData = snapshot.data() as Map<String, dynamic>;
+        profileData['email'] = auth.currentUser!.email;
+        profile = Profile.fromMap(profileData);
+        notifyListeners();
+      });
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Future<void> logout() async {
@@ -166,8 +183,10 @@ class UserController extends ChangeNotifier {
       await auth.signOut();
       profile = null;
       profileRef = null;
+    } on FirebaseException catch (e) {
+      throw "Error occured while logging out the user: ${e.message}";
     } catch (e) {
-      rethrow;
+      throw "Failed to logout the user: ${e.toString()}";
     }
   }
 }

@@ -23,6 +23,7 @@ class DeviceSettings extends StatefulWidget {
 
 class _DeviceSettingsState extends State<DeviceSettings> {
   bool isLoading = false;
+  String? deleteError;
 
   @override
   Widget build(BuildContext context) {
@@ -251,12 +252,24 @@ class _DeviceSettingsState extends State<DeviceSettings> {
                   backgroundColor: Colors.white,
                   disableElevation: true,
                 ),
-                const SizedBox(height: 15),
+                const SizedBox(height: 5),
+                if (deleteError != null)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    child: Text(
+                      deleteError!,
+                      style: const TextStyle(
+                        color: Colors.red,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
                 CustomButton(
                   text: "Delete Device",
                   onPressed: () async {
                     try {
                       setState(() {
+                        if (deleteError != null) deleteError = null;
                         isLoading = true;
                       });
 
@@ -265,6 +278,7 @@ class _DeviceSettingsState extends State<DeviceSettings> {
                     } catch (e) {
                       setState(() {
                         isLoading = false;
+                        deleteError = e.toString();
                       });
 
                       showMessage(context, "Failed to delete the device");

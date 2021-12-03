@@ -22,8 +22,10 @@ class DeviceController extends ChangeNotifier {
           devices[element.id] = element.data();
         }
       }
+    } on FirebaseException catch (e) {
+      throw Exception("Error occured while loading devices: ${e.message}");
     } catch (e) {
-      rethrow;
+      throw Exception("Failed to load devices: ${e.toString()}");
     }
   }
 
@@ -37,8 +39,10 @@ class DeviceController extends ChangeNotifier {
       await Provider.of<UserController>(context, listen: false).linkDeviceToUser(document.id);
 
       notifyListeners();
+    } on FirebaseException catch (e) {
+      throw Exception("Error occured while adding the device: ${e.message}");
     } catch (e) {
-      rethrow;
+      throw Exception("Failed to add the device: ${e.toString()}");
     }
   }
 
@@ -51,8 +55,10 @@ class DeviceController extends ChangeNotifier {
       await Provider.of<UserController>(context, listen: false).unlinkDeviceFromUser(deviceID);
 
       notifyListeners();
+    } on FirebaseException catch (e) {
+      throw "Error occured while removing the device: ${e.message}";
     } catch (e) {
-      rethrow;
+      throw Exception("Failed to remove the device: ${e.toString()}");
     }
   }
 

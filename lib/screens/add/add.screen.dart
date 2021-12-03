@@ -205,6 +205,7 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
     try {
       final Map<String, dynamic> device = {"name": "Device 1", "temperature": 0, "humidity": 0, "relays": []};
       await Provider.of<DeviceController>(context, listen: false).addDevice(device, context);
+      showMessage(context, "Device added successfully");
     } catch (e) {
       rethrow;
     }
