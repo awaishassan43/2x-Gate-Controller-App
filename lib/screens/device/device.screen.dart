@@ -4,6 +4,7 @@ import 'package:iot/enum/route.enum.dart';
 import 'package:iot/models/device.model.dart';
 import 'package:iot/screens/device/components/item.component.dart';
 import 'package:iot/screens/device/components/sensor.component.dart';
+import 'package:iot/models/relay.model.dart';
 
 class DeviceScreen extends StatelessWidget {
   final Device device;

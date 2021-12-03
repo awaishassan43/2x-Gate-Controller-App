@@ -1,20 +1,41 @@
+import 'package:iot/models/relay.model.dart';
+
 class Device {
   final String id;
   final String name;
   final double? temperature;
   final double? humidity;
   final List<Relay> relays;
+  final int onOpenAlert;
+  final int onCloseAlert;
+  final int remainedOpenAlert;
+  final bool nightAlert;
+  final int temperatureAlert;
+  final String firmware;
+  final String networkStrength;
+  final String macID;
+  final String ipAddress;
 
   const Device({
     required this.id,
     required this.name,
-    this.temperature,
-    this.humidity,
+    required this.temperature,
+    required this.humidity,
     required this.relays,
+    required this.onOpenAlert,
+    required this.onCloseAlert,
+    required this.remainedOpenAlert,
+    required this.nightAlert,
+    required this.temperatureAlert,
+    required this.firmware,
+    required this.networkStrength,
+    required this.macID,
+    required this.ipAddress,
   });
 
-  /// It is important to note that we could have accessed the temperature and humidity as integers
+  /// It is important to note that we could have accessed the temperature and humidity as doubles
   /// however, the conversion of data object to map sometimes convers the whole values to integers
+  /// and can cause the app to crash cause direct type casting from int to double doesn't work
   /// so changing based on the runtime type
   factory Device.fromMap(Map<String, dynamic> data) {
     final dynamic temperature = data['temperature'];
@@ -26,34 +47,34 @@ class Device {
       temperature: temperature.runtimeType.toString() == "int" ? (temperature as int).toDouble() : temperature,
       humidity: humidity.runtimeType.toString() == "int" ? (humidity as int).toDouble() : humidity,
       relays: (data['relays'] as List<dynamic>).cast<Map<String, dynamic>>().map((relay) => Relay.fromJSON(relay)).toList(),
+      onOpenAlert: data['onOpenAlert'],
+      onCloseAlert: data['onCloseAlert'],
+      remainedOpenAlert: data['remainedOpenAlert'],
+      nightAlert: data['nightAlert'],
+      temperatureAlert: data['temperatureAlert'],
+      firmware: data['firmware'],
+      networkStrength: data['networkStrength'],
+      macID: data['macID'],
+      ipAddress: data['ipAddress'],
     );
   }
-
-  Map<String, dynamic> toJSON() {
-    return {"id": id, "name": name, "temperature": temperature, "humidity": humidity, "relays": relays.map((relay) => relay.toJSON()).toList()};
-  }
-}
-
-class Relay {
-  final String id;
-  final String name;
-  final bool isOpen;
-
-  const Relay({
-    required this.id,
-    required this.name,
-    required this.isOpen,
-  });
 
   Map<String, dynamic> toJSON() {
     return {
       "id": id,
       "name": name,
-      "isOpen": isOpen,
+      "temperature": temperature,
+      "humidity": humidity,
+      "relays": relays.map((relay) => relay.toJSON()).toList(),
+      "onOpenAlert": onOpenAlert,
+      "onCloseAlert": onCloseAlert,
+      "remainedOpenAlert": remainedOpenAlert,
+      "nightAlert": nightAlert,
+      "temperatureAlert": temperatureAlert,
+      "firmware": firmware,
+      "networkStrength": networkStrength,
+      "macID": macID,
+      "ipAddress": ipAddress,
     };
-  }
-
-  factory Relay.fromJSON(Map<String, dynamic> data) {
-    return Relay(id: data['id'], name: data['name'], isOpen: data['isOpen']);
   }
 }

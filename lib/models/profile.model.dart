@@ -6,6 +6,8 @@ class Profile {
   final String phone;
   final String id;
   final List<String> devices;
+  final String temperatureUnit;
+  final bool is24Hours;
 
   Profile({
     required this.id,
@@ -14,7 +16,9 @@ class Profile {
     required this.lastName,
     required this.code,
     required this.phone,
-    this.devices = const [],
+    required this.devices,
+    required this.temperatureUnit,
+    required this.is24Hours,
   });
 
   factory Profile.fromMap(Map<String, dynamic> data) {
@@ -26,6 +30,8 @@ class Profile {
       code: data['code'],
       phone: data['phone'],
       devices: (data['devices'] as List<dynamic>).cast<String>(),
+      temperatureUnit: data['temperatureUnit'],
+      is24Hours: data['is24Hours'],
     );
   }
 
@@ -38,6 +44,8 @@ class Profile {
       "phone": phone,
       "devices": devices,
       "userID": id,
+      "temperatureUnit": temperatureUnit,
+      "is24Hours": is24Hours,
     };
   }
 }
