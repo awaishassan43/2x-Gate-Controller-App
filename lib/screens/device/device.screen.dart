@@ -1,10 +1,14 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:iot/components/error.component.dart';
 import 'package:iot/components/largeButton.component.dart';
+import 'package:iot/controllers/user.controller.dart';
 import 'package:iot/enum/route.enum.dart';
 import 'package:iot/models/device.model.dart';
 import 'package:iot/screens/device/components/item.component.dart';
 import 'package:iot/screens/device/components/sensor.component.dart';
 import 'package:iot/models/relay.model.dart';
+import 'package:provider/provider.dart';
 
 class DeviceScreen extends StatelessWidget {
   final Device device;
@@ -15,14 +19,9 @@ class DeviceScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String temperature = device.temperature == null ? '...' : device.temperature!.round().toString();
-    final String humidity = device.humidity == null ? '...' : device.humidity!.toStringAsFixed(1);
-    final String deviceName = device.name;
-    final List<Relay> relays = device.relays;
-
     return Scaffold(
       appBar: AppBar(
-        title: Text(deviceName),
+        title: Text(device.name),
         centerTitle: true,
       ),
       body: Column(
@@ -31,51 +30,72 @@ class DeviceScreen extends StatelessWidget {
            * Scrollable area
            */
           Expanded(
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Row(
-                      children: [
-                        DeviceSensor(
-                          sensorName: "Temperature",
-                          value: temperature,
-                          showDegrees: true,
-                          unit: "C",
-                          icon: 'assets/icons/temp.png',
-                        ),
-                        const SizedBox(width: 10),
-                        DeviceSensor(
-                          sensorName: "Humidity",
-                          value: humidity,
-                          showPercent: true,
-                          icon: 'assets/icons/humidity.png',
-                        ),
-                      ],
-                    ),
-                    ...relays.map((relay) {
-                      final String name = relay.name;
-                      final bool isOpen = relay.isOpen;
+            child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+                stream: device.deviceRef!.snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasError || snapshot.error != null) {
+                    return ErrorMessage(message: snapshot.error.toString());
+                  }
 
-                      return Column(
+                  Device tempDevice = device;
+
+                  if (snapshot.data != null) {
+                    final Map<String, dynamic> streamData = snapshot.data!.data() as Map<String, dynamic>;
+                    streamData['id'] = tempDevice.id;
+
+                    tempDevice = Device.fromMap(streamData, ref: tempDevice.deviceRef);
+                  }
+
+                  final String temperature = tempDevice.temperature == null ? '...' : tempDevice.temperature!.round().toString();
+                  final String humidity = tempDevice.humidity == null ? '...' : tempDevice.humidity!.toStringAsFixed(1);
+                  final List<Relay> relays = tempDevice.relays;
+
+                  return SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
-                          const SizedBox(height: 30),
-                          LargeButton(
-                            icon: isOpen ? Icons.lock_open_rounded : Icons.lock_rounded,
-                            label: isOpen ? "Opened" : "Closed",
-                            iconColor: isOpen ? const Color(0xFFfc4646) : const Color(0xFF00e6c3),
-                            onPressed: () {},
-                            bottomText: name,
+                          Row(
+                            children: [
+                              DeviceSensor(
+                                sensorName: "Temperature",
+                                value: temperature,
+                                showDegrees: true,
+                                unit: Provider.of<UserController>(context, listen: false).profile!.temperatureUnit,
+                                icon: 'assets/icons/temp.png',
+                              ),
+                              const SizedBox(width: 10),
+                              DeviceSensor(
+                                sensorName: "Humidity",
+                                value: humidity,
+                                showPercent: true,
+                                icon: 'assets/icons/humidity.png',
+                              ),
+                            ],
                           ),
+                          ...relays.map((relay) {
+                            final String name = relay.name;
+                            final bool isOpen = relay.isOpen;
+
+                            return Column(
+                              children: [
+                                const SizedBox(height: 30),
+                                LargeButton(
+                                  icon: isOpen ? Icons.lock_open_rounded : Icons.lock_rounded,
+                                  label: isOpen ? "Opened" : "Closed",
+                                  iconColor: isOpen ? const Color(0xFFfc4646) : const Color(0xFF00e6c3),
+                                  onPressed: () {},
+                                  bottomText: name,
+                                ),
+                              ],
+                            );
+                          }).toList(),
                         ],
-                      );
-                    }).toList(),
-                  ],
-                ),
-              ),
-            ),
+                      ),
+                    ),
+                  );
+                }),
           ),
           /**
            * End of scrollable area

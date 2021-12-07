@@ -22,6 +22,13 @@ class _AppSettingsState extends State<AppSettings> {
 
   @override
   Widget build(BuildContext context) {
+    /// It is important to note that I could have used stream
+    /// just like i did for devices.... however, there are two reasons
+    /// 1. the devices would have to be tracked
+    /// seperately... and at the moment, I can't think of doing that the easy way
+    /// so using change notifier to provider the changes
+    /// 2. the listener is being used directly in the controller, while the change
+    /// notifier is providing the changes....
     final UserController controller = Provider.of<UserController>(context);
     final Profile profile = controller.profile!;
 
@@ -89,7 +96,7 @@ class _AppSettingsState extends State<AppSettings> {
               children: [
                 SectionItem(
                   title: "Temperature Unit",
-                  trailingText: "Celcius",
+                  trailingText: profile.temperatureUnit,
                   showChevron: true,
                   onTap: () {
                     Navigator.pushNamed(
@@ -101,8 +108,10 @@ class _AppSettingsState extends State<AppSettings> {
                 SectionItem(
                   title: "24-Hour Time",
                   trailing: Switch(
-                    value: false,
-                    onChanged: (value) {},
+                    value: profile.is24Hours,
+                    onChanged: (value) {
+                      controller.updateProfile("is24Hour", value);
+                    },
                   ),
                   showSeparator: false,
                 ),

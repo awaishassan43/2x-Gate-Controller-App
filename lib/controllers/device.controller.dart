@@ -21,17 +21,7 @@ class DeviceController extends ChangeNotifier {
         }
 
         deviceData['id'] = deviceID;
-        final Device device = Device.fromMap(
-          deviceData,
-          stream: document.reference.snapshots().asBroadcastStream(
-            onListen: (StreamSubscription<DocumentSnapshot<Map<String, dynamic>>> snapshot) {
-              print("Someone seems to be listening to the stream");
-            },
-            onCancel: (StreamSubscription<DocumentSnapshot<Map<String, dynamic>>> snapshot) {
-              print("Someone cancelled the stream subscription");
-            },
-          ),
-        );
+        final Device device = deviceWithData(deviceData, document.reference);
 
         devices[deviceID] = device;
       }
@@ -51,18 +41,7 @@ class DeviceController extends ChangeNotifier {
       final DocumentReference<Map<String, dynamic>> document = collection.doc(deviceID);
       await document.set(deviceData);
 
-      final Device newDevice = Device.fromMap(
-        deviceData,
-        stream: document.snapshots().asBroadcastStream(
-          onListen: (StreamSubscription<DocumentSnapshot<Map<String, dynamic>>> snapshot) {
-            print("Someone seems to be listening to the stream");
-          },
-          onCancel: (StreamSubscription<DocumentSnapshot<Map<String, dynamic>>> snapshot) {
-            print("Someone cancelled the stream subscription");
-          },
-        ),
-      );
-
+      final Device newDevice = deviceWithData(deviceData, document);
       devices[deviceID] = newDevice;
 
       await Provider.of<UserController>(context, listen: false).linkDeviceToUser(document.id);
@@ -72,6 +51,11 @@ class DeviceController extends ChangeNotifier {
     } catch (e) {
       throw Exception("Failed to add the device: ${e.toString()}");
     }
+  }
+
+  Device deviceWithData(Map<String, dynamic> data, DocumentReference<Map<String, dynamic>> document) {
+    data['id'] = document.id;
+    return Device.fromMap(data, ref: document);
   }
 
   removeDevice(String deviceID, BuildContext context) async {

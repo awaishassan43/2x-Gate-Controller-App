@@ -11,12 +11,12 @@ class Device {
   final int onCloseAlert;
   final int remainedOpenAlert;
   final bool nightAlert;
-  final int temperatureAlert;
-  final String firmware;
-  final String networkStrength;
-  final String macID;
-  final String ipAddress;
-  final Stream<DocumentSnapshot<Map<String, dynamic>>>? stream;
+  final int? temperatureAlert;
+  final String? firmware;
+  final String? networkStrength;
+  final String? macID;
+  final String? ipAddress;
+  final DocumentReference<Map<String, dynamic>>? deviceRef;
 
   const Device({
     required this.id,
@@ -28,19 +28,19 @@ class Device {
     required this.onCloseAlert,
     required this.remainedOpenAlert,
     required this.nightAlert,
-    required this.temperatureAlert,
-    required this.firmware,
-    required this.networkStrength,
-    required this.macID,
-    required this.ipAddress,
-    this.stream,
+    this.temperatureAlert,
+    this.firmware,
+    this.networkStrength,
+    this.macID,
+    this.ipAddress,
+    this.deviceRef,
   });
 
   /// It is important to note that we could have accessed the temperature and humidity as doubles
   /// however, the conversion of data object to map sometimes convers the whole values to integers
   /// and can cause the app to crash cause direct type casting from int to double doesn't work
   /// so changing based on the runtime type
-  factory Device.fromMap(Map<String, dynamic> data, {Stream<DocumentSnapshot<Map<String, dynamic>>>? stream}) {
+  factory Device.fromMap(Map<String, dynamic> data, {DocumentReference<Map<String, dynamic>>? ref}) {
     final dynamic temperature = data['temperature'];
     final dynamic humidity = data['humidity'];
 
@@ -59,7 +59,7 @@ class Device {
       networkStrength: data['networkStrength'],
       macID: data['macID'],
       ipAddress: data['ipAddress'],
-      stream: stream,
+      deviceRef: ref,
     );
   }
 

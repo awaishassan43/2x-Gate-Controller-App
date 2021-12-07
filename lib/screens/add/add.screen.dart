@@ -5,6 +5,7 @@ import 'package:iot/components/button.component.dart';
 import 'package:iot/components/input.component.dart';
 import 'package:iot/controllers/device.controller.dart';
 import 'package:iot/models/device.model.dart';
+import 'package:iot/models/relay.model.dart';
 import 'package:iot/util/constants.util.dart';
 import 'package:iot/util/functions.util.dart';
 import 'package:provider/provider.dart';
@@ -209,16 +210,15 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
         name: "Front Gate",
         temperature: 0,
         humidity: 0,
-        relays: [],
-        onOpenAlert: 10,
-        onCloseAlert: 10,
-        remainedOpenAlert: 10,
-        nightAlert: true,
-        temperatureAlert: 10,
-        firmware: "v1.1",
-        networkStrength: "Good",
-        macID: "12:23:21:49:12",
-        ipAddress: "192.168.1.3",
+        relays: [
+          Relay(id: 'r1', name: "Relay 1", isOpen: false, outputTime: 30, autoCloseTime: 30, scheduled: false, isEnabled: true),
+          Relay(id: 'r2', name: "Relay 2", isOpen: false, outputTime: 30, autoCloseTime: 30, scheduled: false, isEnabled: true),
+        ],
+        onOpenAlert: 0,
+        onCloseAlert: 0,
+        remainedOpenAlert: 0,
+        nightAlert: false,
+        temperatureAlert: 0,
       );
 
       await Provider.of<DeviceController>(context, listen: false).addDevice(device, context);

@@ -45,6 +45,7 @@ dependencies:
   wifi_iot: ^0.3.8
   connectivity_plus: ^2.0.3
   location: ^4.3.0
+  intl: ^0.17.0
 
 dev_dependencies:
   flutter_test:
