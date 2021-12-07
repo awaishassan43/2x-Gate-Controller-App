@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:iot/models/relay.model.dart';
 
 class Device {
@@ -15,6 +16,7 @@ class Device {
   final String networkStrength;
   final String macID;
   final String ipAddress;
+  final Stream<DocumentSnapshot<Map<String, dynamic>>>? stream;
 
   const Device({
     required this.id,
@@ -31,13 +33,14 @@ class Device {
     required this.networkStrength,
     required this.macID,
     required this.ipAddress,
+    this.stream,
   });
 
   /// It is important to note that we could have accessed the temperature and humidity as doubles
   /// however, the conversion of data object to map sometimes convers the whole values to integers
   /// and can cause the app to crash cause direct type casting from int to double doesn't work
   /// so changing based on the runtime type
-  factory Device.fromMap(Map<String, dynamic> data) {
+  factory Device.fromMap(Map<String, dynamic> data, {Stream<DocumentSnapshot<Map<String, dynamic>>>? stream}) {
     final dynamic temperature = data['temperature'];
     final dynamic humidity = data['humidity'];
 
@@ -56,6 +59,7 @@ class Device {
       networkStrength: data['networkStrength'],
       macID: data['macID'],
       ipAddress: data['ipAddress'],
+      stream: stream,
     );
   }
 

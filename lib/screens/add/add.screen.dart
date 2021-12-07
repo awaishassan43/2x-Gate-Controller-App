@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:iot/components/button.component.dart';
 import 'package:iot/components/input.component.dart';
 import 'package:iot/controllers/device.controller.dart';
+import 'package:iot/models/device.model.dart';
 import 'package:iot/util/constants.util.dart';
 import 'package:iot/util/functions.util.dart';
 import 'package:provider/provider.dart';
@@ -203,7 +204,23 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
 
   Future<void> addDevice(BuildContext context) async {
     try {
-      final Map<String, dynamic> device = {"name": "Device 1", "temperature": 0, "humidity": 0, "relays": []};
+      const Device device = Device(
+        id: "a random device",
+        name: "Front Gate",
+        temperature: 0,
+        humidity: 0,
+        relays: [],
+        onOpenAlert: 10,
+        onCloseAlert: 10,
+        remainedOpenAlert: 10,
+        nightAlert: true,
+        temperatureAlert: 10,
+        firmware: "v1.1",
+        networkStrength: "Good",
+        macID: "12:23:21:49:12",
+        ipAddress: "192.168.1.3",
+      );
+
       await Provider.of<DeviceController>(context, listen: false).addDevice(device, context);
       showMessage(context, "Device added successfully");
     } catch (e) {

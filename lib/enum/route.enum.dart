@@ -11,8 +11,9 @@ class Screen {
   static String get resetPassword => '/resetPassword';
   static String get feedback => '/feedback';
   static String get addDevice => '/addDevice';
+  static String get editPhone => '/editPhone';
 
   // General purpose screens
   static String get editor => '/editor';
-  static String get temperatureUnit => '/temperatureUnit';
+  static String get selector => '/selector';
 }

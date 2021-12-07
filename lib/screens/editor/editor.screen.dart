@@ -5,10 +5,12 @@ import 'package:iot/components/input.component.dart';
 class EditorScreen extends StatefulWidget {
   final String initialValue;
   final String heading;
+  final void Function(String value) onEdit;
   const EditorScreen({
     Key? key,
     required this.initialValue,
     required this.heading,
+    required this.onEdit,
   }) : super(key: key);
 
   @override
@@ -18,11 +20,24 @@ class EditorScreen extends StatefulWidget {
 class _EditorScreenState extends State<EditorScreen> {
   late final TextEditingController controller;
   final GlobalKey<FormState> form = GlobalKey();
+  String error = '';
 
   @override
   void initState() {
     super.initState();
     controller = TextEditingController(text: widget.initialValue);
+  }
+
+  void onEditDone() {
+    final String value = controller.text;
+
+    if (value.isEmpty) {
+      setState(() {
+        error = "${widget.heading} cannot be empty!";
+      });
+    }
+
+    widget.onEdit(value);
   }
 
   @override
@@ -41,12 +56,13 @@ class _EditorScreenState extends State<EditorScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               CustomInput(
-                label: "",
+                label: widget.heading,
                 controller: controller,
                 autoFocus: true,
+                error: error,
               ),
               const SizedBox(height: 30),
-              CustomButton(text: "Save", onPressed: () {}),
+              CustomButton(text: "Save", onPressed: onEditDone),
             ],
           ),
         ),

@@ -9,11 +9,22 @@ import 'package:iot/util/functions.util.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 
-class AppSettings extends StatelessWidget {
+class AppSettings extends StatefulWidget {
   const AppSettings({Key? key}) : super(key: key);
 
   @override
+  State<AppSettings> createState() => _AppSettingsState();
+}
+
+class _AppSettingsState extends State<AppSettings> {
+  bool isLoading = false;
+  String error = '';
+
+  @override
   Widget build(BuildContext context) {
+    final UserController controller = Provider.of<UserController>(context);
+    final Profile profile = controller.profile!;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("App Settings"),
@@ -24,37 +35,43 @@ class AppSettings extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Selector<UserController, Profile>(
-                selector: (context, controller) => controller.profile!,
-                builder: (context, profile, _) {
-                  return Section(
-                    header: "Profile",
-                    children: [
-                      SectionItem(
-                        title: "Email",
-                        trailingText: profile.email,
-                      ),
-                      SectionItem(
-                        title: "Name",
-                        trailingText: profile.firstName + " " + profile.lastName,
-                        onEdit: () {},
-                      ),
-                      SectionItem(
-                        title: "Phone",
-                        onEdit: () {},
-                        trailingText: "+" + profile.code + " " + profile.phone,
-                      ),
-                      SectionItem(
-                        title: "Password",
-                        showChevron: true,
-                        onTap: () {
-                          Navigator.pushNamed(context, Screen.resetPassword);
-                        },
-                        showSeparator: false,
-                      ),
-                    ],
-                  );
-                }),
+            Section(
+              header: "Profile",
+              children: [
+                SectionItem(
+                  title: "Email",
+                  trailingText: profile.email,
+                ),
+                SectionItem(
+                  title: "Name",
+                  trailingText: profile.name,
+                  onEdit: (String value) async {
+                    try {
+                      await controller.updateProfile("name", value);
+                    } catch (e) {}
+                  },
+                ),
+                SectionItem(
+                  title: "Phone",
+                  onEdit: (String value) {},
+                  onTap: () {
+                    Navigator.pushNamed(context, Screen.editPhone, arguments: {
+                      "code": profile.code,
+                      "phone": profile.phone,
+                    });
+                  },
+                  trailingText: "+" + profile.code + " " + profile.phone,
+                ),
+                SectionItem(
+                  title: "Password",
+                  showChevron: true,
+                  onTap: () {
+                    Navigator.pushNamed(context, Screen.resetPassword);
+                  },
+                  showSeparator: false,
+                ),
+              ],
+            ),
             Section(
               header: "Upgrade",
               children: [
@@ -75,7 +92,10 @@ class AppSettings extends StatelessWidget {
                   trailingText: "Celcius",
                   showChevron: true,
                   onTap: () {
-                    Navigator.pushNamed(context, Screen.temperatureUnit);
+                    Navigator.pushNamed(
+                      context,
+                      Screen.selector,
+                    );
                   },
                 ),
                 SectionItem(

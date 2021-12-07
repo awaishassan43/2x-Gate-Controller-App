@@ -70,29 +70,19 @@ class UserController extends ChangeNotifier {
       final User? user = FirebaseAuth.instance.currentUser;
 
       if (user != null) {
-        final QuerySnapshot<Object?> querySnapshot = await users.where('userID', isEqualTo: user.uid).limit(1).get();
+        final DocumentSnapshot<Object?> document = await users.doc(user.email).get();
 
-        if (querySnapshot.docs.isEmpty) {
+        if (!document.exists) {
           throw Exception("User profile does not exist");
         }
 
-        final QueryDocumentSnapshot<Object?> document = querySnapshot.docs.first;
+        transformMapToProfile(document.data());
+        await attachProfileListener(document.reference);
 
-        if (!document.exists || document.data() == null) {
-          throw Exception("User profile does not exist");
-        }
-
-        final Map<String, dynamic> data = document.data()! as Map<String, dynamic>;
-
-        data['userID'] = auth.currentUser!.uid;
-        data['email'] = auth.currentUser!.email;
-        profile = Profile.fromMap(data);
-
-        await attachProfileListener(querySnapshot.docs.first.reference);
         return true;
+      } else {
+        return false;
       }
-
-      return false;
     } on FirebaseException catch (e) {
       throw "Error occured while getting the user profile: ${e.message}";
     } catch (e) {
@@ -108,16 +98,9 @@ class UserController extends ChangeNotifier {
         throw Exception("Error occured while trying to login");
       }
 
-      final User user = userCredential.user!;
-      final QuerySnapshot<Object?> querySnapshot = await users.where('userID', isEqualTo: user.uid).limit(1).get();
+      final bool isLoggedIn = await getLoggedInUser();
 
-      if (querySnapshot.docs.isEmpty || !querySnapshot.docs.first.exists) {
-        throw Exception("User profile does not exist");
-      }
-
-      await attachProfileListener(querySnapshot.docs.first.reference);
-
-      return true;
+      return isLoggedIn;
     } on FirebaseException catch (e) {
       throw "Error occured while logging in the user: ${e.message}";
     } catch (e) {
@@ -143,18 +126,24 @@ class UserController extends ChangeNotifier {
         throw Exception("Error occured while trying to register user");
       }
 
-      final User user = userCredential.user!;
+      final Profile tempProfile = Profile(
+        devices: [],
+        email: email,
+        phone: phone,
+        code: callingCode,
+        name: '$firstName $lastName',
+        is24Hours: true,
+        temperatureUnit: "C",
+      );
 
-      final DocumentReference<Object?> reference = await users.add({
-        "firstName": firstName,
-        "lastName": lastName,
-        "code": callingCode,
-        "phone": phone,
-        "userID": user.uid,
-        "devices": [],
-      });
+      final Map<String, dynamic> profileData = tempProfile.toJSON();
+      profileData.remove('email');
 
-      await attachProfileListener(reference);
+      final DocumentReference<Object?> document = users.doc(email);
+      await document.set(profileData);
+
+      profile = tempProfile;
+      await attachProfileListener(document);
 
       return true;
     } on FirebaseException catch (e) {
@@ -168,14 +157,38 @@ class UserController extends ChangeNotifier {
     try {
       profileRef = await reference.get();
       reference.snapshots().listen((snapshot) {
-        Map<String, dynamic> profileData = snapshot.data() as Map<String, dynamic>;
-        profileData['email'] = auth.currentUser!.email;
-        profile = Profile.fromMap(profileData);
+        transformMapToProfile(snapshot.data());
         notifyListeners();
       });
     } catch (e) {
       rethrow;
     }
+  }
+
+  Future<void> updateProfile(String key, dynamic value) async {
+    try {
+      if (profile == null) {
+        throw "Failed to get the profile data";
+      }
+
+      final Map<String, dynamic> data = profile!.toJSON();
+      data[key] = value;
+
+      await users.doc(profile!.email).set(data);
+    } on FirebaseException catch (e) {
+      throw "Error occured while trying to update the profile: ${e.message}";
+    } catch (e) {
+      throw "Failed to update the profile: ${e.toString()}";
+    }
+  }
+
+  /// Note: The profile data being stored in the firebase does not include email
+  /// So manually have to add the email of the signed in user to the profile data map
+  void transformMapToProfile(Object? data) {
+    Map<String, dynamic> profileData = data as Map<String, dynamic>;
+
+    profileData['email'] = auth.currentUser!.email;
+    profile = Profile.fromMap(profileData);
   }
 
   Future<void> logout() async {

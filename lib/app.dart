@@ -9,6 +9,7 @@ import 'package:iot/screens/dashboard/dashboard.screen.dart';
 import 'package:iot/screens/feedback/feedback.component.dart';
 import 'package:iot/screens/login/login.screen.dart';
 import 'package:iot/screens/password/password.screen.dart';
+import 'package:iot/screens/phone/phone.screen.dart';
 import 'package:iot/screens/selector/selector.screen.dart';
 import 'package:iot/screens/settings/app.screen.dart';
 import 'package:iot/screens/settings/device.screen.dart';
@@ -77,12 +78,15 @@ class _AppState extends State<App> {
                   } else if (settings.name == Screen.deviceSettings) {
                     final Device device = settings.arguments as Device;
                     return DeviceSettings(device: device);
-                  } else if (settings.name == Screen.temperatureUnit) {
+                  } else if (settings.name == Screen.selector) {
                     return const SelectorScreen(
                       title: "Temperature Unit",
                       options: ["Celcius", "Farenheit"],
                       selectedOption: "Celcius",
                     );
+                  } else if (settings.name == Screen.editPhone) {
+                    final Map<String, String> params = settings.arguments as Map<String, String>;
+                    return PhoneEditingScreen(code: params["code"]!, phone: params["phone"]!);
                   } else {
                     return Container();
                   }

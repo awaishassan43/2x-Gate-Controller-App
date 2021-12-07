@@ -53,7 +53,7 @@ class _DeviceSettingsState extends State<DeviceSettings> {
                     SectionItem(
                       title: "Controller Name",
                       trailingText: widget.device.name,
-                      onEdit: () {},
+                      onEdit: (String value) {},
                       showSeparator: false,
                     ),
                   ],
@@ -67,7 +67,7 @@ class _DeviceSettingsState extends State<DeviceSettings> {
                             title: "Name",
                             subtitleText: "Automatically close the door at a specified time",
                             trailingText: relay.name,
-                            onEdit: () {},
+                            onEdit: (String value) {},
                           ),
                           SectionItem(
                             title: "Output Time",
@@ -171,7 +171,7 @@ class _DeviceSettingsState extends State<DeviceSettings> {
                       title: "Temperature Alert",
                       subtitleText: "Alert if temperature exceeds",
                       trailingText: "70C",
-                      onEdit: () {},
+                      onEdit: (String value) {},
                     ),
                   ],
                 ),

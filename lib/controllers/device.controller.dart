@@ -2,25 +2,38 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:iot/controllers/user.controller.dart';
+import 'package:iot/models/device.model.dart';
 import 'package:provider/provider.dart';
 
 class DeviceController extends ChangeNotifier {
   final collection = FirebaseFirestore.instance.collection('devices');
-  Map<String, Stream<DocumentSnapshot<Map<String, dynamic>>>> deviceStreams = {};
-  Map<String, Map<String, dynamic>> devices = {};
+  Map<String, Device> devices = {};
 
   Future<void> loadDevices({required List<String> deviceIDs}) async {
     try {
-      final QuerySnapshot<Map<String, dynamic>> deviceCollection = await collection.get();
+      for (String deviceID in deviceIDs) {
+        final DocumentSnapshot<Map<String, dynamic>> document = await collection.doc(deviceID).get();
 
-      if (deviceCollection.docs.isNotEmpty) {
-        final Iterable<QueryDocumentSnapshot<Map<String, dynamic>>> filteredDevices =
-            deviceCollection.docs.where((element) => deviceIDs.contains(element.id));
+        final Map<String, dynamic>? deviceData = document.data();
 
-        for (var element in filteredDevices) {
-          deviceStreams[element.id] = element.reference.snapshots();
-          devices[element.id] = element.data();
+        if (deviceData == null) {
+          throw "Device data does not exist";
         }
+
+        deviceData['id'] = deviceID;
+        final Device device = Device.fromMap(
+          deviceData,
+          stream: document.reference.snapshots().asBroadcastStream(
+            onListen: (StreamSubscription<DocumentSnapshot<Map<String, dynamic>>> snapshot) {
+              print("Someone seems to be listening to the stream");
+            },
+            onCancel: (StreamSubscription<DocumentSnapshot<Map<String, dynamic>>> snapshot) {
+              print("Someone cancelled the stream subscription");
+            },
+          ),
+        );
+
+        devices[deviceID] = device;
       }
     } on FirebaseException catch (e) {
       throw Exception("Error occured while loading devices: ${e.message}");
@@ -29,15 +42,30 @@ class DeviceController extends ChangeNotifier {
     }
   }
 
-  Future<void> addDevice(Map<String, dynamic> device, BuildContext context) async {
+  Future<void> addDevice(Device device, BuildContext context) async {
     try {
-      final DocumentReference<Map<String, dynamic>> document = await collection.add(device);
-      deviceStreams[document.id] = document.snapshots();
-      devices[document.id] = device;
-      device["id"] = document.id;
+      final String deviceID = device.id;
+      final Map<String, dynamic> deviceData = device.toJSON();
+      deviceData.remove('id');
+
+      final DocumentReference<Map<String, dynamic>> document = collection.doc(deviceID);
+      await document.set(deviceData);
+
+      final Device newDevice = Device.fromMap(
+        deviceData,
+        stream: document.snapshots().asBroadcastStream(
+          onListen: (StreamSubscription<DocumentSnapshot<Map<String, dynamic>>> snapshot) {
+            print("Someone seems to be listening to the stream");
+          },
+          onCancel: (StreamSubscription<DocumentSnapshot<Map<String, dynamic>>> snapshot) {
+            print("Someone cancelled the stream subscription");
+          },
+        ),
+      );
+
+      devices[deviceID] = newDevice;
 
       await Provider.of<UserController>(context, listen: false).linkDeviceToUser(document.id);
-
       notifyListeners();
     } on FirebaseException catch (e) {
       throw Exception("Error occured while adding the device: ${e.message}");
@@ -49,7 +77,6 @@ class DeviceController extends ChangeNotifier {
   removeDevice(String deviceID, BuildContext context) async {
     try {
       await collection.doc(deviceID).delete();
-      deviceStreams.remove(deviceID);
       devices.remove(deviceID);
 
       await Provider.of<UserController>(context, listen: false).unlinkDeviceFromUser(deviceID);
@@ -64,6 +91,5 @@ class DeviceController extends ChangeNotifier {
 
   removeDevices() {
     devices.clear();
-    deviceStreams.clear();
   }
 }

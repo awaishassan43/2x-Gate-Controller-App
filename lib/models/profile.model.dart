@@ -1,19 +1,15 @@
 class Profile {
   final String email;
-  final String firstName;
-  final String lastName;
+  final String name;
   final String code;
   final String phone;
-  final String id;
   final List<String> devices;
   final String temperatureUnit;
   final bool is24Hours;
 
   Profile({
-    required this.id,
     required this.email,
-    required this.firstName,
-    required this.lastName,
+    required this.name,
     required this.code,
     required this.phone,
     required this.devices,
@@ -23,10 +19,8 @@ class Profile {
 
   factory Profile.fromMap(Map<String, dynamic> data) {
     return Profile(
-      id: data['userID'],
       email: data['email'],
-      firstName: data['firstName'],
-      lastName: data['lastName'],
+      name: data['name'],
       code: data['code'],
       phone: data['phone'],
       devices: (data['devices'] as List<dynamic>).cast<String>(),
@@ -38,12 +32,10 @@ class Profile {
   Map<String, dynamic> toJSON() {
     return {
       "email": email,
-      "firstName": firstName,
-      "lastName": lastName,
+      "name": name,
       "code": code,
       "phone": phone,
       "devices": devices,
-      "userID": id,
       "temperatureUnit": temperatureUnit,
       "is24Hours": is24Hours,
     };

@@ -57,9 +57,9 @@ class Dashboard extends StatelessWidget {
             return Consumer<DeviceController>(
               builder: (context, controller, _) {
                 return Column(
-                  children: controller.deviceStreams.entries.map((entry) {
+                  children: controller.devices.entries.map((entry) {
                     return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-                      stream: entry.value,
+                      stream: entry.value.stream,
                       builder: (context, snapshot) {
                         if (snapshot.data == null || snapshot.data?.data() == null) {
                           return Container();

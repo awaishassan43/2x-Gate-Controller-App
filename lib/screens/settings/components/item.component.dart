@@ -7,7 +7,7 @@ class SectionItem extends StatelessWidget {
   final Widget? subtitle;
   final Widget? trailing;
   final String? trailingText;
-  final void Function()? onEdit;
+  final void Function(String value)? onEdit;
   final void Function()? onTap;
   final bool showSeparator;
   final bool showChevron;
@@ -111,7 +111,11 @@ class SectionItem extends StatelessWidget {
                           }
 
                           Navigator.push(context, MaterialPageRoute(builder: (context) {
-                            return EditorScreen(initialValue: trailingText!, heading: title);
+                            return EditorScreen(
+                              initialValue: trailingText!,
+                              heading: title,
+                              onEdit: onEdit!,
+                            );
                           }));
                         },
                         constraints: const BoxConstraints(
