@@ -8,11 +8,11 @@ import 'package:iot/screens/add/add.screen.dart';
 import 'package:iot/screens/dashboard/dashboard.screen.dart';
 import 'package:iot/screens/feedback/feedback.component.dart';
 import 'package:iot/screens/login/login.screen.dart';
-import 'package:iot/screens/password/password.screen.dart';
-import 'package:iot/screens/phone/phone.screen.dart';
+import 'package:iot/screens/settings/subscreens/password.screen.dart';
+import 'package:iot/screens/settings/subscreens/phone.screen.dart';
 import 'package:iot/screens/selector/selector.screen.dart';
-import 'package:iot/screens/settings/app.screen.dart';
-import 'package:iot/screens/settings/device.screen.dart';
+import 'package:iot/screens/settings/app.settings.dart';
+import 'package:iot/screens/settings/device.settings.dart';
 import 'package:iot/screens/signup/signup.screen.dart';
 import 'package:iot/screens/success/success.screen.dart';
 import 'package:iot/util/themes.util.dart';
@@ -68,6 +68,7 @@ class _AppState extends State<App> {
               Screen.resetPassword: (context) => const ChangePasswordScreen(),
               Screen.feedback: (context) => const FeedbackScreen(),
               Screen.addDevice: (context) => const AddDeviceScreen(),
+              Screen.editPhone: (context) => const PhoneEditingScreen(),
             },
             onGenerateRoute: (settings) {
               return MaterialPageRoute(
@@ -84,9 +85,6 @@ class _AppState extends State<App> {
                       options: ["Celcius", "Farenheit"],
                       selectedOption: "Celcius",
                     );
-                  } else if (settings.name == Screen.editPhone) {
-                    final Map<String, String> params = settings.arguments as Map<String, String>;
-                    return PhoneEditingScreen(code: params["code"]!, phone: params["phone"]!);
                   } else {
                     return Container();
                   }

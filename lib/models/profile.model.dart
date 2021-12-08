@@ -1,11 +1,11 @@
 class Profile {
-  final String email;
-  final String name;
-  final String code;
-  final String phone;
-  final List<String> devices;
-  final String temperatureUnit;
-  final bool is24Hours;
+  String email;
+  String name;
+  String code;
+  String phone;
+  List<String> devices;
+  String temperatureUnit;
+  bool is24Hours;
 
   Profile({
     required this.email,

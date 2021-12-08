@@ -1,6 +1,6 @@
 const linkToTermsOfUse = 'https://google.com';
 
-const temperatureUnits = ["Celcius", "Farenheit"];
+const Map<String, String> temperatureUnits = {"C": "Celcius", "F": "Fahrenheit"};
 
 // const String deviceSSID = 'qasimblock';
 // const String devicePassword = 'ntl108025';

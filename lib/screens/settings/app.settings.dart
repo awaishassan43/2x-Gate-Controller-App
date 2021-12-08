@@ -5,6 +5,7 @@ import 'package:iot/enum/route.enum.dart';
 import 'package:iot/models/profile.model.dart';
 import 'package:iot/screens/settings/components/item.component.dart';
 import 'package:iot/screens/settings/components/section.component.dart';
+import 'package:iot/util/constants.util.dart';
 import 'package:iot/util/functions.util.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
@@ -17,21 +18,20 @@ class AppSettings extends StatefulWidget {
 }
 
 class _AppSettingsState extends State<AppSettings> {
-  bool isLoading = false;
   String error = '';
+  late final UserController controller;
+  late final Profile profile;
+
+  @override
+  void initState() {
+    controller = Provider.of<UserController>(context, listen: false);
+    profile = controller.profile!;
+
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
-    /// It is important to note that I could have used stream
-    /// just like i did for devices.... however, there are two reasons
-    /// 1. the devices would have to be tracked
-    /// seperately... and at the moment, I can't think of doing that the easy way
-    /// so using change notifier to provider the changes
-    /// 2. the listener is being used directly in the controller, while the change
-    /// notifier is providing the changes....
-    final UserController controller = Provider.of<UserController>(context);
-    final Profile profile = controller.profile!;
-
     return Scaffold(
       appBar: AppBar(
         title: const Text("App Settings"),
@@ -49,24 +49,32 @@ class _AppSettingsState extends State<AppSettings> {
                   title: "Email",
                   trailingText: profile.email,
                 ),
-                SectionItem(
-                  title: "Name",
-                  trailingText: profile.name,
-                  onEdit: (String value) async {
-                    try {
-                      await controller.updateProfile("name", value);
-                    } catch (e) {}
+                Selector<UserController, String>(
+                  selector: (context, controller) => controller.profile!.name,
+                  builder: (context, name, __) {
+                    return SectionItem(
+                      title: "Name",
+                      trailingText: name,
+                      onEdit: (String value) async {
+                        final String previousValue = profile.name;
+
+                        try {
+                          controller.profile!.name = value;
+                          await controller.updateProfile();
+                        } catch (e) {
+                          controller.profile!.name = previousValue;
+                          showMessage(context, e.toString());
+                        }
+                      },
+                    );
                   },
                 ),
                 SectionItem(
                   title: "Phone",
-                  onEdit: (String value) {},
                   onTap: () {
-                    Navigator.pushNamed(context, Screen.editPhone, arguments: {
-                      "code": profile.code,
-                      "phone": profile.phone,
-                    });
+                    Navigator.pushNamed(context, Screen.editPhone);
                   },
+                  showChevron: true,
                   trailingText: "+" + profile.code + " " + profile.phone,
                 ),
                 SectionItem(
@@ -94,26 +102,44 @@ class _AppSettingsState extends State<AppSettings> {
             Section(
               header: "Settings",
               children: [
-                SectionItem(
-                  title: "Temperature Unit",
-                  trailingText: profile.temperatureUnit,
-                  showChevron: true,
-                  onTap: () {
-                    Navigator.pushNamed(
-                      context,
-                      Screen.selector,
+                Selector<UserController, String>(
+                  selector: (context, controller) => controller.profile!.temperatureUnit,
+                  builder: (context, unit, __) {
+                    return SectionItem(
+                      title: "Temperature Unit",
+                      trailingText: temperatureUnits[unit],
+                      showChevron: true,
+                      onTap: () {
+                        Navigator.pushNamed(
+                          context,
+                          Screen.selector,
+                        );
+                      },
                     );
                   },
                 ),
-                SectionItem(
-                  title: "24-Hour Time",
-                  trailing: Switch(
-                    value: profile.is24Hours,
-                    onChanged: (value) {
-                      controller.updateProfile("is24Hour", value);
-                    },
-                  ),
-                  showSeparator: false,
+                Selector<UserController, bool>(
+                  selector: (context, controller) => controller.profile!.is24Hours,
+                  builder: (context, is24Hours, __) {
+                    return SectionItem(
+                      title: "24-Hour Time",
+                      trailing: Switch(
+                        value: is24Hours,
+                        onChanged: (value) async {
+                          final bool previousValue = profile.is24Hours;
+
+                          try {
+                            controller.profile!.is24Hours = !is24Hours;
+                            await controller.updateProfile();
+                          } catch (e) {
+                            profile.is24Hours = previousValue;
+                            showMessage(context, e.toString());
+                          }
+                        },
+                      ),
+                      showSeparator: false,
+                    );
+                  },
                 ),
               ],
             ),

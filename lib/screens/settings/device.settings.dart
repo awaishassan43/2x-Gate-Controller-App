@@ -7,10 +7,10 @@ import 'package:iot/components/loader.component.dart';
 import 'package:iot/controllers/device.controller.dart';
 import 'package:iot/controllers/user.controller.dart';
 import 'package:iot/models/device.model.dart';
-import 'package:iot/screens/selector/selector.screen.dart';
-import 'package:iot/util/extensions.util.dart';
 import 'package:iot/screens/settings/components/item.component.dart';
 import 'package:iot/screens/settings/components/section.component.dart';
+import 'package:iot/screens/selector/selector.screen.dart';
+import 'package:iot/util/extensions.util.dart';
 import 'package:iot/util/functions.util.dart';
 import 'package:provider/provider.dart';
 

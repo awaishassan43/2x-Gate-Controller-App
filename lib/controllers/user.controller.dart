@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:iot/models/profile.model.dart';
 
@@ -39,7 +40,6 @@ class UserController extends ChangeNotifier {
       (data['devices'] as List<dynamic>).cast<String>().add(deviceID);
 
       await profileRef!.reference.set(data);
-      notifyListeners();
     } on FirebaseException catch (e) {
       throw "Error occured while linking the device to user: ${e.message}";
     } catch (e) {
@@ -57,7 +57,6 @@ class UserController extends ChangeNotifier {
       (data["devices"] as List<dynamic>).cast<String>().remove(deviceID);
 
       await profileRef!.reference.set(data);
-      notifyListeners();
     } on FirebaseException catch (e) {
       throw "Error occured while removing the device from user: ${e.message}";
     } catch (e) {
@@ -153,6 +152,23 @@ class UserController extends ChangeNotifier {
     }
   }
 
+  Future<void> updatePassword(String oldPass, String newPass) async {
+    try {
+      if (auth.currentUser == null) {
+        throw "Failed to get user profile";
+      }
+
+      final AuthCredential credential = EmailAuthProvider.credential(email: auth.currentUser!.email!, password: oldPass);
+      await auth.currentUser!.reauthenticateWithCredential(credential);
+
+      await auth.currentUser!.updatePassword(newPass);
+    } on FirebaseAuthException catch (e) {
+      throw "Error occured while trying to update the password: ${e.message}";
+    } catch (e) {
+      throw "Failed to update the password: ${e.toString()}";
+    }
+  }
+
   Future<void> attachProfileListener(DocumentReference<Object?> reference) async {
     try {
       profileRef = await reference.get();
@@ -165,14 +181,15 @@ class UserController extends ChangeNotifier {
     }
   }
 
-  Future<void> updateProfile(String key, dynamic value) async {
+  Future<void> updateProfile() async {
     try {
+      notifyListeners();
+
       if (profile == null) {
         throw "Failed to get the profile data";
       }
 
       final Map<String, dynamic> data = profile!.toJSON();
-      data[key] = value;
 
       await users.doc(profile!.email).set(data);
     } on FirebaseException catch (e) {
@@ -184,11 +201,13 @@ class UserController extends ChangeNotifier {
 
   /// Note: The profile data being stored in the firebase does not include email
   /// So manually have to add the email of the signed in user to the profile data map
+  /// the return true shows the new value has been applied because it was different from original value
+  /// false means... the value didn't update.. .cause it was already updated
   void transformMapToProfile(Object? data) {
-    Map<String, dynamic> profileData = data as Map<String, dynamic>;
+    Map<String, dynamic> newData = data as Map<String, dynamic>;
 
-    profileData['email'] = auth.currentUser!.email;
-    profile = Profile.fromMap(profileData);
+    newData['email'] = auth.currentUser!.email;
+    profile = Profile.fromMap(newData);
   }
 
   Future<void> logout() async {
