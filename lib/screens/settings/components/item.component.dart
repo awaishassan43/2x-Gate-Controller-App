@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:iot/screens/editor/editor.screen.dart';
 
 class SectionItem extends StatelessWidget {
   final String title;
@@ -7,23 +6,24 @@ class SectionItem extends StatelessWidget {
   final Widget? subtitle;
   final Widget? trailing;
   final String? trailingText;
-  final void Function(String value)? onEdit;
   final void Function()? onTap;
   final bool showSeparator;
   final bool showChevron;
+  final bool showEditIcon;
   const SectionItem({
     Key? key,
     required this.title,
     this.subtitle,
     this.subtitleText,
     this.trailing,
-    this.onEdit,
     this.onTap,
     this.trailingText,
     this.showSeparator = true,
     this.showChevron = false,
+    this.showEditIcon = false,
   })  : assert((trailing != null || trailingText != null) || (trailing == null && trailingText == null)),
         assert((trailing != null || trailingText != null) || (trailing == null && trailingText == null)),
+        assert((showChevron != true || showEditIcon != true) || (showChevron == false && showEditIcon == false)),
         super(key: key);
 
   @override
@@ -46,7 +46,7 @@ class SectionItem extends StatelessWidget {
           hoverElevation: 0,
           padding: const EdgeInsets.all(0),
           child: Padding(
-            padding: EdgeInsets.only(top: 12.5, bottom: 12.5, left: 12.5, right: onEdit != null || trailing != null ? 5 : 12.5),
+            padding: EdgeInsets.only(top: 12.5, bottom: 12.5, left: 12.5, right: trailing != null ? 5 : 12.5),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -87,6 +87,8 @@ class SectionItem extends StatelessWidget {
                  * End of left section
                  */
 
+                const SizedBox(width: 5),
+
                 /**
                  * Right section
                  */
@@ -103,36 +105,14 @@ class SectionItem extends StatelessWidget {
                         ),
                       ),
                     if (trailing != null) trailing!,
-                    if (onEdit != null)
-                      IconButton(
-                        onPressed: () {
-                          if (trailingText == null) {
-                            return;
-                          }
-
-                          Navigator.push(context, MaterialPageRoute(builder: (context) {
-                            return EditorScreen(
-                              initialValue: trailingText!,
-                              heading: title,
-                              onEdit: onEdit!,
-                            );
-                          }));
-                        },
-                        constraints: const BoxConstraints(
-                          maxHeight: 40,
-                          maxWidth: 40,
-                        ),
-                        icon: const Icon(
-                          Icons.edit,
-                          size: 20,
-                        ),
-                      ),
-                    if (showChevron)
-                      const Icon(
-                        Icons.chevron_right_rounded,
-                        size: 28,
+                    if (showChevron || showEditIcon) ...[
+                      if (showEditIcon) const SizedBox(width: 5),
+                      Icon(
+                        showChevron ? Icons.chevron_right_rounded : Icons.edit,
+                        size: showChevron ? 28 : 20,
                         color: Colors.black45,
                       ),
+                    ],
                   ],
                 ),
                 /**

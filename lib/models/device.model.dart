@@ -2,23 +2,23 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:iot/models/relay.model.dart';
 
 class Device {
-  final String id;
-  final String name;
-  final double? temperature;
-  final double? humidity;
-  final List<Relay> relays;
-  final int onOpenAlert;
-  final int onCloseAlert;
-  final int remainedOpenAlert;
-  final bool nightAlert;
-  final int? temperatureAlert;
-  final String? firmware;
-  final String? networkStrength;
-  final String? macID;
-  final String? ipAddress;
+  String id;
+  String name;
+  double? temperature;
+  double? humidity;
+  List<Relay> relays;
+  int onOpenAlert;
+  int onCloseAlert;
+  int remainedOpenAlert;
+  bool nightAlert;
+  int? temperatureAlert;
+  String? firmware;
+  String? networkStrength;
+  String? macID;
+  String? ipAddress;
   final DocumentReference<Map<String, dynamic>>? deviceRef;
 
-  const Device({
+  Device({
     required this.id,
     required this.name,
     required this.temperature,
@@ -41,8 +41,8 @@ class Device {
   /// and can cause the app to crash cause direct type casting from int to double doesn't work
   /// so changing based on the runtime type
   factory Device.fromMap(Map<String, dynamic> data, {DocumentReference<Map<String, dynamic>>? ref}) {
-    final dynamic temperature = data['temperature'];
-    final dynamic humidity = data['humidity'];
+    dynamic temperature = data['temperature'];
+    dynamic humidity = data['humidity'];
 
     return Device(
       id: data['id'],

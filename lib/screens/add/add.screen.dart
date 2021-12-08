@@ -205,7 +205,7 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
 
   Future<void> addDevice(BuildContext context) async {
     try {
-      const Device device = Device(
+      Device device = Device(
         id: "a random device",
         name: "Front Gate",
         temperature: 0,

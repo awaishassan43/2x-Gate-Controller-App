@@ -6,13 +6,16 @@ import 'package:iot/enum/route.enum.dart';
 import 'package:iot/models/device.model.dart';
 import 'package:iot/screens/add/add.screen.dart';
 import 'package:iot/screens/dashboard/dashboard.screen.dart';
-import 'package:iot/screens/feedback/feedback.component.dart';
+import 'package:iot/screens/settings/subscreens/controllerName.screen.dart';
+import 'package:iot/screens/settings/subscreens/feedback.component.dart';
 import 'package:iot/screens/login/login.screen.dart';
+import 'package:iot/screens/settings/subscreens/name.screen.dart';
 import 'package:iot/screens/settings/subscreens/password.screen.dart';
 import 'package:iot/screens/settings/subscreens/phone.screen.dart';
 import 'package:iot/screens/selector/selector.screen.dart';
 import 'package:iot/screens/settings/app.settings.dart';
 import 'package:iot/screens/settings/device.settings.dart';
+import 'package:iot/screens/settings/subscreens/relayName.screen.dart';
 import 'package:iot/screens/signup/signup.screen.dart';
 import 'package:iot/screens/success/success.screen.dart';
 import 'package:iot/util/themes.util.dart';
@@ -69,6 +72,7 @@ class _AppState extends State<App> {
               Screen.feedback: (context) => const FeedbackScreen(),
               Screen.addDevice: (context) => const AddDeviceScreen(),
               Screen.editPhone: (context) => const PhoneEditingScreen(),
+              Screen.editName: (context) => const UpdateNameScreen(),
             },
             onGenerateRoute: (settings) {
               return MaterialPageRoute(
@@ -84,6 +88,13 @@ class _AppState extends State<App> {
                       title: "Temperature Unit",
                       options: ["Celcius", "Farenheit"],
                       selectedOption: "Celcius",
+                    );
+                  } else if (settings.name == Screen.editControllerName) {
+                    return EditControllerNameScreen(device: settings.arguments as Device);
+                  } else if (settings.name == Screen.editRelayName) {
+                    return EditRelayNameScreen(
+                      device: (settings.arguments as Map<String, dynamic>)['device'],
+                      relayID: (settings.arguments as Map<String, dynamic>)['relayID'],
                     );
                   } else {
                     return Container();

@@ -6,6 +6,7 @@ import 'package:iot/components/error.component.dart';
 import 'package:iot/components/loader.component.dart';
 import 'package:iot/controllers/device.controller.dart';
 import 'package:iot/controllers/user.controller.dart';
+import 'package:iot/enum/route.enum.dart';
 import 'package:iot/models/device.model.dart';
 import 'package:iot/screens/settings/components/item.component.dart';
 import 'package:iot/screens/settings/components/section.component.dart';
@@ -73,8 +74,11 @@ class _DeviceSettingsState extends State<DeviceSettings> {
                           SectionItem(
                             title: "Controller Name",
                             trailingText: device.name,
-                            onEdit: (String value) {},
+                            onTap: () {
+                              Navigator.pushNamed(context, Screen.editControllerName, arguments: device);
+                            },
                             showSeparator: false,
+                            showEditIcon: true,
                           ),
                         ],
                       ),
@@ -87,7 +91,13 @@ class _DeviceSettingsState extends State<DeviceSettings> {
                                   title: "Name",
                                   subtitleText: "Automatically close the door at a specified time",
                                   trailingText: relay.name,
-                                  onEdit: (String value) {},
+                                  showEditIcon: true,
+                                  onTap: () {
+                                    Navigator.pushNamed(context, Screen.editRelayName, arguments: {
+                                      "device": device,
+                                      "relayID": relay.id,
+                                    });
+                                  },
                                 ),
                                 SectionItem(
                                   title: "Output Time",
@@ -190,11 +200,11 @@ class _DeviceSettingsState extends State<DeviceSettings> {
                           ),
                           SectionItem(
                             title: "Temperature Alert",
+                            showEditIcon: true,
                             subtitleText: "Alert if temperature exceeds",
                             trailingText: device.temperatureAlert == null
                                 ? "Don't alert"
                                 : '${device.temperatureAlert.toString()} ${Provider.of<UserController>(context, listen: false).profile!.temperatureUnit}',
-                            onEdit: (String value) {},
                           ),
                         ],
                       ),

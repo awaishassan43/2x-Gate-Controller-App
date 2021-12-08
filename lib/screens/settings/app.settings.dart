@@ -55,16 +55,9 @@ class _AppSettingsState extends State<AppSettings> {
                     return SectionItem(
                       title: "Name",
                       trailingText: name,
-                      onEdit: (String value) async {
-                        final String previousValue = profile.name;
-
-                        try {
-                          controller.profile!.name = value;
-                          await controller.updateProfile();
-                        } catch (e) {
-                          controller.profile!.name = previousValue;
-                          showMessage(context, e.toString());
-                        }
+                      showEditIcon: true,
+                      onTap: () {
+                        Navigator.pushNamed(context, Screen.editName);
                       },
                     );
                   },
@@ -74,7 +67,7 @@ class _AppSettingsState extends State<AppSettings> {
                   onTap: () {
                     Navigator.pushNamed(context, Screen.editPhone);
                   },
-                  showChevron: true,
+                  showEditIcon: true,
                   trailingText: "+" + profile.code + " " + profile.phone,
                 ),
                 SectionItem(

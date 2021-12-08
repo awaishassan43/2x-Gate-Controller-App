@@ -1,13 +1,13 @@
 class Relay {
-  final String id;
-  final String name;
-  final bool isOpen;
-  final int outputTime;
-  final int autoCloseTime;
-  final bool scheduled;
-  final bool isEnabled;
+  String id;
+  String name;
+  bool isOpen;
+  int outputTime;
+  int autoCloseTime;
+  bool scheduled;
+  bool isEnabled;
 
-  const Relay({
+  Relay({
     required this.id,
     required this.name,
     required this.isOpen,

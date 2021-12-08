@@ -58,6 +58,16 @@ class DeviceController extends ChangeNotifier {
     return Device.fromMap(data, ref: document);
   }
 
+  Future<void> updateDevice(Device device) async {
+    try {
+      await collection.doc(device.id).set(device.toJSON());
+    } on FirebaseException catch (e) {
+      throw "Error occured while updating the device: ${e.message}";
+    } catch (e) {
+      throw "Failed to update the device: ${e.toString()}";
+    }
+  }
+
   removeDevice(String deviceID, BuildContext context) async {
     try {
       await collection.doc(deviceID).delete();
