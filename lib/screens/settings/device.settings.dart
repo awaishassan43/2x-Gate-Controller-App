@@ -8,9 +8,10 @@ import 'package:iot/controllers/device.controller.dart';
 import 'package:iot/controllers/user.controller.dart';
 import 'package:iot/enum/route.enum.dart';
 import 'package:iot/models/device.model.dart';
+import 'package:iot/screens/selector/components/selector.component.dart';
 import 'package:iot/screens/settings/components/item.component.dart';
 import 'package:iot/screens/settings/components/section.component.dart';
-import 'package:iot/screens/selector/selector.screen.dart';
+import 'package:iot/screens/settings/subscreens/selector.screen.dart';
 import 'package:iot/util/extensions.util.dart';
 import 'package:iot/util/functions.util.dart';
 import 'package:provider/provider.dart';
@@ -29,6 +30,16 @@ class DeviceSettings extends StatefulWidget {
 class _DeviceSettingsState extends State<DeviceSettings> {
   bool isLoading = false;
   String? deleteError;
+
+  Future<void> onOutputTimeUpdated(BuildContext context, String relayID, int selectedValue) async {
+    try {
+      final DeviceController controller = Provider.of<DeviceController>(context, listen: false);
+
+      controller.isLoading = true;
+    } catch (e) {
+      showMessage(context, e.toString());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -99,19 +110,38 @@ class _DeviceSettingsState extends State<DeviceSettings> {
                                     });
                                   },
                                 ),
-                                SectionItem(
-                                  title: "Output Time",
-                                  subtitleText: "Duration",
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(builder: (context) {
-                                        return const SelectorScreen(
-                                          title: "Output Time",
-                                          options: ["0.5 seconds", "5 seconds", "5 minutes", "30 minutes"],
-                                          selectedOption: "5 seconds",
+                                Selector<DeviceController, int>(
+                                  selector: (context, controller) => controller.devices[device.id]!.relays
+                                      .firstWhere(
+                                        (element) => (element.id == relay.id),
+                                      )
+                                      .outputTime,
+                                  builder: (context, outputTime, _) {
+                                    return SectionItem(
+                                      title: "Output Time",
+                                      subtitleText: "Duration",
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) {
+                                              return SelectorScreen(
+                                                title: "Output Time",
+                                                selector: CustomSelector<int>(
+                                                  selectedItem: 60,
+                                                  onSelected: (int selectedValue) {
+                                                    onOutputTimeUpdated(context, relay.id, selectedValue);
+                                                  },
+                                                  items: const [30, 60, 90, 120, 150],
+                                                  transformer: (int value) {
+                                                    return '${(value / 60).toStringAsFixed(1)} minutes';
+                                                  },
+                                                ),
+                                              );
+                                            },
+                                          ),
                                         );
-                                      }),
+                                      },
                                     );
                                   },
                                 ),
@@ -119,16 +149,16 @@ class _DeviceSettingsState extends State<DeviceSettings> {
                                   title: "External Input",
                                   subtitleText: "Select door sensor input",
                                   onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(builder: (context) {
-                                        return const SelectorScreen(
-                                          title: "Door Sensor Input",
-                                          options: ["External Input 1", "None"],
-                                          selectedOption: "External Input 1",
-                                        );
-                                      }),
-                                    );
+                                    // Navigator.push(
+                                    //   context,
+                                    //   MaterialPageRoute(builder: (context) {
+                                    //     return const SelectorScreen(
+                                    //       title: "Door Sensor Input",
+                                    //       options: ["External Input 1", "None"],
+                                    //       selectedOption: "External Input 1",
+                                    //     );
+                                    //   }),
+                                    // );
                                   },
                                 ),
                                 SectionItem(
@@ -136,16 +166,16 @@ class _DeviceSettingsState extends State<DeviceSettings> {
                                   subtitleText: "Automatically close the dooar at a specified time",
                                   trailingText: "30 Seconds",
                                   onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(builder: (context) {
-                                        return const SelectorScreen(
-                                          title: "Auto Close",
-                                          options: ["30 seconds", "1 minutes", "2 minutes", "5 minutes", "None"],
-                                          selectedOption: "30 seconds",
-                                        );
-                                      }),
-                                    );
+                                    // Navigator.push(
+                                    //   context,
+                                    // MaterialPageRoute(builder: (context) {
+                                    //     return const SelectorScreen(
+                                    //       title: "Auto Close",
+                                    //       options: ["30 seconds", "1 minutes", "2 minutes", "5 minutes", "None"],
+                                    //       selectedOption: "30 seconds",
+                                    //     );
+                                    //   }),
+                                    // );
                                   },
                                 ),
                                 SectionItem(

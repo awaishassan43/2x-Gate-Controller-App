@@ -12,7 +12,6 @@ import 'package:iot/screens/login/login.screen.dart';
 import 'package:iot/screens/settings/subscreens/name.screen.dart';
 import 'package:iot/screens/settings/subscreens/password.screen.dart';
 import 'package:iot/screens/settings/subscreens/phone.screen.dart';
-import 'package:iot/screens/selector/selector.screen.dart';
 import 'package:iot/screens/settings/app.settings.dart';
 import 'package:iot/screens/settings/device.settings.dart';
 import 'package:iot/screens/settings/subscreens/relayName.screen.dart';
@@ -83,12 +82,6 @@ class _AppState extends State<App> {
                   } else if (settings.name == Screen.deviceSettings) {
                     final Device device = settings.arguments as Device;
                     return DeviceSettings(device: device);
-                  } else if (settings.name == Screen.selector) {
-                    return const SelectorScreen(
-                      title: "Temperature Unit",
-                      options: ["Celcius", "Farenheit"],
-                      selectedOption: "Celcius",
-                    );
                   } else if (settings.name == Screen.editControllerName) {
                     return EditControllerNameScreen(device: settings.arguments as Device);
                   } else if (settings.name == Screen.editRelayName) {

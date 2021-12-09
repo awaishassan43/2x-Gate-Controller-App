@@ -8,6 +8,22 @@ import 'package:provider/provider.dart';
 class DeviceController extends ChangeNotifier {
   final collection = FirebaseFirestore.instance.collection('devices');
   Map<String, Device> devices = {};
+  bool _isLoading = false;
+  String _outputTimeError = '';
+
+  /// Loader setter and getter
+  bool get isLoading => _isLoading;
+  set isLoading(bool value) {
+    _isLoading = value;
+    notifyListeners();
+  }
+
+  /// error setter and getter
+  String get outputTimeError => _outputTimeError;
+  set error(String value) {
+    _outputTimeError = value;
+    notifyListeners();
+  }
 
   Future<void> loadDevices({required List<String> deviceIDs}) async {
     try {
