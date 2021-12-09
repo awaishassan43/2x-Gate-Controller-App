@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
 
-class CustomSelector extends StatelessWidget {
-  final List<String> options;
-  final String selectedOption;
+class CustomSelector<T> extends StatelessWidget {
+  final List<T> items;
+  final T selectedItem;
+  final void Function(T value) onSelected;
+  final String Function(T value)? transformer;
+  final bool includesNull;
+
   const CustomSelector({
     Key? key,
-    required this.options,
-    required this.selectedOption,
+    required this.items,
+    required this.selectedItem,
+    required this.onSelected,
+    this.transformer,
+    this.includesNull = false,
   }) : super(key: key);
 
   @override
@@ -20,36 +27,40 @@ class CustomSelector extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
-        children: options.asMap().entries.map<Widget>((entry) {
-          final int index = entry.key;
-          final String option = entry.value;
+        children: items.asMap().entries.map<Widget>(
+          (entry) {
+            final int index = entry.key;
+            final String option = transformer != null ? transformer!(entry.value) : entry.value.toString();
 
-          return Column(
-            children: [
-              MaterialButton(
-                onPressed: () {},
-                height: 52.5,
-                padding: const EdgeInsets.all(10.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(option),
-                    if (option == selectedOption)
-                      const Icon(
-                        Icons.done,
-                        color: Colors.black87,
-                      ),
-                  ],
+            return Column(
+              children: [
+                MaterialButton(
+                  onPressed: () {
+                    onSelected(entry.value);
+                  },
+                  height: 52.5,
+                  padding: const EdgeInsets.all(10.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(option),
+                      if (option == selectedItem)
+                        const Icon(
+                          Icons.done,
+                          color: Colors.black87,
+                        ),
+                    ],
+                  ),
                 ),
-              ),
-              if (index != options.length - 1)
-                Container(
-                  height: 0.5,
-                  color: Colors.black26,
-                ),
-            ],
-          );
-        }).toList(),
+                if (index != items.length - 1)
+                  Container(
+                    height: 0.5,
+                    color: Colors.black26,
+                  ),
+              ],
+            );
+          },
+        ).toList(),
       ),
     );
   }
