@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:iot/components/button.component.dart';
-import 'package:iot/components/loader.component.dart';
 import 'package:iot/controllers/device.controller.dart';
 import 'package:iot/enum/route.enum.dart';
 import 'package:iot/models/device.model.dart';

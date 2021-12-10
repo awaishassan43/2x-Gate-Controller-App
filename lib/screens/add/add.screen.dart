@@ -1,7 +1,5 @@
 import 'dart:async';
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
-import 'package:iot/components/button.component.dart';
 import 'package:iot/components/input.component.dart';
 import 'package:iot/controllers/device.controller.dart';
 import 'package:iot/models/device.model.dart';
@@ -13,6 +11,7 @@ import 'package:wifi_iot/wifi_iot.dart';
 import 'package:iot/components/loader.component.dart';
 import 'package:http/http.dart' as http;
 import 'package:location/location.dart';
+import 'package:cross_connectivity/cross_connectivity.dart';
 
 class AddDeviceScreen extends StatefulWidget {
   const AddDeviceScreen({Key? key}) : super(key: key);
@@ -25,12 +24,18 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
   late final PageController controller;
   late final TextEditingController ssid;
   late final TextEditingController password;
+
   String ssidError = '';
   String passwordError = '';
+  String formError = '';
+
   bool isLoading = false;
+
   String? id;
   String? loaderMessage;
-  String formError = '';
+
+  int currentStep = 0;
+  final int totalSteps = 3;
 
   @override
   void initState() {
@@ -102,7 +107,7 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
         });
 
         await Future.any([
-          Connectivity().onConnectivityChanged.firstWhere((result) => result == ConnectivityResult.wifi),
+          Connectivity().onConnectivityChanged.firstWhere((result) => result == ConnectivityStatus.wifi),
           Future.delayed(const Duration(seconds: 10), () {
             return Future.error("Timed out while trying to enable wifi");
           })
@@ -188,12 +193,9 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
 
       await Future.delayed(const Duration(seconds: 2));
 
-      showMessage(context, "Device added successfully");
       setState(() {
         isLoading = false;
       });
-      // Navigator.pop(context);
-
     } catch (e) {
       setState(() {
         isLoading = false;
@@ -205,8 +207,13 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
 
   Future<void> addDevice(BuildContext context) async {
     try {
+      setState(() {
+        isLoading = true;
+        loaderMessage = "Adding device to database";
+      });
+
       Device device = Device(
-        id: "a random device",
+        id: id!,
         name: "Front Gate",
         temperature: 0,
         humidity: 0,
@@ -218,11 +225,13 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
         onCloseAlert: false,
         remainedOpenAlert: null,
         nightAlert: false,
-        temperatureAlert: 0,
+        temperatureAlert: null,
       );
 
       await Provider.of<DeviceController>(context, listen: false).addDevice(device, context);
       showMessage(context, "Device added successfully");
+
+      Navigator.pop(context);
     } catch (e) {
       rethrow;
     }
@@ -238,77 +247,153 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
       body: Stack(
         children: [
           SingleChildScrollView(
-            padding: const EdgeInsets.all(20.0),
+            padding: const EdgeInsets.symmetric(vertical: 20.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  "Enter the WiFi credentials",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 40),
-                const Text("Please enter the credentials for the WiFi with which your IoT device will connect"),
-                const SizedBox(height: 15),
-                Form(
-                  child: Column(
-                    children: [
-                      if (formError.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(
-                            bottom: 10,
-                            left: 20,
-                            right: 20,
-                          ),
-                          child: Text(
-                            formError,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.red,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
+                Stepper(
+                  onStepContinue: () async {
+                    try {
+                      if (currentStep == 0) {
+                        setState(() {
+                          currentStep++;
+                        });
+                      } else if (currentStep == 1) {
+                        await connectDevice(context);
+                      } else if (currentStep == 2 && await Connectivity().checkConnection()) {
+                        await addDevice(context);
+                      } else {
+                        showMessage(context, "Please check your internet connection");
+                      }
+                    } catch (e) {
+                      showMessage(context, "Failed to load next step");
+                    }
+                  },
+                  onStepCancel: () {
+                    if (currentStep != 0 && currentStep != 2) {
+                      setState(() {
+                        currentStep--;
+                      });
+                    }
+                  },
+                  steps: [
+                    Step(
+                      state: currentStep > 0 ? StepState.complete : StepState.indexed,
+                      isActive: currentStep == 0,
+                      title: const Text(
+                        "Set the device to access mode",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
                         ),
-                      CustomInput(
-                        icon: Icons.network_wifi_rounded,
-                        label: "WiFi SSID",
-                        controller: ssid,
-                        error: ssidError,
                       ),
-                      const SizedBox(height: 12.5),
-                      CustomInput(
-                        icon: Icons.wifi_lock_rounded,
-                        label: "WiFi Password",
-                        controller: password,
-                        isPassword: true,
-                        error: passwordError,
+                      content: const Text(
+                        "Before proceeding, please make sure that the device is in access mode",
+                        style: TextStyle(
+                          fontSize: 12,
+                        ),
                       ),
-                    ],
-                  ),
+                    ),
+                    Step(
+                      state: currentStep > 1 ? StepState.complete : StepState.indexed,
+                      isActive: currentStep == 1,
+                      title: const Text(
+                        "Enter the WiFi credentials",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      content: Column(
+                        children: [
+                          const Text(
+                            "Please enter the credentials for the WiFi with which your IoT device will connect",
+                            style: TextStyle(fontSize: 12),
+                          ),
+                          const SizedBox(height: 15),
+                          Form(
+                            child: Column(
+                              children: [
+                                if (formError.isNotEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                      bottom: 10,
+                                      left: 20,
+                                      right: 20,
+                                    ),
+                                    child: Text(
+                                      formError,
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.red,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                CustomInput(
+                                  icon: Icons.network_wifi_rounded,
+                                  label: "WiFi SSID",
+                                  controller: ssid,
+                                  error: ssidError,
+                                ),
+                                const SizedBox(height: 12.5),
+                                CustomInput(
+                                  icon: Icons.wifi_lock_rounded,
+                                  label: "WiFi Password",
+                                  controller: password,
+                                  isPassword: true,
+                                  error: passwordError,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Step(
+                      state: currentStep > 2 ? StepState.complete : StepState.indexed,
+                      isActive: currentStep == 2,
+                      title: const Text(
+                        "Reconnect to internet",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      content: Column(
+                        children: [
+                          const Text(
+                            "Reconnect your device to internet to continue",
+                            style: TextStyle(fontSize: 12),
+                          ),
+                          const SizedBox(height: 15),
+                          ConnectivityBuilder(
+                            builder: (context, isConnected, _) {
+                              return Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: <Widget>[
+                                  Icon(
+                                    isConnected == true ? Icons.signal_wifi_4_bar : Icons.signal_wifi_off,
+                                    color: isConnected == true ? Colors.green : Colors.red,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    isConnected == true ? "Connected to internet" : "Disconnected from internet",
+                                    style: TextStyle(
+                                      color: isConnected == true ? Colors.green : Colors.red,
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                  currentStep: currentStep,
                 ),
-                const SizedBox(height: 30),
-                const Text(
-                  "* Before proceeding, please make sure that your device is in access mode. Once you are done, proceed by clicking the button.",
-                  style: TextStyle(
-                    fontSize: 12,
-                  ),
-                ),
-                const SizedBox(height: 30),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: CustomButton(
-                    text: "Connect",
-                    onPressed: () {
-                      // connectDevice(context);
-                      addDevice(context);
-                    },
-                  ),
-                ),
-                const SizedBox(height: 50),
-                Text("Received response as: $id"),
               ],
             ),
           ),
