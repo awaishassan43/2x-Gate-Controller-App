@@ -10,6 +10,14 @@ class UserController extends ChangeNotifier {
   late final CollectionReference users;
   Profile? profile;
   DocumentSnapshot? profileRef;
+  bool _isLoading = false;
+
+  /// Loader getter and setter
+  bool get isLoading => _isLoading;
+  set isLoading(bool value) {
+    _isLoading = value;
+    notifyListeners();
+  }
 
   Future<bool> init() async {
     try {
@@ -183,7 +191,7 @@ class UserController extends ChangeNotifier {
 
   Future<void> updateProfile() async {
     try {
-      notifyListeners();
+      // notifyListeners();
 
       if (profile == null) {
         throw "Failed to get the profile data";

@@ -11,6 +11,7 @@ import 'package:iot/models/device.model.dart';
 import 'package:iot/screens/settings/components/item.component.dart';
 import 'package:iot/screens/settings/components/section.component.dart';
 import 'package:iot/screens/settings/subscreens/selector.screen.dart';
+import 'package:iot/screens/settings/subscreens/temperature.screen.dart';
 import 'package:iot/util/extensions.util.dart';
 import 'package:iot/util/functions.util.dart';
 import 'package:provider/provider.dart';
@@ -30,34 +31,27 @@ class _DeviceSettingsState extends State<DeviceSettings> {
   bool isLoading = false;
   String? deleteError;
 
-  Future<void> onOutputTimeUpdated(BuildContext context, String relayID, int selectedValue) async {
+  Future<void> onDeviceUpdated(BuildContext context, String key, bool value) async {
     final DeviceController controller = Provider.of<DeviceController>(context, listen: false);
     final Device device = controller.devices[widget.device.id]!;
-    try {
-      controller.isLoading = true;
-      device.relays.firstWhere((element) => element.id == relayID).outputTime = selectedValue;
-      await controller.updateDevice(device);
-      Navigator.pop(context);
-    } catch (e) {
-      controller.outputTimeError = e.toString();
-      showMessage(context, e.toString());
-    }
-    controller.isLoading = false;
-  }
 
-  Future<void> onAutoCloseTimeUpdated(BuildContext context, String relayID, int selectedValue) async {
-    final DeviceController controller = Provider.of<DeviceController>(context, listen: false);
-    final Device device = controller.devices[widget.device.id]!;
     try {
-      controller.isLoading = true;
-      device.relays.firstWhere((element) => element.id == relayID).autoCloseTime = selectedValue;
+      setState(() {
+        isLoading = true;
+      });
+
+      device.updateDevice(key, value);
       await controller.updateDevice(device);
-      Navigator.pop(context);
+
+      showMessage(context, "Controller updated successfully!");
     } catch (e) {
       controller.outputTimeError = e.toString();
       showMessage(context, e.toString());
     }
-    controller.isLoading = false;
+
+    setState(() {
+      isLoading = false;
+    });
   }
 
   Future<void> onScheduledStatusUpdated(BuildContext context, String relayID, bool selectedValue) async {
@@ -65,63 +59,7 @@ class _DeviceSettingsState extends State<DeviceSettings> {
     final Device device = controller.devices[widget.device.id]!;
     try {
       controller.isLoading = true;
-      device.relays.firstWhere((element) => element.id == relayID).scheduled = selectedValue;
-      await controller.updateDevice(device);
-    } catch (e) {
-      controller.outputTimeError = e.toString();
-      showMessage(context, e.toString());
-    }
-    controller.isLoading = false;
-  }
-
-  Future<void> onCloseAlertUpdated(BuildContext context, int selectedValue) async {
-    final DeviceController controller = Provider.of<DeviceController>(context, listen: false);
-    final Device device = controller.devices[widget.device.id]!;
-    try {
-      controller.isLoading = true;
-      device.onCloseAlert = selectedValue;
-      await controller.updateDevice(device);
-    } catch (e) {
-      controller.outputTimeError = e.toString();
-      showMessage(context, e.toString());
-    }
-    controller.isLoading = false;
-  }
-
-  Future<void> onOpenAlertUpdated(BuildContext context, int selectedValue) async {
-    final DeviceController controller = Provider.of<DeviceController>(context, listen: false);
-    final Device device = controller.devices[widget.device.id]!;
-    try {
-      controller.isLoading = true;
-      device.onOpenAlert = selectedValue;
-      await controller.updateDevice(device);
-    } catch (e) {
-      controller.outputTimeError = e.toString();
-      showMessage(context, e.toString());
-    }
-    controller.isLoading = false;
-  }
-
-  Future<void> onRemainedOpenAlert(BuildContext context, int selectedValue) async {
-    final DeviceController controller = Provider.of<DeviceController>(context, listen: false);
-    final Device device = controller.devices[widget.device.id]!;
-    try {
-      controller.isLoading = true;
-      device.remainedOpenAlert = selectedValue;
-      await controller.updateDevice(device);
-    } catch (e) {
-      controller.outputTimeError = e.toString();
-      showMessage(context, e.toString());
-    }
-    controller.isLoading = false;
-  }
-
-  Future<void> onNightAlertUpdated(BuildContext context, bool selectedValue) async {
-    final DeviceController controller = Provider.of<DeviceController>(context, listen: false);
-    final Device device = controller.devices[widget.device.id]!;
-    try {
-      controller.isLoading = true;
-      device.nightAlert = selectedValue;
+      device.updateDevice('scheduled', selectedValue, relayID: relayID);
       await controller.updateDevice(device);
     } catch (e) {
       controller.outputTimeError = e.toString();
@@ -203,65 +141,44 @@ class _DeviceSettingsState extends State<DeviceSettings> {
                                   title: "Output Time",
                                   subtitleText: "Duration",
                                   onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) {
-                                          return SelectorScreen<int>(
-                                            title: "Output Time",
-                                            items: const [30, 60, 90, 120, 150],
-                                            selectedItem: relay.outputTime,
-                                            deviceID: device.id,
-                                            relayID: relay.id,
-                                            mapKey: 'outputTime',
-                                          );
-                                          //   selector: CustomSelector<int>(
-                                          //     selectedItem: 60,
-                                          //     onSelected: (int? selectedValue) {
-                                          //       onOutputTimeUpdated(context, relay.id, selectedValue!);
-                                          //     },
-                                          //     items: const [30, 60, 90, 120, 150],
-                                          //     transformer: (int value) {
-                                          //       return '${(value / 60).toStringAsFixed(1)} minutes';
-                                          //     },
-                                          //   ),
-                                          // );
-                                        },
-                                      ),
-                                    );
+                                    Navigator.push(context, MaterialPageRoute(
+                                      builder: (context) {
+                                        return SelectorScreen<int>(
+                                          title: "Output Time",
+                                          items: const [1, 5, 300, 1800],
+                                          selectedItem: relay.outputTime,
+                                          deviceID: device.id,
+                                          relayID: relay.id,
+                                          mapKey: 'outputTime',
+                                        );
+                                      },
+                                    ));
                                   },
                                 ),
-                                SectionItem(
-                                  title: "External Input",
-                                  subtitleText: "Select door sensor input",
-                                  onTap: () {},
-                                ),
+                                // SectionItem(
+                                //   title: "External Input",
+                                //   subtitleText: "Select door sensor input",
+                                //   onTap: () {},
+                                // ),
                                 SectionItem(
                                   title: "Auto Close",
                                   subtitleText: "Automatically close the dooar at a specified time",
-                                  trailingText: "${relay.autoCloseTime} Seconds",
+                                  trailingText:
+                                      relay.autoCloseTime < 60 ? '${relay.autoCloseTime} seconds' : '${(relay.autoCloseTime / 60).round()} minutes',
                                   showChevron: true,
                                   onTap: () {
-                                    // Navigator.push(
-                                    //   context,
-                                    //   MaterialPageRoute(
-                                    //     builder: (context) {
-                                    //       return SelectorScreen(
-                                    //         title: "Auto Close Time",
-                                    //         selector: CustomSelector<int>(
-                                    //           selectedItem: 60,
-                                    //           onSelected: (int? selectedValue) {
-                                    //             onAutoCloseTimeUpdated(context, relay.id, selectedValue!);
-                                    //           },
-                                    //           items: const [30, 60, 90, 120, 150],
-                                    //           transformer: (int value) {
-                                    //             return '${(value / 60).toStringAsFixed(1)} minutes';
-                                    //           },
-                                    //         ),
-                                    //       );
-                                    //     },
-                                    //   ),
-                                    // );
+                                    Navigator.push(context, MaterialPageRoute(
+                                      builder: (context) {
+                                        return SelectorScreen<int?>(
+                                          title: "Auto Close Time",
+                                          items: const [30, 60, 90, 120, 150, null],
+                                          selectedItem: relay.autoCloseTime,
+                                          deviceID: device.id,
+                                          relayID: relay.id,
+                                          mapKey: 'autoClose',
+                                        );
+                                      },
+                                    ));
                                   },
                                 ),
                                 SectionItem(
@@ -291,51 +208,60 @@ class _DeviceSettingsState extends State<DeviceSettings> {
                           SectionItem(
                             title: "On Close",
                             trailing: Switch(
-                              onChanged: (value) {},
-                              value: device.onCloseAlert != 0,
+                              onChanged: (value) {
+                                onDeviceUpdated(context, 'onCloseAlert', value);
+                              },
+                              value: device.onCloseAlert,
                             ),
                             onTap: () {
-                              // Navigator.push(
-                              //   context,
-                              // MaterialPageRoute(
-                              //     builder: (context) {
-                              //       return SelectorScreen(
-                              //         title: "Output Time",
-                              //         selector: CustomSelector<int>(
-                              //           selectedItem: 60,
-                              //           onSelected: (int? selectedValue) {
-                              //             onCloseAlertUpdated(context, selectedValue!);
-                              //           },
-                              //           items: const [30, 60, 90, 120, 150],
-                              //         ),
-                              //       );
-                              //     },
-                              //   ),
-                              // );
+                              onDeviceUpdated(context, 'onCloseAlert', !device.onCloseAlert);
                             },
                           ),
                           SectionItem(
                             title: "On Open",
                             trailing: Switch(
-                              onChanged: (value) {},
-                              value: device.onOpenAlert != 0,
+                              onChanged: (value) {
+                                onDeviceUpdated(context, 'onOpenAlert', value);
+                              },
+                              value: device.onOpenAlert,
                             ),
-                            onTap: () {},
+                            onTap: () {
+                              onDeviceUpdated(context, 'onOpenAlert', !device.onOpenAlert);
+                            },
                           ),
                           SectionItem(
                             title: "Open Alert",
                             subtitleText: "Alert if door is left open",
-                            trailingText:
-                                device.remainedOpenAlert <= 0 ? "Don't alert" : '${(device.remainedOpenAlert / 60).toStringAsFixed(1)} minutes',
+                            trailingText: device.remainedOpenAlert == null
+                                ? "Don't alert"
+                                : device.remainedOpenAlert! < 60
+                                    ? '${device.remainedOpenAlert} seconds'
+                                    : '${(device.remainedOpenAlert! / 60).round()} minutes',
                             showChevron: true,
-                            onTap: () {},
+                            onTap: () {
+                              Navigator.push(context, MaterialPageRoute(
+                                builder: (context) {
+                                  return SelectorScreen<int?>(
+                                    title: "On Remained Open Alert",
+                                    items: const [30, 60, 90, 120, 150, null],
+                                    selectedItem: device.remainedOpenAlert,
+                                    deviceID: device.id,
+                                    mapKey: 'remainedOpenAlert',
+                                  );
+                                },
+                              ));
+                            },
                           ),
                           SectionItem(
                             title: "Night Alert",
                             subtitleText: "Alert if door is left open",
-                            onTap: () {},
+                            onTap: () {
+                              onDeviceUpdated(context, 'nightAlert', !device.nightAlert);
+                            },
                             trailing: Switch(
-                              onChanged: (value) {},
+                              onChanged: (value) {
+                                onDeviceUpdated(context, 'nightAlert', value);
+                              },
                               value: device.nightAlert,
                             ),
                           ),
@@ -343,6 +269,11 @@ class _DeviceSettingsState extends State<DeviceSettings> {
                             title: "Temperature Alert",
                             showEditIcon: true,
                             subtitleText: "Alert if temperature exceeds",
+                            onTap: () {
+                              Navigator.push(context, MaterialPageRoute(builder: (context) {
+                                return TemperatureAlertScreen(device: device);
+                              }));
+                            },
                             trailingText: device.temperatureAlert == null
                                 ? "Don't alert"
                                 : '${device.temperatureAlert.toString()} ${Provider.of<UserController>(context, listen: false).profile!.temperatureUnit}',

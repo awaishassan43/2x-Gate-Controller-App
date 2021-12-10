@@ -214,9 +214,9 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
           Relay(id: 'r1', name: "Relay 1", isOpen: false, outputTime: 30, autoCloseTime: 30, scheduled: false, isEnabled: true),
           Relay(id: 'r2', name: "Relay 2", isOpen: false, outputTime: 30, autoCloseTime: 30, scheduled: false, isEnabled: true),
         ],
-        onOpenAlert: 0,
-        onCloseAlert: 0,
-        remainedOpenAlert: 0,
+        onOpenAlert: false,
+        onCloseAlert: false,
+        remainedOpenAlert: null,
         nightAlert: false,
         temperatureAlert: 0,
       );

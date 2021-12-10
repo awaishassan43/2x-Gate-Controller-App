@@ -40,4 +40,17 @@ class Profile {
       "is24Hours": is24Hours,
     };
   }
+
+  void updateProfile(String key, dynamic value) {
+    final Map<String, dynamic> data = toJSON();
+    data[key] = value;
+
+    email = data['email'];
+    name = data['name'];
+    code = data['code'];
+    phone = data['phone'];
+    devices = (data['devices'] as List<dynamic>).cast<String>();
+    temperatureUnit = data['temperatureUnit'];
+    is24Hours = data['is24Hours'];
+  }
 }

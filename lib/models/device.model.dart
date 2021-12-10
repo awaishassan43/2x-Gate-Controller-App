@@ -7,9 +7,9 @@ class Device {
   double? temperature;
   double? humidity;
   List<Relay> relays;
-  int onOpenAlert;
-  int onCloseAlert;
-  int remainedOpenAlert;
+  bool onOpenAlert;
+  bool onCloseAlert;
+  int? remainedOpenAlert;
   bool nightAlert;
   int? temperatureAlert;
   String? firmware;
@@ -102,8 +102,5 @@ class Device {
     networkStrength = mappedData['networkStrength'];
     macID = mappedData['macID'];
     ipAddress = mappedData['ipAddress'];
-
-    this;
-    this;
   }
 }

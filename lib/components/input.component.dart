@@ -8,12 +8,15 @@ class CustomInput extends StatefulWidget {
   final bool isPassword;
   final bool autoFocus;
   final String error;
+  final bool disabled;
   final void Function()? onDone;
+
   const CustomInput({
     Key? key,
     this.icon,
     required this.label,
     required this.controller,
+    this.disabled = false,
     this.error = '',
     this.action,
     this.isPassword = false,
@@ -48,9 +51,12 @@ class _CustomInputState extends State<CustomInput> {
           style: const TextStyle(
             fontSize: 14,
           ),
+          textAlignVertical: TextAlignVertical.center,
           decoration: InputDecoration(
             contentPadding: EdgeInsets.all(widget.icon == null ? 12.5 : 0),
             border: InputBorder.none,
+            fillColor: widget.disabled ? Colors.red.withOpacity(0.05) : null,
+            enabled: !widget.disabled,
             prefixIcon: widget.icon != null
                 ? Icon(
                     widget.icon,

@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:iot/components/loader.component.dart';
 import 'package:iot/components/selector.component.dart';
 import 'package:iot/controllers/device.controller.dart';
-// import 'package:iot/controllers/user.controller.dart';
+import 'package:iot/controllers/user.controller.dart';
 import 'package:iot/models/device.model.dart';
 import 'package:iot/util/functions.util.dart';
 import 'package:provider/provider.dart';
 
 /// Selector screen is sort of a wrapper for selector component
-class SelectorScreen<T> extends StatelessWidget {
+class SelectorScreen<T> extends StatefulWidget {
   final String title;
   final List<T> items;
   final T? selectedItem;
@@ -33,10 +34,18 @@ class SelectorScreen<T> extends StatelessWidget {
         super(key: key);
 
   @override
+  State<SelectorScreen<T>> createState() => _SelectorScreenState<T>();
+}
+
+class _SelectorScreenState<T> extends State<SelectorScreen<T>> {
+  bool isLoading = false;
+  String error = '';
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(title),
+        title: Text(widget.title),
         centerTitle: true,
       ),
       body: Stack(
@@ -46,43 +55,61 @@ class SelectorScreen<T> extends StatelessWidget {
             child: Column(
               children: [
                 CustomSelector<T>(
-                  items: items,
-                  selectedItem: selectedItem,
-                  transformer: isTime
+                  items: widget.items,
+                  selectedItem: widget.selectedItem,
+                  transformer: widget.isTime
                       ? (T value) {
                           if (value.runtimeType.toString() == "int") {
-                            return '${((value as int) / 60).toStringAsFixed(1)} minutes';
+                            if ((value as int) < 60) {
+                              return '${value.toString()} seconds';
+                            } else {
+                              return '${(value / 60).round()} minutes';
+                            }
                           } else {
                             return value.toString();
                           }
                         }
                       : null,
                   onSelected: (T? selectedValue) async {
-                    if (deviceID != null || relayID != null) {
-                      final DeviceController controller = Provider.of<DeviceController>(context, listen: false);
+                    try {
+                      setState(() {
+                        isLoading = true;
+                      });
 
-                      try {
-                        controller.isLoading = true;
-                        final Device device = controller.devices[deviceID]!;
-                        device.updateDevice(mapKey, selectedValue, relayID: relayID);
+                      if (widget.isProfileKey) {
+                        final UserController controller = Provider.of<UserController>(context, listen: false);
+
+                        controller.profile!.updateProfile(widget.mapKey, selectedValue);
+                        await controller.updateProfile();
+
+                        showMessage(context, "Profile updated successfully!");
+                      } else if (widget.deviceID != null) {
+                        final DeviceController controller = Provider.of<DeviceController>(context, listen: false);
+
+                        final Device device = controller.devices[widget.deviceID]!;
+                        device.updateDevice(widget.mapKey, selectedValue, relayID: widget.relayID);
                         await controller.updateDevice(device);
 
                         showMessage(context, "Controller updated successfully!");
-
-                        Navigator.pop(context);
-                      } catch (e) {
-                        showMessage(context, e.toString());
+                      } else {
+                        throw "No device ID was provided";
                       }
 
-                      controller.isLoading = false;
-                    } else {
-                      // final UserController controller = Provider.of<UserController>(context, listen: false);
+                      Navigator.pop(context);
+                    } catch (e) {
+                      setState(() {
+                        isLoading = false;
+                        error = e.toString();
+                      });
+
+                      showMessage(context, e.toString());
                     }
                   },
                 ),
               ],
             ),
           ),
+          if (isLoading) Loader(message: widget.isProfileKey ? "Updating profile" : "Updating controller"),
         ],
       ),
     );

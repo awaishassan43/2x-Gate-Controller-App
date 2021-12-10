@@ -27,9 +27,10 @@ class _UpdateNameScreenState extends State<UpdateNameScreen> {
   @override
   void initState() {
     super.initState();
-    name = TextEditingController();
     controller = Provider.of<UserController>(context, listen: false);
     profile = controller.profile!;
+
+    name = TextEditingController(text: profile.name);
   }
 
   bool validateName() {
@@ -104,10 +105,12 @@ class _UpdateNameScreenState extends State<UpdateNameScreen> {
                     final String previousName = profile.name;
 
                     try {
-                      controller.profile!.name = name.text.trim();
-                      await controller.updateProfile();
+                      if (previousName != name.text.trim()) {
+                        controller.profile!.name = name.text.trim();
+                        await controller.updateProfile();
+                      }
 
-                      showMessage(context, "Name updated successfully!");
+                      showMessage(context, "Profile updated successfully!");
                       Navigator.pop(context);
                     } catch (e) {
                       setState(() {
@@ -116,14 +119,14 @@ class _UpdateNameScreenState extends State<UpdateNameScreen> {
                       });
 
                       controller.profile!.name = previousName;
-                      showMessage(context, "Failed to update the name");
+                      showMessage(context, "Failed to update the profile");
                     }
                   },
                 ),
               ],
             ),
           ),
-          if (isLoading) const Loader(message: "Updating password"),
+          if (isLoading) const Loader(message: "Updating profile"),
         ],
       ),
     );

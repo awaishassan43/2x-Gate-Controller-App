@@ -121,11 +121,14 @@ class _PhoneEditingScreenState extends State<PhoneEditingScreen> {
                     final String previousCode = profile.code;
                     final String previousPhone = profile.phone;
                     try {
-                      userController.profile!.code = code;
-                      userController.profile!.phone = phone.text;
+                      if (previousCode != code || previousPhone != phone.text.trim()) {
+                        userController.profile!.code = code;
+                        userController.profile!.phone = phone.text.trim();
 
-                      await userController.updateProfile();
+                        await userController.updateProfile();
+                      }
 
+                      showMessage(context, "Profile updated successfully!");
                       Navigator.pop(context);
                     } catch (e) {
                       setState(() {
