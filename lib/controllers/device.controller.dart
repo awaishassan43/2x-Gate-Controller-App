@@ -20,7 +20,7 @@ class DeviceController extends ChangeNotifier {
 
   /// error setter and getter
   String get outputTimeError => _outputTimeError;
-  set error(String value) {
+  set outputTimeError(String value) {
     _outputTimeError = value;
     notifyListeners();
   }

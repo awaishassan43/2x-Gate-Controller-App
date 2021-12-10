@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 class CustomSelector<T> extends StatelessWidget {
   final List<T> items;
-  final T selectedItem;
-  final void Function(T value) onSelected;
+  final T? selectedItem;
+  final void Function(T? value) onSelected;
   final String Function(T value)? transformer;
   final bool includesNull;
 
@@ -44,7 +44,7 @@ class CustomSelector<T> extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(option),
-                      if (option == selectedItem)
+                      if (entry.value == selectedItem)
                         const Icon(
                           Icons.done,
                           color: Colors.black87,

@@ -81,4 +81,29 @@ class Device {
       "ipAddress": ipAddress,
     };
   }
+
+  void updateDevice(String key, dynamic value, {String? relayID}) {
+    final Map<String, dynamic> mappedData = toJSON();
+    relayID != null
+        ? (mappedData['relays'] as List<Map<String, dynamic>>).firstWhere((relay) => relay['id'] == relayID)[key] = value
+        : mappedData[key] = value;
+
+    id = mappedData['id'];
+    name = mappedData['name'];
+    temperature = mappedData['temperature'];
+    humidity = mappedData['humidity'];
+    relays = (mappedData['relays'] as List<dynamic>).cast<Map<String, dynamic>>().map((relay) => Relay.fromJSON(relay)).toList();
+    onOpenAlert = mappedData['onOpenAlert'];
+    onCloseAlert = mappedData['onCloseAlert'];
+    remainedOpenAlert = mappedData['remainedOpenAlert'];
+    nightAlert = mappedData['nightAlert'];
+    temperatureAlert = mappedData['temperatureAlert'];
+    firmware = mappedData['firmware'];
+    networkStrength = mappedData['networkStrength'];
+    macID = mappedData['macID'];
+    ipAddress = mappedData['ipAddress'];
+
+    this;
+    this;
+  }
 }

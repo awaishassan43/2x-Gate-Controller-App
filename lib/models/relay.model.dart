@@ -40,4 +40,18 @@ class Relay {
       isEnabled: data['isEnabled'],
     );
   }
+
+  updateRelay(String key, dynamic value) {
+    final Map<String, dynamic> data = toJSON();
+    data[key] = value;
+
+    id = data['id'];
+    name = data['name'];
+    isOpen = data['isOpen'];
+    isOpen = data['isOpen'];
+    scheduled = data['scheduled'];
+    outputTime = data['outputTime'];
+    autoCloseTime = data['autoClose'];
+    isEnabled = data['isEnabled'];
+  }
 }

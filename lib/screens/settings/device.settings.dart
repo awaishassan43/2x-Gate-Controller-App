@@ -8,7 +8,6 @@ import 'package:iot/controllers/device.controller.dart';
 import 'package:iot/controllers/user.controller.dart';
 import 'package:iot/enum/route.enum.dart';
 import 'package:iot/models/device.model.dart';
-import 'package:iot/screens/selector/components/selector.component.dart';
 import 'package:iot/screens/settings/components/item.component.dart';
 import 'package:iot/screens/settings/components/section.component.dart';
 import 'package:iot/screens/settings/subscreens/selector.screen.dart';
@@ -32,13 +31,103 @@ class _DeviceSettingsState extends State<DeviceSettings> {
   String? deleteError;
 
   Future<void> onOutputTimeUpdated(BuildContext context, String relayID, int selectedValue) async {
+    final DeviceController controller = Provider.of<DeviceController>(context, listen: false);
+    final Device device = controller.devices[widget.device.id]!;
     try {
-      final DeviceController controller = Provider.of<DeviceController>(context, listen: false);
-
       controller.isLoading = true;
+      device.relays.firstWhere((element) => element.id == relayID).outputTime = selectedValue;
+      await controller.updateDevice(device);
+      Navigator.pop(context);
     } catch (e) {
+      controller.outputTimeError = e.toString();
       showMessage(context, e.toString());
     }
+    controller.isLoading = false;
+  }
+
+  Future<void> onAutoCloseTimeUpdated(BuildContext context, String relayID, int selectedValue) async {
+    final DeviceController controller = Provider.of<DeviceController>(context, listen: false);
+    final Device device = controller.devices[widget.device.id]!;
+    try {
+      controller.isLoading = true;
+      device.relays.firstWhere((element) => element.id == relayID).autoCloseTime = selectedValue;
+      await controller.updateDevice(device);
+      Navigator.pop(context);
+    } catch (e) {
+      controller.outputTimeError = e.toString();
+      showMessage(context, e.toString());
+    }
+    controller.isLoading = false;
+  }
+
+  Future<void> onScheduledStatusUpdated(BuildContext context, String relayID, bool selectedValue) async {
+    final DeviceController controller = Provider.of<DeviceController>(context, listen: false);
+    final Device device = controller.devices[widget.device.id]!;
+    try {
+      controller.isLoading = true;
+      device.relays.firstWhere((element) => element.id == relayID).scheduled = selectedValue;
+      await controller.updateDevice(device);
+    } catch (e) {
+      controller.outputTimeError = e.toString();
+      showMessage(context, e.toString());
+    }
+    controller.isLoading = false;
+  }
+
+  Future<void> onCloseAlertUpdated(BuildContext context, int selectedValue) async {
+    final DeviceController controller = Provider.of<DeviceController>(context, listen: false);
+    final Device device = controller.devices[widget.device.id]!;
+    try {
+      controller.isLoading = true;
+      device.onCloseAlert = selectedValue;
+      await controller.updateDevice(device);
+    } catch (e) {
+      controller.outputTimeError = e.toString();
+      showMessage(context, e.toString());
+    }
+    controller.isLoading = false;
+  }
+
+  Future<void> onOpenAlertUpdated(BuildContext context, int selectedValue) async {
+    final DeviceController controller = Provider.of<DeviceController>(context, listen: false);
+    final Device device = controller.devices[widget.device.id]!;
+    try {
+      controller.isLoading = true;
+      device.onOpenAlert = selectedValue;
+      await controller.updateDevice(device);
+    } catch (e) {
+      controller.outputTimeError = e.toString();
+      showMessage(context, e.toString());
+    }
+    controller.isLoading = false;
+  }
+
+  Future<void> onRemainedOpenAlert(BuildContext context, int selectedValue) async {
+    final DeviceController controller = Provider.of<DeviceController>(context, listen: false);
+    final Device device = controller.devices[widget.device.id]!;
+    try {
+      controller.isLoading = true;
+      device.remainedOpenAlert = selectedValue;
+      await controller.updateDevice(device);
+    } catch (e) {
+      controller.outputTimeError = e.toString();
+      showMessage(context, e.toString());
+    }
+    controller.isLoading = false;
+  }
+
+  Future<void> onNightAlertUpdated(BuildContext context, bool selectedValue) async {
+    final DeviceController controller = Provider.of<DeviceController>(context, listen: false);
+    final Device device = controller.devices[widget.device.id]!;
+    try {
+      controller.isLoading = true;
+      device.nightAlert = selectedValue;
+      await controller.updateDevice(device);
+    } catch (e) {
+      controller.outputTimeError = e.toString();
+      showMessage(context, e.toString());
+    }
+    controller.isLoading = false;
   }
 
   @override
@@ -110,71 +199,68 @@ class _DeviceSettingsState extends State<DeviceSettings> {
                                     });
                                   },
                                 ),
-                                Selector<DeviceController, int>(
-                                  selector: (context, controller) => controller.devices[device.id]!.relays
-                                      .firstWhere(
-                                        (element) => (element.id == relay.id),
-                                      )
-                                      .outputTime,
-                                  builder: (context, outputTime, _) {
-                                    return SectionItem(
-                                      title: "Output Time",
-                                      subtitleText: "Duration",
-                                      onTap: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) {
-                                              return SelectorScreen(
-                                                title: "Output Time",
-                                                selector: CustomSelector<int>(
-                                                  selectedItem: 60,
-                                                  onSelected: (int selectedValue) {
-                                                    onOutputTimeUpdated(context, relay.id, selectedValue);
-                                                  },
-                                                  items: const [30, 60, 90, 120, 150],
-                                                  transformer: (int value) {
-                                                    return '${(value / 60).toStringAsFixed(1)} minutes';
-                                                  },
-                                                ),
-                                              );
-                                            },
-                                          ),
-                                        );
-                                      },
+                                SectionItem(
+                                  title: "Output Time",
+                                  subtitleText: "Duration",
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) {
+                                          return SelectorScreen<int>(
+                                            title: "Output Time",
+                                            items: const [30, 60, 90, 120, 150],
+                                            selectedItem: relay.outputTime,
+                                            deviceID: device.id,
+                                            relayID: relay.id,
+                                            mapKey: 'outputTime',
+                                          );
+                                          //   selector: CustomSelector<int>(
+                                          //     selectedItem: 60,
+                                          //     onSelected: (int? selectedValue) {
+                                          //       onOutputTimeUpdated(context, relay.id, selectedValue!);
+                                          //     },
+                                          //     items: const [30, 60, 90, 120, 150],
+                                          //     transformer: (int value) {
+                                          //       return '${(value / 60).toStringAsFixed(1)} minutes';
+                                          //     },
+                                          //   ),
+                                          // );
+                                        },
+                                      ),
                                     );
                                   },
                                 ),
                                 SectionItem(
                                   title: "External Input",
                                   subtitleText: "Select door sensor input",
-                                  onTap: () {
-                                    // Navigator.push(
-                                    //   context,
-                                    //   MaterialPageRoute(builder: (context) {
-                                    //     return const SelectorScreen(
-                                    //       title: "Door Sensor Input",
-                                    //       options: ["External Input 1", "None"],
-                                    //       selectedOption: "External Input 1",
-                                    //     );
-                                    //   }),
-                                    // );
-                                  },
+                                  onTap: () {},
                                 ),
                                 SectionItem(
                                   title: "Auto Close",
                                   subtitleText: "Automatically close the dooar at a specified time",
-                                  trailingText: "30 Seconds",
+                                  trailingText: "${relay.autoCloseTime} Seconds",
+                                  showChevron: true,
                                   onTap: () {
                                     // Navigator.push(
                                     //   context,
-                                    // MaterialPageRoute(builder: (context) {
-                                    //     return const SelectorScreen(
-                                    //       title: "Auto Close",
-                                    //       options: ["30 seconds", "1 minutes", "2 minutes", "5 minutes", "None"],
-                                    //       selectedOption: "30 seconds",
-                                    //     );
-                                    //   }),
+                                    //   MaterialPageRoute(
+                                    //     builder: (context) {
+                                    //       return SelectorScreen(
+                                    //         title: "Auto Close Time",
+                                    //         selector: CustomSelector<int>(
+                                    //           selectedItem: 60,
+                                    //           onSelected: (int? selectedValue) {
+                                    //             onAutoCloseTimeUpdated(context, relay.id, selectedValue!);
+                                    //           },
+                                    //           items: const [30, 60, 90, 120, 150],
+                                    //           transformer: (int value) {
+                                    //             return '${(value / 60).toStringAsFixed(1)} minutes';
+                                    //           },
+                                    //         ),
+                                    //       );
+                                    //     },
+                                    //   ),
                                     // );
                                   },
                                 ),
@@ -182,9 +268,16 @@ class _DeviceSettingsState extends State<DeviceSettings> {
                                   title: "Scheduled",
                                   subtitleText: "Open and close the door at a specified time",
                                   trailing: Switch(
-                                    value: false,
-                                    onChanged: (value) {},
+                                    value: relay.scheduled,
+                                    onChanged: (value) {
+                                      if (value != relay.scheduled) {
+                                        onScheduledStatusUpdated(context, relay.id, value);
+                                      }
+                                    },
                                   ),
+                                  onTap: () {
+                                    onScheduledStatusUpdated(context, relay.id, !relay.scheduled);
+                                  },
                                   showSeparator: false,
                                 ),
                               ],
@@ -201,7 +294,25 @@ class _DeviceSettingsState extends State<DeviceSettings> {
                               onChanged: (value) {},
                               value: device.onCloseAlert != 0,
                             ),
-                            onTap: () {},
+                            onTap: () {
+                              // Navigator.push(
+                              //   context,
+                              // MaterialPageRoute(
+                              //     builder: (context) {
+                              //       return SelectorScreen(
+                              //         title: "Output Time",
+                              //         selector: CustomSelector<int>(
+                              //           selectedItem: 60,
+                              //           onSelected: (int? selectedValue) {
+                              //             onCloseAlertUpdated(context, selectedValue!);
+                              //           },
+                              //           items: const [30, 60, 90, 120, 150],
+                              //         ),
+                              //       );
+                              //     },
+                              //   ),
+                              // );
+                            },
                           ),
                           SectionItem(
                             title: "On Open",
