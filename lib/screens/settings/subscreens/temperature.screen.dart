@@ -41,6 +41,7 @@ class _TemperatureAlertScreenState extends State<TemperatureAlertScreen> {
               context,
               value,
               withUnit: false,
+              decimalPlaces: 1,
               onNullMessage: '',
             )
           : '0',
@@ -119,7 +120,7 @@ class _TemperatureAlertScreenState extends State<TemperatureAlertScreen> {
                         disabled: !shouldAlert,
                         error: temperatureError,
                         controller: temperature,
-                        suffixText: userController.profile!.temperatureUnit,
+                        suffixText: '\u00b0${userController.profile!.temperatureUnit}',
                       ),
                       if (formError != '')
                         Padding(

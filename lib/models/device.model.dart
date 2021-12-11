@@ -42,6 +42,7 @@ class Device {
   /// so changing based on the runtime type
   factory Device.fromMap(Map<String, dynamic> data, {DocumentReference<Map<String, dynamic>>? ref}) {
     dynamic temperature = data['temperature'];
+    dynamic temperatureAlert = data['temperatureAlert'];
     dynamic humidity = data['humidity'];
 
     return Device(
@@ -54,7 +55,7 @@ class Device {
       onCloseAlert: data['onCloseAlert'],
       remainedOpenAlert: data['remainedOpenAlert'],
       nightAlert: data['nightAlert'],
-      temperatureAlert: data['temperatureAlert'],
+      temperatureAlert: temperatureAlert.runtimeType.toString() == "int" ? (temperatureAlert as int).toDouble() : temperatureAlert,
       firmware: data['firmware'],
       networkStrength: data['networkStrength'],
       macID: data['macID'],

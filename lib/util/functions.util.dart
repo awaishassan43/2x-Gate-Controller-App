@@ -37,16 +37,16 @@ String getTimeString(int value) {
   }
 }
 
-String getTemperatureValue(BuildContext context, double? temperature, {String onNullMessage = '...', withUnit = true}) {
+String getTemperatureValue(BuildContext context, double? temperature, {int decimalPlaces = 0, String onNullMessage = '...', withUnit = true}) {
   if (temperature == null) {
     return onNullMessage;
   } else {
     final String unit = Provider.of<UserController>(context, listen: false).profile!.temperatureUnit;
 
     if (unit == "F") {
-      return '${convertCelciusToFarenheit(temperature).toStringAsFixed(0)}${withUnit ? '\u00b0$unit' : ''}';
+      return '${convertCelciusToFarenheit(temperature).toStringAsFixed(decimalPlaces)}${withUnit ? '\u00b0$unit' : ''}';
     } else {
-      return '${temperature.toStringAsFixed(0)}${withUnit ? '\u00b0$unit' : ''}';
+      return '${temperature.toStringAsFixed(decimalPlaces)}${withUnit ? '\u00b0$unit' : ''}';
     }
   }
 }

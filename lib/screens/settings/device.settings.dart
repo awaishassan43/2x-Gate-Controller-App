@@ -273,7 +273,7 @@ class _DeviceSettingsState extends State<DeviceSettings> {
                                 return TemperatureAlertScreen(device: device);
                               }));
                             },
-                            trailingText: getTemperatureValue(context, device.temperatureAlert, onNullMessage: 'Don\'t Alert'),
+                            trailingText: getTemperatureValue(context, device.temperatureAlert, onNullMessage: 'Don\'t Alert', decimalPlaces: 1),
                           ),
                         ],
                       ),

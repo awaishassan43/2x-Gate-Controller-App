@@ -146,7 +146,7 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
       });
 
       Device device = Device(
-        id: 'demoDevice',
+        id: id!,
         name: "Gate Controller",
         temperature: 0,
         humidity: 0,
