@@ -71,6 +71,10 @@ class Dashboard extends StatelessWidget {
                         Device device = initialData;
 
                         if (snapshot.data != null) {
+                          if (!snapshot.data!.exists) {
+                            return Container();
+                          }
+
                           final Map<String, dynamic> streamData = snapshot.data!.data() as Map<String, dynamic>;
                           streamData['id'] = device.id;
 

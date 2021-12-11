@@ -47,7 +47,10 @@ class _AppState extends State<App> {
           return SizedBox.expand(
             child: Container(
               color: backgroundColor,
-              child: const Loader(),
+              child: const Padding(
+                padding: EdgeInsets.symmetric(vertical: 40.0),
+                child: Loader(),
+              ),
             ),
           );
         } else {

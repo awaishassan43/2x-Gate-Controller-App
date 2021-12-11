@@ -60,11 +60,7 @@ class _SelectorScreenState<T> extends State<SelectorScreen<T>> {
                   transformer: widget.isTime
                       ? (T value) {
                           if (value.runtimeType.toString() == "int") {
-                            if ((value as int) < 60) {
-                              return '${value.toString()} seconds';
-                            } else {
-                              return '${(value / 60).round()} minutes';
-                            }
+                            return getTimeString((value as int));
                           } else {
                             return value.toString();
                           }

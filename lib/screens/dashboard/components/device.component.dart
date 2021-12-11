@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:iot/components/button.component.dart';
 import 'package:iot/controllers/device.controller.dart';
+import 'package:iot/controllers/user.controller.dart';
 import 'package:iot/enum/route.enum.dart';
 import 'package:iot/models/device.model.dart';
 import 'package:iot/util/functions.util.dart';
@@ -105,10 +106,26 @@ class _DeviceComponentState extends State<DeviceComponent> {
     );
   }
 
+  String getTemperatureValue(BuildContext context) {
+    final double? temperature = widget.device.temperature;
+
+    if (temperature == null) {
+      return '...';
+    } else {
+      final String unit = Provider.of<UserController>(context, listen: false).profile!.temperatureUnit;
+
+      if (unit == "F") {
+        return convertCelciusToFarenheit(temperature).toStringAsFixed(0);
+      } else {
+        return temperature.toStringAsFixed(0);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final String temperature = widget.device.temperature == null ? '...' : widget.device.temperature!.round().toString();
-    final String humidity = widget.device.humidity == null ? '...' : widget.device.humidity!.toStringAsFixed(1);
+    final String humidity = widget.device.humidity == null ? '...' : widget.device.humidity!.ceil().toString();
+
     final String deviceName = widget.device.name;
 
     return Stack(
@@ -168,20 +185,24 @@ class _DeviceComponentState extends State<DeviceComponent> {
                                 ),
                               ),
                             ),
-                            RichText(
-                              text: TextSpan(
-                                style: const TextStyle(
-                                  color: textColor,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 15,
-                                ),
-                                children: [
-                                  TextSpan(text: temperature),
-                                  const TextSpan(text: "\u00b0"),
-                                  const TextSpan(text: "C"),
-                                ],
-                              ),
-                            ),
+                            Selector<UserController, String>(
+                                selector: (context, controller) => controller.profile!.temperatureUnit,
+                                builder: (context, unit, _) {
+                                  return RichText(
+                                    text: TextSpan(
+                                      style: const TextStyle(
+                                        color: textColor,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 15,
+                                      ),
+                                      children: [
+                                        TextSpan(text: getTemperatureValue(context)),
+                                        const TextSpan(text: "\u00b0"),
+                                        TextSpan(text: unit),
+                                      ],
+                                    ),
+                                  );
+                                }),
                           ],
                         ),
                         /**

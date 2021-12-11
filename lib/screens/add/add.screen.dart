@@ -4,13 +4,10 @@ import 'package:iot/components/input.component.dart';
 import 'package:iot/controllers/device.controller.dart';
 import 'package:iot/models/device.model.dart';
 import 'package:iot/models/relay.model.dart';
-import 'package:iot/util/constants.util.dart';
 import 'package:iot/util/functions.util.dart';
 import 'package:provider/provider.dart';
-import 'package:wifi_iot/wifi_iot.dart';
 import 'package:iot/components/loader.component.dart';
 import 'package:http/http.dart' as http;
-import 'package:location/location.dart';
 import 'package:cross_connectivity/cross_connectivity.dart';
 
 class AddDeviceScreen extends StatefulWidget {
@@ -28,6 +25,7 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
   String ssidError = '';
   String passwordError = '';
   String formError = '';
+  String addError = '';
 
   bool isLoading = false;
 
@@ -71,76 +69,16 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
     });
   }
 
-  /// return type indicates whether the device is already connected to the required
-  /// wifi or not
-  Future<bool> enableWifi(BuildContext context) async {
-    try {
-      final PermissionStatus permission = await Location.instance.requestPermission();
-
-      if (permission != PermissionStatus.granted) {
-        throw Exception("This feature requires location permissions to determine the WiFi SSID");
-      } else if (permission == PermissionStatus.deniedForever) {
-        throw Exception("Please allow the location permission to the app from the app settings");
-      }
-
-      bool status = await Location.instance.serviceEnabled();
-
-      if (!status) {
-        status = await Location.instance.requestService();
-
-        if (!status) {
-          throw Exception("This feature requies the location services to be enabled");
-        }
-      }
-
-      final bool isWiFiEnabled = await WiFiForIoTPlugin.isEnabled();
-
-      if (!isWiFiEnabled) {
-        setState(() {
-          loaderMessage = "Seems like wifi is not enabled!";
-        });
-
-        await WiFiForIoTPlugin.setEnabled(true, shouldOpenSettings: true);
-
-        setState(() {
-          loaderMessage = "Waiting for wifi status to change to enabled";
-        });
-
-        await Future.any([
-          Connectivity().onConnectivityChanged.firstWhere((result) => result == ConnectivityStatus.wifi),
-          Future.delayed(const Duration(seconds: 10), () {
-            return Future.error("Timed out while trying to enable wifi");
-          })
-        ]);
-
-        return await enableWifi(context);
-      }
-
-      final String? currentSSID = await WiFiForIoTPlugin.getSSID();
-
-      if (currentSSID != null) {
-        if (currentSSID == deviceSSID) {
-          /// i.e. device is already connected to the required connection
-          return true;
-        } else {
-          setState(() {
-            loaderMessage = "Device seems to be connected to a different network\nPlease select the respective device from the menu below";
-          });
-
-          return false;
-        }
-      } else {
-        return false;
-      }
-    } catch (e) {
-      rethrow;
-    }
-  }
-
   Future<void> sendCreds() async {
     try {
       final Uri url = Uri.parse(getDeviceURL(ssid.text, password.text));
-      final http.Response response = await http.post(url);
+      final http.Response response = await http.post(url).timeout(
+        const Duration(milliseconds: 7500),
+        onTimeout: () {
+          throw "Timed out while trying to send credentials to the device";
+        },
+      );
+
       final String deviceID = response.body;
 
       setState(() {
@@ -153,36 +91,26 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
 
   Future<void> connectDevice(BuildContext context) async {
     try {
-      setState(() {
-        formError = '';
-      });
+      if (formError != '') {
+        setState(() {
+          formError = '';
+        });
+      }
 
       validateSSID();
       validatePassword();
 
       if (ssidError.isNotEmpty || passwordError.isNotEmpty) {
-        throw Exception("Cannot connect the device");
+        return;
       }
 
-      FocusScope.of(context).unfocus();
+      if (FocusScope.of(context).hasFocus) {
+        FocusScope.of(context).unfocus();
+      }
 
       setState(() {
         isLoading = true;
-        loaderMessage = "Checking wifi status";
-      });
-
-      final bool isAlreadyConnected = await enableWifi(context);
-
-      if (!isAlreadyConnected) {
-        final bool isConnected = await WiFiForIoTPlugin.connect(deviceSSID, password: deviceSSID, security: NetworkSecurity.WPA);
-
-        if (!isConnected) {
-          throw Exception("Failed to connect to the device");
-        }
-      }
-
-      setState(() {
-        loaderMessage = "Device is connected - Sending WiFi credentials";
+        loaderMessage = "Sending WiFi credentials to the device";
       });
 
       await sendCreds();
@@ -191,11 +119,12 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
         throw Exception("Failed to get response from the device");
       }
 
-      await Future.delayed(const Duration(seconds: 2));
-
       setState(() {
         isLoading = false;
+        currentStep++;
       });
+
+      showMessage(context, "Successfully updated credentials on device!");
     } catch (e) {
       setState(() {
         isLoading = false;
@@ -208,13 +137,17 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
   Future<void> addDevice(BuildContext context) async {
     try {
       setState(() {
+        if (addError != '') {
+          addError = '';
+        }
+
         isLoading = true;
         loaderMessage = "Adding device to database";
       });
 
       Device device = Device(
-        id: id!,
-        name: "Front Gate",
+        id: 'demoDevice',
+        name: "Gate Controller",
         temperature: 0,
         humidity: 0,
         relays: [
@@ -233,7 +166,11 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
 
       Navigator.pop(context);
     } catch (e) {
-      rethrow;
+      setState(() {
+        isLoading = false;
+        loaderMessage = null;
+        addError = e.toString();
+      });
     }
   }
 
@@ -254,13 +191,13 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
                 Stepper(
                   onStepContinue: () async {
                     try {
-                      if (currentStep == 0) {
+                      if (currentStep == 0 || currentStep == 1) {
                         setState(() {
                           currentStep++;
                         });
-                      } else if (currentStep == 1) {
+                      } else if (currentStep == 2) {
                         await connectDevice(context);
-                      } else if (currentStep == 2 && await Connectivity().checkConnection()) {
+                      } else if (currentStep == 3 && await Connectivity().checkConnection()) {
                         await addDevice(context);
                       } else {
                         showMessage(context, "Please check your internet connection");
@@ -270,7 +207,7 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
                     }
                   },
                   onStepCancel: () {
-                    if (currentStep != 0 && currentStep != 2) {
+                    if (currentStep != 0 && currentStep != 3) {
                       setState(() {
                         currentStep--;
                       });
@@ -297,6 +234,23 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
                     Step(
                       state: currentStep > 1 ? StepState.complete : StepState.indexed,
                       isActive: currentStep == 1,
+                      title: const Text(
+                        "Connect to your device's WiFi",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      content: const Text(
+                        "Before proceeding, please make sure that your mobile is connected to the WiFi of the device",
+                        style: TextStyle(
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                    Step(
+                      state: currentStep > 2 ? StepState.complete : StepState.indexed,
+                      isActive: currentStep == 2,
                       title: const Text(
                         "Enter the WiFi credentials",
                         style: TextStyle(
@@ -352,8 +306,8 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
                       ),
                     ),
                     Step(
-                      state: currentStep > 2 ? StepState.complete : StepState.indexed,
-                      isActive: currentStep == 2,
+                      // state: currentStep > 3 ? StepState.complete : StepState.indexed,
+                      isActive: currentStep == 3,
                       title: const Text(
                         "Reconnect to internet",
                         style: TextStyle(
@@ -368,6 +322,23 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
                             style: TextStyle(fontSize: 12),
                           ),
                           const SizedBox(height: 15),
+                          if (addError.isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                bottom: 10,
+                                left: 20,
+                                right: 20,
+                              ),
+                              child: Text(
+                                addError,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.red,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
                           ConnectivityBuilder(
                             builder: (context, isConnected, _) {
                               return Row(

@@ -19,7 +19,7 @@ class TemperatureAlertScreen extends StatefulWidget {
 
 class _TemperatureAlertScreenState extends State<TemperatureAlertScreen> {
   bool isLoading = false;
-  bool shouldAlert = false;
+  late bool shouldAlert;
 
   late final TextEditingController temperature;
   late final DeviceController controller;
@@ -38,6 +38,8 @@ class _TemperatureAlertScreenState extends State<TemperatureAlertScreen> {
     temperature = TextEditingController(text: value != null ? value.toString() : '0');
     controller = Provider.of<DeviceController>(context, listen: false);
     userController = Provider.of<UserController>(context, listen: false);
+
+    shouldAlert = value != null;
   }
 
   bool validateTemperature() {

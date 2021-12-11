@@ -18,3 +18,10 @@ samples, guidance on mobile development, and a full API reference.
 # Default units
 - Temperature: Celcius
 - Time: Seconds
+
+# pending issues
+- time being rounded in the selector
+- temperature unit not being updated on the selector screen
+- default device name on device creation
+- next field not focusing in case of password field
+- meaning of owe me a favor

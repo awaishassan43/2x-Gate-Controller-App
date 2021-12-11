@@ -126,7 +126,7 @@ class AppSettings extends StatelessWidget {
                               return SelectorScreen(
                                 title: "Temperature Unit",
                                 items: temperatureUnits.keys.toList(),
-                                selectedItem: profile.temperatureUnit,
+                                selectedItem: unit,
                                 mapKey: 'temperatureUnit',
                                 isProfileKey: true,
                                 isTime: false,

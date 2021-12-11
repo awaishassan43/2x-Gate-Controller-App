@@ -95,6 +95,10 @@ class _DeviceSettingsState extends State<DeviceSettings> {
                 Device device = widget.device;
 
                 if (snapshot.data != null) {
+                  if (!snapshot.data!.exists) {
+                    return Container();
+                  }
+
                   final Map<String, dynamic> streamData = snapshot.data!.data() as Map<String, dynamic>;
                   streamData['id'] = device.id;
 
@@ -123,7 +127,7 @@ class _DeviceSettingsState extends State<DeviceSettings> {
                       ...device.relays
                           .map(
                             (relay) => Section(
-                              header: "Relay 1",
+                              header: relay.name,
                               children: [
                                 SectionItem(
                                   title: "Name",
@@ -162,9 +166,8 @@ class _DeviceSettingsState extends State<DeviceSettings> {
                                 // ),
                                 SectionItem(
                                   title: "Auto Close",
-                                  subtitleText: "Automatically close the dooar at a specified time",
-                                  trailingText:
-                                      relay.autoCloseTime < 60 ? '${relay.autoCloseTime} seconds' : '${(relay.autoCloseTime / 60).round()} minutes',
+                                  subtitleText: "Automatically close the door at a specified time",
+                                  trailingText: getTimeString(relay.autoCloseTime),
                                   showChevron: true,
                                   onTap: () {
                                     Navigator.push(context, MaterialPageRoute(
@@ -232,11 +235,7 @@ class _DeviceSettingsState extends State<DeviceSettings> {
                           SectionItem(
                             title: "Open Alert",
                             subtitleText: "Alert if door is left open",
-                            trailingText: device.remainedOpenAlert == null
-                                ? "Don't alert"
-                                : device.remainedOpenAlert! < 60
-                                    ? '${device.remainedOpenAlert} seconds'
-                                    : '${(device.remainedOpenAlert! / 60).round()} minutes',
+                            trailingText: device.remainedOpenAlert == null ? "Don't alert" : getTimeString(device.remainedOpenAlert!),
                             showChevron: true,
                             onTap: () {
                               Navigator.push(context, MaterialPageRoute(
@@ -374,7 +373,7 @@ class _DeviceSettingsState extends State<DeviceSettings> {
                             });
 
                             await Provider.of<DeviceController>(context, listen: false).removeDevice(device.id, context);
-                            Navigator.pop(context);
+                            Navigator.popUntil(context, ModalRoute.withName(Screen.dashboard));
                           } catch (e) {
                             setState(() {
                               isLoading = false;
