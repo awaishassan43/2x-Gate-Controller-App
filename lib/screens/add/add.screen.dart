@@ -32,7 +32,7 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
   String? id;
   String? loaderMessage;
 
-  int currentStep = 3;
+  int currentStep = 0;
   final int totalSteps = 3;
 
   @override
