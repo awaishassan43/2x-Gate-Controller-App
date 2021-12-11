@@ -273,9 +273,7 @@ class _DeviceSettingsState extends State<DeviceSettings> {
                                 return TemperatureAlertScreen(device: device);
                               }));
                             },
-                            trailingText: device.temperatureAlert == null
-                                ? "Don't alert"
-                                : '${device.temperatureAlert.toString()} ${Provider.of<UserController>(context, listen: false).profile!.temperatureUnit}',
+                            trailingText: getTemperatureValue(context, device.temperatureAlert, onNullMessage: 'Don\'t Alert'),
                           ),
                         ],
                       ),

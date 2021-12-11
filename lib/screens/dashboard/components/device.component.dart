@@ -106,22 +106,6 @@ class _DeviceComponentState extends State<DeviceComponent> {
     );
   }
 
-  String getTemperatureValue(BuildContext context) {
-    final double? temperature = widget.device.temperature;
-
-    if (temperature == null) {
-      return '...';
-    } else {
-      final String unit = Provider.of<UserController>(context, listen: false).profile!.temperatureUnit;
-
-      if (unit == "F") {
-        return convertCelciusToFarenheit(temperature).toStringAsFixed(0);
-      } else {
-        return temperature.toStringAsFixed(0);
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final String humidity = widget.device.humidity == null ? '...' : widget.device.humidity!.ceil().toString();
@@ -196,7 +180,7 @@ class _DeviceComponentState extends State<DeviceComponent> {
                                         fontSize: 15,
                                       ),
                                       children: [
-                                        TextSpan(text: getTemperatureValue(context)),
+                                        TextSpan(text: getTemperatureValue(context, widget.device.temperature, withUnit: false)),
                                         const TextSpan(text: "\u00b0"),
                                         TextSpan(text: unit),
                                       ],

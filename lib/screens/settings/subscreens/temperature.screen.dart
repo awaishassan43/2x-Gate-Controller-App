@@ -33,9 +33,18 @@ class _TemperatureAlertScreenState extends State<TemperatureAlertScreen> {
   void initState() {
     super.initState();
 
-    final int? value = widget.device.temperatureAlert;
+    final double? value = widget.device.temperatureAlert;
 
-    temperature = TextEditingController(text: value != null ? value.toString() : '0');
+    temperature = TextEditingController(
+      text: value != null
+          ? getTemperatureValue(
+              context,
+              value,
+              withUnit: false,
+              onNullMessage: '',
+            )
+          : '0',
+    );
     controller = Provider.of<DeviceController>(context, listen: false);
     userController = Provider.of<UserController>(context, listen: false);
 
@@ -43,15 +52,19 @@ class _TemperatureAlertScreenState extends State<TemperatureAlertScreen> {
   }
 
   bool validateTemperature() {
+    if (!shouldAlert) {
+      return true;
+    }
+
     if (temperature.text == "") {
       setState(() {
         temperatureError = "This field cannot be empty!";
       });
 
       return false;
-    } else if (int.tryParse(temperature.text) == null) {
+    } else if (double.tryParse(temperature.text) == null) {
       setState(() {
-        temperatureError = "Temperature must be a valid integer";
+        temperatureError = "Temperature must be a valid number";
       });
 
       return false;
@@ -106,6 +119,7 @@ class _TemperatureAlertScreenState extends State<TemperatureAlertScreen> {
                         disabled: !shouldAlert,
                         error: temperatureError,
                         controller: temperature,
+                        prefixText: userController.profile!.temperatureUnit,
                       ),
                       if (formError != '')
                         Padding(
@@ -135,10 +149,16 @@ class _TemperatureAlertScreenState extends State<TemperatureAlertScreen> {
                       isLoading = true;
                     });
 
-                    final int? previousValue = widget.device.temperatureAlert;
+                    final double? previousValue = widget.device.temperatureAlert;
 
                     try {
-                      controller.devices[widget.device.id]!.temperatureAlert = shouldAlert ? int.parse(temperature.text) : null;
+                      final String unit = Provider.of<UserController>(context, listen: false).profile!.temperatureUnit;
+
+                      controller.devices[widget.device.id]!.temperatureAlert = shouldAlert
+                          ? unit == "F"
+                              ? double.parse(convertFarenheitToCelcius(double.parse(temperature.text)).toStringAsFixed(1))
+                              : double.parse(temperature.text)
+                          : null;
                       await controller.updateDevice(controller.devices[widget.device.id]!);
 
                       showMessage(context, "Controller updated successfully!");

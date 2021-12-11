@@ -11,7 +11,7 @@ class Device {
   bool onCloseAlert;
   int? remainedOpenAlert;
   bool nightAlert;
-  int? temperatureAlert;
+  double? temperatureAlert;
   String? firmware;
   String? networkStrength;
   String? macID;

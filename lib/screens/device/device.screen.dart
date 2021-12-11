@@ -49,22 +49,6 @@ class _DeviceScreenState extends State<DeviceScreen> {
     });
   }
 
-  String getTemperatureValue(BuildContext context) {
-    final double? temperature = widget.device.temperature;
-
-    if (temperature == null) {
-      return '...';
-    } else {
-      final String unit = Provider.of<UserController>(context, listen: false).profile!.temperatureUnit;
-
-      if (unit == "F") {
-        return convertCelciusToFarenheit(temperature).toStringAsFixed(0);
-      } else {
-        return temperature.toStringAsFixed(0);
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -100,7 +84,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
                         tempDevice = Device.fromMap(streamData, ref: tempDevice.deviceRef);
                       }
 
-                      final String temperature = getTemperatureValue(context);
+                      final String temperature = getTemperatureValue(context, tempDevice.temperature, withUnit: false);
                       final String humidity = tempDevice.humidity == null ? '...' : tempDevice.humidity!.toStringAsFixed(1);
                       final List<Relay> relays = tempDevice.relays;
 

@@ -9,6 +9,7 @@ class CustomInput extends StatefulWidget {
   final bool autoFocus;
   final String error;
   final bool disabled;
+  final String? prefixText;
   final void Function()? onDone;
 
   const CustomInput({
@@ -21,6 +22,7 @@ class CustomInput extends StatefulWidget {
     this.action,
     this.isPassword = false,
     this.autoFocus = false,
+    this.prefixText,
     this.onDone,
   })  : assert((action == null && isPassword) || (action != null && !isPassword) || (action == null && !isPassword)),
         super(key: key);
@@ -53,7 +55,7 @@ class _CustomInputState extends State<CustomInput> {
           ),
           textAlignVertical: TextAlignVertical.center,
           decoration: InputDecoration(
-            contentPadding: EdgeInsets.all(widget.icon == null ? 12.5 : 0),
+            contentPadding: EdgeInsets.all(widget.icon == null || widget.prefixText != null ? 12.5 : 0),
             border: InputBorder.none,
             fillColor: widget.disabled ? Colors.red.withOpacity(0.05) : null,
             enabled: !widget.disabled,
@@ -63,6 +65,7 @@ class _CustomInputState extends State<CustomInput> {
                     size: 20.0,
                   )
                 : null,
+            suffixText: '\u00b0${widget.prefixText}',
             hintText: widget.label,
             suffixIcon: widget.action ??
                 (widget.isPassword
