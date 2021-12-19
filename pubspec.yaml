@@ -45,6 +45,7 @@ dependencies:
   intl: ^0.17.0
   tuple: ^2.0.0
   cross_connectivity: ^3.0.3
+  firebase_database: ^9.0.4
 
 dev_dependencies:
   flutter_test:

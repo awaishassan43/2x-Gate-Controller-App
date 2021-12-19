@@ -3,7 +3,6 @@ class Profile {
   String name;
   String code;
   String phone;
-  List<String> devices;
   String temperatureUnit;
   bool is24Hours;
 
@@ -12,7 +11,6 @@ class Profile {
     required this.name,
     required this.code,
     required this.phone,
-    required this.devices,
     required this.temperatureUnit,
     required this.is24Hours,
   });
@@ -23,7 +21,6 @@ class Profile {
       name: data['name'],
       code: data['code'],
       phone: data['phone'],
-      devices: (data['devices'] as List<dynamic>).cast<String>(),
       temperatureUnit: data['temperatureUnit'],
       is24Hours: data['is24Hours'],
     );
@@ -35,7 +32,6 @@ class Profile {
       "name": name,
       "code": code,
       "phone": phone,
-      "devices": devices,
       "temperatureUnit": temperatureUnit,
       "is24Hours": is24Hours,
     };
@@ -49,7 +45,6 @@ class Profile {
     name = data['name'];
     code = data['code'];
     phone = data['phone'];
-    devices = (data['devices'] as List<dynamic>).cast<String>();
     temperatureUnit = data['temperatureUnit'];
     is24Hours = data['is24Hours'];
   }

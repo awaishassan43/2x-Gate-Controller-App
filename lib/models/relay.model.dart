@@ -19,7 +19,6 @@ class Relay {
 
   Map<String, dynamic> toJSON() {
     return {
-      "id": id,
       "name": name,
       "isOpen": isOpen,
       "outputTime": outputTime,

@@ -1,4 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:iot/models/relay.model.dart';
 
 class Device {
@@ -16,7 +16,7 @@ class Device {
   String? networkStrength;
   String? macID;
   String? ipAddress;
-  final DocumentReference<Map<String, dynamic>>? deviceRef;
+  final Stream<DatabaseEvent>? stream;
 
   Device({
     required this.id,
@@ -33,14 +33,14 @@ class Device {
     this.networkStrength,
     this.macID,
     this.ipAddress,
-    this.deviceRef,
+    this.stream,
   });
 
   /// It is important to note that we could have accessed the temperature and humidity as doubles
   /// however, the conversion of data object to map sometimes convers the whole values to integers
   /// and can cause the app to crash cause direct type casting from int to double doesn't work
   /// so changing based on the runtime type
-  factory Device.fromMap(Map<String, dynamic> data, {DocumentReference<Map<String, dynamic>>? ref}) {
+  factory Device.fromMap(Map<String, dynamic> data, {Stream<DatabaseEvent>? stream}) {
     dynamic temperature = data['temperature'];
     dynamic temperatureAlert = data['temperatureAlert'];
     dynamic humidity = data['humidity'];
@@ -60,7 +60,7 @@ class Device {
       networkStrength: data['networkStrength'],
       macID: data['macID'],
       ipAddress: data['ipAddress'],
-      deviceRef: ref,
+      stream: stream,
     );
   }
 
@@ -83,12 +83,7 @@ class Device {
     };
   }
 
-  void updateDevice(String key, dynamic value, {String? relayID}) {
-    final Map<String, dynamic> mappedData = toJSON();
-    relayID != null
-        ? (mappedData['relays'] as List<Map<String, dynamic>>).firstWhere((relay) => relay['id'] == relayID)[key] = value
-        : mappedData[key] = value;
-
+  void updateDeviceUsingMap(Map<String, dynamic> mappedData) {
     id = mappedData['id'];
     name = mappedData['name'];
     temperature = mappedData['temperature'];
@@ -103,5 +98,14 @@ class Device {
     networkStrength = mappedData['networkStrength'];
     macID = mappedData['macID'];
     ipAddress = mappedData['ipAddress'];
+  }
+
+  void updateDevice(String key, dynamic value, {String? relayID}) {
+    final Map<String, dynamic> mappedData = toJSON();
+    relayID != null
+        ? (mappedData['relays'] as List<Map<String, dynamic>>).firstWhere((relay) => relay['id'] == relayID)[key] = value
+        : mappedData[key] = value;
+
+    updateDeviceUsingMap(mappedData);
   }
 }

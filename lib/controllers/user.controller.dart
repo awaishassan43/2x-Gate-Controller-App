@@ -1,13 +1,16 @@
+import 'dart:collection';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:iot/models/profile.model.dart';
 
 class UserController extends ChangeNotifier {
   late final FirebaseAuth auth;
-  late final CollectionReference users;
+  late final DatabaseReference users;
   Profile? profile;
   DocumentSnapshot? profileRef;
   bool _isLoading = false;
@@ -26,7 +29,7 @@ class UserController extends ChangeNotifier {
       // Initializing firebase and collections
       await Firebase.initializeApp();
       auth = FirebaseAuth.instance;
-      users = FirebaseFirestore.instance.collection('users');
+      users = FirebaseDatabase.instance.ref('users');
 
       // Getting logged in user
       final bool isLoggedIn = await getLoggedInUser();
@@ -77,15 +80,7 @@ class UserController extends ChangeNotifier {
       final User? user = FirebaseAuth.instance.currentUser;
 
       if (user != null) {
-        final DocumentSnapshot<Object?> document = await users.doc(user.email).get();
-
-        if (!document.exists) {
-          throw Exception("User profile does not exist");
-        }
-
-        transformMapToProfile(document.data());
-        await attachProfileListener(document.reference);
-
+        await attachProfileListener();
         return true;
       } else {
         return false;
@@ -134,7 +129,6 @@ class UserController extends ChangeNotifier {
       }
 
       final Profile tempProfile = Profile(
-        devices: [],
         email: email,
         phone: phone,
         code: callingCode,
@@ -146,11 +140,10 @@ class UserController extends ChangeNotifier {
       final Map<String, dynamic> profileData = tempProfile.toJSON();
       profileData.remove('email');
 
-      final DocumentReference<Object?> document = users.doc(email);
-      await document.set(profileData);
+      final String userID = auth.currentUser!.uid;
+      await users.child(userID).set(profileData);
 
-      profile = tempProfile;
-      await attachProfileListener(document);
+      await attachProfileListener();
 
       return true;
     } on FirebaseException catch (e) {
@@ -177,11 +170,20 @@ class UserController extends ChangeNotifier {
     }
   }
 
-  Future<void> attachProfileListener(DocumentReference<Object?> reference) async {
+  Future<void> attachProfileListener() async {
     try {
-      profileRef = await reference.get();
-      reference.snapshots().listen((snapshot) {
-        transformMapToProfile(snapshot.data());
+      final String userID = auth.currentUser!.uid;
+
+      final DataSnapshot document = await users.child(userID).get();
+
+      if (!document.exists) {
+        throw Exception("User profile does not exist");
+      }
+
+      transformMapToProfile(document.value);
+
+      users.child(userID).onValue.listen((event) {
+        transformMapToProfile(event.snapshot.value);
         notifyListeners();
       });
     } catch (e) {
@@ -199,7 +201,7 @@ class UserController extends ChangeNotifier {
 
       final Map<String, dynamic> data = profile!.toJSON();
 
-      await users.doc(profile!.email).set(data);
+      // await users.doc(profile!.email).set(data);
     } on FirebaseException catch (e) {
       throw "Error occured while trying to update the profile: ${e.message}";
     } catch (e) {
@@ -212,9 +214,9 @@ class UserController extends ChangeNotifier {
   /// the return true shows the new value has been applied because it was different from original value
   /// false means... the value didn't update.. .cause it was already updated
   void transformMapToProfile(Object? data) {
-    Map<String, dynamic> newData = data as Map<String, dynamic>;
+    final newData = (data as LinkedHashMap<Object?, Object?>).cast<String, dynamic>();
 
-    newData['email'] = auth.currentUser!.email;
+    newData['email'] = auth.currentUser!.email!;
     profile = Profile.fromMap(newData);
   }
 

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:iot/components/error.component.dart';
 import 'package:iot/controllers/device.controller.dart';
@@ -42,9 +43,7 @@ class Dashboard extends StatelessWidget {
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: FutureBuilder<void>(
-          future: controller.loadDevices(
-            deviceIDs: Provider.of<UserController>(context, listen: false).profile!.devices,
-          ),
+          future: controller.loadDevices(),
           builder: (context, snapshot) {
             if (snapshot.connectionState != ConnectionState.done) {
               return Container();
@@ -60,8 +59,8 @@ class Dashboard extends StatelessWidget {
                   children: controller.devices.entries.map((entry) {
                     final Device initialData = entry.value;
 
-                    return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-                      stream: initialData.deviceRef!.snapshots(),
+                    return StreamBuilder<DatabaseEvent>(
+                      stream: initialData.stream!,
                       builder: (context, snapshot) {
                         if (snapshot.hasError || snapshot.error != null) {
                           return ErrorMessage(message: snapshot.error.toString());
@@ -71,14 +70,16 @@ class Dashboard extends StatelessWidget {
                         Device device = initialData;
 
                         if (snapshot.data != null) {
-                          if (!snapshot.data!.exists) {
+                          final DataSnapshot snapshotData = snapshot.data!.snapshot;
+
+                          if (!snapshotData.exists) {
                             return Container();
                           }
 
-                          final Map<String, dynamic> streamData = snapshot.data!.data() as Map<String, dynamic>;
+                          final Map<String, dynamic> streamData = (snapshotData.value as Map<Object?, Object?>).cast<String, dynamic>();
                           streamData['id'] = device.id;
 
-                          device = Device.fromMap(streamData, ref: device.deviceRef);
+                          device.updateDeviceUsingMap(streamData);
                         }
 
                         return DeviceComponent(
