@@ -40,7 +40,7 @@ class _DeviceSettingsState extends State<DeviceSettings> {
         isLoading = true;
       });
 
-      device.updateDevice(key, value);
+      device.update(key, value);
       await controller.updateDevice(device);
 
       showMessage(context, "Controller updated successfully!");
@@ -59,7 +59,7 @@ class _DeviceSettingsState extends State<DeviceSettings> {
     final Device device = controller.devices[widget.device.id]!;
     try {
       controller.isLoading = true;
-      device.updateDevice('scheduled', selectedValue, relayID: relayID);
+      device.update('scheduled', selectedValue, relayID: relayID);
       await controller.updateDevice(device);
     } catch (e) {
       controller.outputTimeError = e.toString();

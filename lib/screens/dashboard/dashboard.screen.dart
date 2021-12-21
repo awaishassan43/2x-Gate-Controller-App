@@ -7,6 +7,7 @@ import 'package:iot/controllers/user.controller.dart';
 import 'package:iot/enum/route.enum.dart';
 import 'package:iot/models/device.model.dart';
 import 'package:iot/screens/dashboard/components/device.component.dart';
+import 'package:iot/util/functions.util.dart';
 import 'package:provider/provider.dart';
 
 class Dashboard extends StatelessWidget {
@@ -79,7 +80,8 @@ class Dashboard extends StatelessWidget {
                           final Map<String, dynamic> streamData = (snapshotData.value as Map<Object?, Object?>).cast<String, dynamic>();
                           streamData['id'] = device.id;
 
-                          device.updateDeviceUsingMap(streamData);
+                          print("Updating the device in dashboard");
+                          device.updateUsingMap(streamData);
                         }
 
                         return DeviceComponent(

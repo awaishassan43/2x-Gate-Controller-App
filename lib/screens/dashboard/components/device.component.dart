@@ -31,7 +31,7 @@ class _DeviceComponentState extends State<DeviceComponent> {
     });
 
     try {
-      device.updateDevice('isOpen', isOpen, relayID: relayID);
+      device.update('isOpen', isOpen, relayID: relayID);
       await controller.updateDevice(device);
 
       showMessage(context, "Controller updated successfully!");
@@ -46,7 +46,7 @@ class _DeviceComponentState extends State<DeviceComponent> {
 
   Widget renderRelays() {
     final List<Widget> children = [];
-    final relays = widget.device.relays;
+    final relays = widget.device.relays.values.toList();
 
     for (int i = 0; i < (relays.length / 2).ceil(); i++) {
       final List<Widget> rowItems = [];

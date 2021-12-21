@@ -1,11 +1,11 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'package:iot/controllers/user.controller.dart';
 import 'package:iot/models/device.model.dart';
-import 'package:provider/provider.dart';
+import 'package:iot/util/functions.util.dart';
 
 class DeviceController extends ChangeNotifier {
   DatabaseReference collection = FirebaseDatabase.instance.ref('/');
@@ -30,28 +30,26 @@ class DeviceController extends ChangeNotifier {
 
   void updateReference() {
     final String userID = FirebaseAuth.instance.currentUser!.uid;
-    collection = collection.child('$userID/devices/');
+    collection = FirebaseDatabase.instance.ref('/users/$userID/devices');
   }
 
   Future<void> loadDevices() async {
     try {
       updateReference();
+
       final DataSnapshot data = await collection.get();
 
-      // for (String deviceID in deviceIDs) {
-      //   final DocumentSnapshot<Map<String, dynamic>> document = await collection.doc(deviceID).get();
+      if (data.children.isEmpty) {
+        return;
+      }
 
-      //   final Map<String, dynamic>? deviceData = document.data();
+      for (DataSnapshot device in data.children) {
+        final String id = device.key!;
+        final Map<String, dynamic> deviceData = (device.value as Map<Object?, Object?>).cast<String, dynamic>();
 
-      //   if (deviceData == null) {
-      //     throw "Device data does not exist";
-      //   }
-
-      //   deviceData['id'] = deviceID;
-      //   final Device device = deviceWithData(deviceData, document.reference);
-
-      //   devices[deviceID] = device;
-      // }
+        deviceData['id'] = id;
+        devices[id] = Device.fromMap(deviceData, stream: device.ref.onValue);
+      }
     } on FirebaseException catch (e) {
       throw Exception("Error occured while loading devices: ${e.message}");
     } catch (e) {

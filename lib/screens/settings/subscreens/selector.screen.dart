@@ -83,7 +83,7 @@ class _SelectorScreenState<T> extends State<SelectorScreen<T>> {
                         final DeviceController controller = Provider.of<DeviceController>(context, listen: false);
 
                         final Device device = controller.devices[widget.deviceID]!;
-                        device.updateDevice(widget.mapKey, selectedValue, relayID: widget.relayID);
+                        device.update(widget.mapKey, selectedValue, relayID: widget.relayID);
                         await controller.updateDevice(device);
 
                         showMessage(context, "Controller updated successfully!");

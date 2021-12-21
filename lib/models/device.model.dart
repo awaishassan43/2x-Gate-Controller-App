@@ -1,12 +1,13 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:iot/models/relay.model.dart';
+import 'package:iot/util/functions.util.dart';
 
 class Device {
   String id;
   String name;
   double? temperature;
   double? humidity;
-  List<Relay> relays;
+  Map<String, Relay> relays;
   bool onOpenAlert;
   bool onCloseAlert;
   int? remainedOpenAlert;
@@ -50,7 +51,6 @@ class Device {
       name: data['name'],
       temperature: temperature.runtimeType.toString() == "int" ? (temperature as int).toDouble() : temperature,
       humidity: humidity.runtimeType.toString() == "int" ? (humidity as int).toDouble() : humidity,
-      relays: (data['relays'] as List<dynamic>).cast<Map<String, dynamic>>().map((relay) => Relay.fromJSON(relay)).toList(),
       onOpenAlert: data['onOpenAlert'],
       onCloseAlert: data['onCloseAlert'],
       remainedOpenAlert: data['remainedOpenAlert'],
@@ -61,6 +61,13 @@ class Device {
       macID: data['macID'],
       ipAddress: data['ipAddress'],
       stream: stream,
+      relays: (data['relays'] as Map<Object?, Object?>).map((key, value) {
+        final String relayID = key as String;
+        final Map<String, dynamic> relayData = (value as Map<Object?, Object?>).cast<String, dynamic>();
+
+        relayData['id'] = relayID;
+        return MapEntry(relayID, Relay.fromJSON(relayData));
+      }),
     );
   }
 
@@ -70,7 +77,9 @@ class Device {
       "name": name,
       "temperature": temperature,
       "humidity": humidity,
-      "relays": relays.map((relay) => relay.toJSON()).toList(),
+      "relays": relays.map((key, value) {
+        return MapEntry(key, value.toJSON());
+      }),
       "onOpenAlert": onOpenAlert,
       "onCloseAlert": onCloseAlert,
       "remainedOpenAlert": remainedOpenAlert,
@@ -83,29 +92,39 @@ class Device {
     };
   }
 
-  void updateDeviceUsingMap(Map<String, dynamic> mappedData) {
+  void updateUsingMap(Map<String, dynamic> mappedData) {
+    dynamic temperature = mappedData['temperature'];
+    dynamic temperatureAlert = mappedData['temperatureAlert'];
+    dynamic humidity = mappedData['humidity'];
+
     id = mappedData['id'];
     name = mappedData['name'];
-    temperature = mappedData['temperature'];
-    humidity = mappedData['humidity'];
-    relays = (mappedData['relays'] as List<dynamic>).cast<Map<String, dynamic>>().map((relay) => Relay.fromJSON(relay)).toList();
+    temperature = temperature.runtimeType.toString() == "int" ? (temperature as int).toDouble() : temperature;
+    humidity = humidity.runtimeType.toString() == "int" ? (humidity as int).toDouble() : humidity;
     onOpenAlert = mappedData['onOpenAlert'];
     onCloseAlert = mappedData['onCloseAlert'];
     remainedOpenAlert = mappedData['remainedOpenAlert'];
     nightAlert = mappedData['nightAlert'];
-    temperatureAlert = mappedData['temperatureAlert'];
+    temperatureAlert = temperatureAlert.runtimeType.toString() == "int" ? (temperatureAlert as int).toDouble() : temperatureAlert;
     firmware = mappedData['firmware'];
     networkStrength = mappedData['networkStrength'];
     macID = mappedData['macID'];
     ipAddress = mappedData['ipAddress'];
+    relays = (mappedData['relays'] as Map<Object?, Object?>).map((key, value) {
+      final String relayID = key as String;
+      final Map<String, dynamic> relayData = (value as Map<Object?, Object?>).cast<String, dynamic>();
+
+      relayData['id'] = relayID;
+      return MapEntry(relayID, Relay.fromJSON(relayData));
+    });
   }
 
-  void updateDevice(String key, dynamic value, {String? relayID}) {
+  void update(String key, dynamic value, {String? relayID}) {
     final Map<String, dynamic> mappedData = toJSON();
     relayID != null
-        ? (mappedData['relays'] as List<Map<String, dynamic>>).firstWhere((relay) => relay['id'] == relayID)[key] = value
+        ? (mappedData['relays'] as Map<String, Map<String, dynamic>>).values.firstWhere((relay) => relay['id'] == relayID)[key] = value
         : mappedData[key] = value;
 
-    updateDeviceUsingMap(mappedData);
+    updateUsingMap(mappedData);
   }
 }

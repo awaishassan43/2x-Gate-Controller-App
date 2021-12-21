@@ -34,7 +34,7 @@ class _EditRelayNameScreenState extends State<EditRelayNameScreen> {
   @override
   void initState() {
     super.initState();
-    relay = widget.device.relays.firstWhere((element) => element.id == widget.relayID);
+    relay = widget.device.relays.values.toList().firstWhere((element) => element.id == widget.relayID);
 
     name = TextEditingController(text: relay.name);
     controller = Provider.of<DeviceController>(context, listen: false);
@@ -112,7 +112,8 @@ class _EditRelayNameScreenState extends State<EditRelayNameScreen> {
                     final String previousName = relay.name;
 
                     try {
-                      controller.devices[widget.device.id]!.relays.firstWhere((element) => element.id == relay.id).name = name.text.trim();
+                      controller.devices[widget.device.id]!.relays.values.toList().firstWhere((element) => element.id == relay.id).name =
+                          name.text.trim();
                       await controller.updateDevice(controller.devices[widget.device.id]!);
 
                       showMessage(context, "Name updated successfully!");
@@ -123,7 +124,8 @@ class _EditRelayNameScreenState extends State<EditRelayNameScreen> {
                         isLoading = false;
                       });
 
-                      controller.devices[widget.device.id]!.relays.firstWhere((element) => element.id == relay.id).name = previousName;
+                      controller.devices[widget.device.id]!.relays.values.toList().firstWhere((element) => element.id == relay.id).name =
+                          previousName;
                       showMessage(context, "Failed to update the relay name");
                     }
                   },

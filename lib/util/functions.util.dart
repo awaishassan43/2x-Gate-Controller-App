@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:iot/controllers/user.controller.dart';
 import 'package:provider/provider.dart';
@@ -49,4 +52,16 @@ String getTemperatureValue(BuildContext context, double? temperature, {int decim
       return '${temperature.toStringAsFixed(decimalPlaces)}${withUnit ? '\u00b0$unit' : ''}';
     }
   }
+}
+
+Future<Map<String, dynamic>> convertToMap(dynamic data) async {
+  final Map<String, dynamic> parsedData = await compute(_converterIsolate, data);
+  return parsedData;
+}
+
+Map<String, dynamic> _converterIsolate(dynamic data) {
+  final String encodedData = jsonEncode(data);
+  final Map<String, dynamic> parsedData = jsonDecode(encodedData);
+
+  return parsedData;
 }

@@ -32,7 +32,7 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
   String? id;
   String? loaderMessage;
 
-  int currentStep = 0;
+  int currentStep = 3;
   final int totalSteps = 3;
 
   @override
@@ -146,14 +146,14 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
       });
 
       Device device = Device(
-        id: id!,
+        id: 'demo',
         name: "Gate Controller",
         temperature: 0,
         humidity: 0,
-        relays: [
-          Relay(id: 'r1', name: "Relay 1", isOpen: false, outputTime: 30, autoCloseTime: 30, scheduled: false, isEnabled: true),
-          Relay(id: 'r2', name: "Relay 2", isOpen: false, outputTime: 30, autoCloseTime: 30, scheduled: false, isEnabled: true),
-        ],
+        relays: {
+          'r1': Relay(id: 'r1', name: "Relay 1", isOpen: false, outputTime: 30, autoCloseTime: 30, scheduled: false, isEnabled: true),
+          'r2': Relay(id: 'r2', name: "Relay 2", isOpen: false, outputTime: 30, autoCloseTime: 30, scheduled: false, isEnabled: true),
+        },
         onOpenAlert: false,
         onCloseAlert: false,
         remainedOpenAlert: null,

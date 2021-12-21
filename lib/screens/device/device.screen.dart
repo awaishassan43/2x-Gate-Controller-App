@@ -36,7 +36,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
     });
 
     try {
-      device.updateDevice('isOpen', isOpen, relayID: relayID);
+      device.update('isOpen', isOpen, relayID: relayID);
       await controller.updateDevice(device);
 
       showMessage(context, "Controller updated successfully!");
