@@ -151,8 +151,22 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
         temperature: 0,
         humidity: 0,
         relays: {
-          'r1': Relay(id: 'r1', name: "Relay 1", isOpen: false, outputTime: 30, autoCloseTime: 30, scheduled: false, isEnabled: true),
-          'r2': Relay(id: 'r2', name: "Relay 2", isOpen: false, outputTime: 30, autoCloseTime: 30, scheduled: false, isEnabled: true),
+          'r1': Relay(
+              id: 'r1',
+              name: "Relay 1",
+              isOpen: false,
+              outputTime: 30,
+              autoCloseTime: 30,
+              scheduled: false,
+              isEnabled: true),
+          'r2': Relay(
+              id: 'r2',
+              name: "Relay 2",
+              isOpen: false,
+              outputTime: 30,
+              autoCloseTime: 30,
+              scheduled: false,
+              isEnabled: true),
         },
         onOpenAlert: false,
         onCloseAlert: false,
@@ -161,7 +175,8 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
         temperatureAlert: null,
       );
 
-      await Provider.of<DeviceController>(context, listen: false).addDevice(device, context);
+      await Provider.of<DeviceController>(context, listen: false)
+          .addDevice(device, context);
       showMessage(context, "Device added successfully");
 
       Navigator.pop(context);
@@ -197,10 +212,12 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
                         });
                       } else if (currentStep == 2) {
                         await connectDevice(context);
-                      } else if (currentStep == 3 && await Connectivity().checkConnection()) {
+                      } else if (currentStep == 3 &&
+                          await Connectivity().checkConnection()) {
                         await addDevice(context);
                       } else {
-                        showMessage(context, "Please check your internet connection");
+                        showMessage(
+                            context, "Please check your internet connection");
                       }
                     } catch (e) {
                       showMessage(context, "Failed to load next step");
@@ -215,7 +232,9 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
                   },
                   steps: [
                     Step(
-                      state: currentStep > 0 ? StepState.complete : StepState.indexed,
+                      state: currentStep > 0
+                          ? StepState.complete
+                          : StepState.indexed,
                       isActive: currentStep == 0,
                       title: const Text(
                         "Set the device to access mode",
@@ -232,7 +251,9 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
                       ),
                     ),
                     Step(
-                      state: currentStep > 1 ? StepState.complete : StepState.indexed,
+                      state: currentStep > 1
+                          ? StepState.complete
+                          : StepState.indexed,
                       isActive: currentStep == 1,
                       title: const Text(
                         "Connect to your device's WiFi",
@@ -249,7 +270,9 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
                       ),
                     ),
                     Step(
-                      state: currentStep > 2 ? StepState.complete : StepState.indexed,
+                      state: currentStep > 2
+                          ? StepState.complete
+                          : StepState.indexed,
                       isActive: currentStep == 2,
                       title: const Text(
                         "Enter the WiFi credentials",
@@ -345,14 +368,22 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: <Widget>[
                                   Icon(
-                                    isConnected == true ? Icons.signal_wifi_4_bar : Icons.signal_wifi_off,
-                                    color: isConnected == true ? Colors.green : Colors.red,
+                                    isConnected == true
+                                        ? Icons.signal_wifi_4_bar
+                                        : Icons.signal_wifi_off,
+                                    color: isConnected == true
+                                        ? Colors.green
+                                        : Colors.red,
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
-                                    isConnected == true ? "Connected to internet" : "Disconnected from internet",
+                                    isConnected == true
+                                        ? "Connected to internet"
+                                        : "Disconnected from internet",
                                     style: TextStyle(
-                                      color: isConnected == true ? Colors.green : Colors.red,
+                                      color: isConnected == true
+                                          ? Colors.green
+                                          : Colors.red,
                                     ),
                                   ),
                                 ],
