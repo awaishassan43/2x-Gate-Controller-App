@@ -1,13 +1,11 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:iot/components/error.component.dart';
+import 'package:iot/components/loader.component.dart';
 import 'package:iot/controllers/device.controller.dart';
-import 'package:iot/controllers/user.controller.dart';
 import 'package:iot/enum/route.enum.dart';
 import 'package:iot/models/device.model.dart';
 import 'package:iot/screens/dashboard/components/device.component.dart';
-import 'package:iot/util/functions.util.dart';
 import 'package:provider/provider.dart';
 
 class Dashboard extends StatelessWidget {
@@ -27,11 +25,18 @@ class Dashboard extends StatelessWidget {
           ),
         ),
         actions: [
-          IconButton(
-            onPressed: () {
-              Navigator.pushNamed(context, Screen.addDevice);
+          Selector<DeviceController, int>(
+            selector: (context, controller) => controller.devices.length,
+            builder: (context, devices, _) {
+              return devices > 0
+                  ? Container()
+                  : IconButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, Screen.addDevice);
+                      },
+                      icon: const Icon(Icons.add),
+                    );
             },
-            icon: const Icon(Icons.add),
           ),
           IconButton(
             onPressed: () {
@@ -41,61 +46,70 @@ class Dashboard extends StatelessWidget {
           )
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: FutureBuilder<void>(
-          future: controller.loadDevices(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState != ConnectionState.done) {
-              return Container();
-            }
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: FutureBuilder<void>(
+              future: controller.loadDevices(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState != ConnectionState.done) {
+                  return Container();
+                }
 
-            if (snapshot.hasError || snapshot.error != null) {
-              return ErrorMessage(message: snapshot.error.toString());
-            }
+                if (snapshot.hasError || snapshot.error != null) {
+                  return ErrorMessage(message: snapshot.error.toString());
+                }
 
-            return Consumer<DeviceController>(
-              builder: (context, controller, _) {
-                return Column(
-                  children: controller.devices.entries.map((entry) {
-                    final Device initialData = entry.value;
+                return Consumer<DeviceController>(
+                  builder: (context, controller, _) {
+                    return Column(
+                      children: controller.devices.entries.map((entry) {
+                        final Device initialData = entry.value;
 
-                    return StreamBuilder<DatabaseEvent>(
-                      stream: initialData.stream!,
-                      builder: (context, snapshot) {
-                        if (snapshot.hasError || snapshot.error != null) {
-                          return ErrorMessage(message: snapshot.error.toString());
-                        }
+                        return StreamBuilder<DatabaseEvent>(
+                          stream: initialData.stream!,
+                          builder: (context, snapshot) {
+                            if (snapshot.hasError || snapshot.error != null) {
+                              return ErrorMessage(message: snapshot.error.toString());
+                            }
 
-                        final String deviceID = initialData.id;
-                        Device device = initialData;
+                            final String deviceID = initialData.id;
+                            Device device = initialData;
 
-                        if (snapshot.data != null) {
-                          final DataSnapshot snapshotData = snapshot.data!.snapshot;
+                            if (snapshot.data != null) {
+                              final DataSnapshot snapshotData = snapshot.data!.snapshot;
 
-                          if (!snapshotData.exists) {
-                            return Container();
-                          }
+                              if (!snapshotData.exists) {
+                                return Container();
+                              }
 
-                          final Map<String, dynamic> streamData = (snapshotData.value as Map<Object?, Object?>).cast<String, dynamic>();
-                          streamData['id'] = device.id;
+                              final Map<String, dynamic> streamData = (snapshotData.value as Map<Object?, Object?>).cast<String, dynamic>();
+                              streamData['id'] = device.id;
 
-                          print("Updating the device in dashboard");
-                          device.updateUsingMap(streamData);
-                        }
+                              device.updateUsingMap(streamData);
+                            }
 
-                        return DeviceComponent(
-                          device: device,
-                          key: ValueKey(deviceID),
+                            return DeviceComponent(
+                              device: device,
+                              key: ValueKey(deviceID),
+                            );
+                          },
                         );
-                      },
+                      }).toList(),
                     );
-                  }).toList(),
+                  },
                 );
               },
-            );
-          },
-        ),
+            ),
+          ),
+          Selector<DeviceController, bool>(
+            selector: (context, controller) => controller.isLoading,
+            builder: (context, isLoading, _) {
+              return isLoading ? const Loader(message: "Updating the controller") : Container();
+            },
+          ),
+        ],
       ),
     );
   }

@@ -1,4 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:iot/components/error.component.dart';
 import 'package:iot/components/largeButton.component.dart';
@@ -63,80 +63,82 @@ class _DeviceScreenState extends State<DeviceScreen> {
               /**
                * Scrollable area
                */
-              // Expanded(
-              //   child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-              //       stream: widget.device.deviceRef!.snapshots(),
-              //       builder: (context, snapshot) {
-              //         if (snapshot.hasError || snapshot.error != null) {
-              //           return ErrorMessage(message: snapshot.error.toString());
-              //         }
+              Expanded(
+                child: StreamBuilder<DatabaseEvent>(
+                    stream: widget.device.stream,
+                    builder: (context, snapshot) {
+                      if (snapshot.hasError || snapshot.error != null) {
+                        return ErrorMessage(message: snapshot.error.toString());
+                      }
 
-              //         Device tempDevice = widget.device;
+                      Device tempDevice = widget.device;
 
-              //         if (snapshot.data != null) {
-              //           if (!snapshot.data!.exists) {
-              //             return Container();
-              //           }
+                      if (snapshot.data != null) {
+                        final DataSnapshot snapshotData = snapshot.data!.snapshot;
 
-              //           final Map<String, dynamic> streamData = snapshot.data!.data() as Map<String, dynamic>;
-              //           streamData['id'] = tempDevice.id;
+                        if (!snapshotData.exists) {
+                          return Container();
+                        }
 
-              //           tempDevice = Device.fromMap(streamData, ref: tempDevice.deviceRef);
-              //         }
+                        final Map<String, dynamic> streamData = (snapshotData.value as Map<Object?, Object?>).cast<String, dynamic>();
+                        streamData['id'] = tempDevice.id;
 
-              //         final String temperature = getTemperatureValue(context, tempDevice.temperature, withUnit: false);
-              //         final String humidity = tempDevice.humidity == null ? '...' : tempDevice.humidity!.toStringAsFixed(1);
-              //         final List<Relay> relays = tempDevice.relays;
+                        tempDevice.updateUsingMap(streamData);
+                      }
 
-              //         return SingleChildScrollView(
-              //           child: Padding(
-              //             padding: const EdgeInsets.all(20),
-              //             child: Column(
-              //               mainAxisAlignment: MainAxisAlignment.spaceAround,
-              //               children: [
-              //                 Row(
-              //                   children: [
-              //                     DeviceSensor(
-              //                       sensorName: "Temperature",
-              //                       value: temperature,
-              //                       showDegrees: true,
-              //                       unit: Provider.of<UserController>(context, listen: false).profile!.temperatureUnit,
-              //                       icon: 'assets/icons/temp.png',
-              //                     ),
-              //                     const SizedBox(width: 10),
-              //                     DeviceSensor(
-              //                       sensorName: "Humidity",
-              //                       value: humidity,
-              //                       showPercent: true,
-              //                       icon: 'assets/icons/humidity.png',
-              //                     ),
-              //                   ],
-              //                 ),
-              //                 ...relays.map((relay) {
-              //                   final String name = relay.name;
-              //                   final bool isOpen = relay.isOpen;
+                      final String temperature = getTemperatureValue(context, tempDevice.temperature, withUnit: false);
+                      final String humidity = tempDevice.humidity == null ? '...' : tempDevice.humidity!.toStringAsFixed(1);
+                      final List<Relay> relays = tempDevice.relays.values.toList();
 
-              //                   return Column(
-              //                     children: [
-              //                       const SizedBox(height: 30),
-              //                       LargeButton(
-              //                         icon: isOpen ? Icons.lock_open_rounded : Icons.lock_rounded,
-              //                         label: isOpen ? "Opened" : "Closed",
-              //                         iconColor: isOpen ? const Color(0xFFfc4646) : const Color(0xFF00e6c3),
-              //                         onPressed: () {
-              //                           updateRelayStatus(context, relay.id, !isOpen);
-              //                         },
-              //                         bottomText: name,
-              //                       ),
-              //                     ],
-              //                   );
-              //                 }).toList(),
-              //               ],
-              //             ),
-              //           ),
-              //         );
-              //       }),
-              // ),
+                      return SingleChildScrollView(
+                        child: Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              Row(
+                                children: [
+                                  DeviceSensor(
+                                    sensorName: "Temperature",
+                                    value: temperature,
+                                    showDegrees: true,
+                                    unit: Provider.of<UserController>(context, listen: false).profile!.temperatureUnit,
+                                    icon: 'assets/icons/temp.png',
+                                  ),
+                                  const SizedBox(width: 10),
+                                  DeviceSensor(
+                                    sensorName: "Humidity",
+                                    value: humidity,
+                                    showPercent: true,
+                                    icon: 'assets/icons/humidity.png',
+                                  ),
+                                ],
+                              ),
+                              ...relays.map((relay) {
+                                final String name = relay.name;
+                                final bool isOpen = relay.isOpen;
+
+                                return Column(
+                                  children: [
+                                    const SizedBox(height: 30),
+                                    LargeButton(
+                                      icon: isOpen ? Icons.lock_open_rounded : Icons.lock_rounded,
+                                      label: isOpen ? "Opened" : "Closed",
+                                      iconColor: isOpen ? const Color(0xFFfc4646) : const Color(0xFF00e6c3),
+                                      onPressed: () {
+                                        updateRelayStatus(context, relay.id, !isOpen);
+                                      },
+                                      bottomText: name,
+                                    ),
+                                  ],
+                                );
+                              }).toList(),
+                            ],
+                          ),
+                        ),
+                      );
+                    }),
+              ),
               /**
                * End of scrollable area
                */

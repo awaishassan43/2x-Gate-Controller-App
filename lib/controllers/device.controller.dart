@@ -1,11 +1,8 @@
 import 'dart:async';
-import 'dart:convert';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:iot/models/device.model.dart';
-import 'package:iot/util/functions.util.dart';
 
 class DeviceController extends ChangeNotifier {
   DatabaseReference collection = FirebaseDatabase.instance.ref('/');
@@ -48,7 +45,7 @@ class DeviceController extends ChangeNotifier {
         final Map<String, dynamic> deviceData = (device.value as Map<Object?, Object?>).cast<String, dynamic>();
 
         deviceData['id'] = id;
-        devices[id] = Device.fromMap(deviceData, stream: device.ref.onValue);
+        devices[id] = Device.fromMap(deviceData, stream: device.ref.onValue.asBroadcastStream());
       }
     } on FirebaseException catch (e) {
       throw Exception("Error occured while loading devices: ${e.message}");
@@ -79,7 +76,7 @@ class DeviceController extends ChangeNotifier {
 
   Future<void> updateDevice(Device device) async {
     try {
-      // await collection.doc(device.id).set(device.toJSON());
+      await collection.child(device.id).set(device.toJSON());
     } on FirebaseException catch (e) {
       throw "Error occured while updating the device: ${e.message}";
     } catch (e) {
@@ -89,10 +86,8 @@ class DeviceController extends ChangeNotifier {
 
   removeDevice(String deviceID, BuildContext context) async {
     try {
-      // await collection.doc(deviceID).delete();
-      // devices.remove(deviceID);
-
-      // await Provider.of<UserController>(context, listen: false).unlinkDeviceFromUser(deviceID);
+      await collection.child(deviceID).remove();
+      devices.remove(deviceID);
 
       notifyListeners();
     } on FirebaseException catch (e) {

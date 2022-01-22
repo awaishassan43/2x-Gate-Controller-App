@@ -8,27 +8,18 @@ import 'package:iot/util/functions.util.dart';
 import 'package:iot/util/themes.util.dart';
 import 'package:provider/provider.dart';
 
-class DeviceComponent extends StatefulWidget {
+class DeviceComponent extends StatelessWidget {
   final Device device;
   const DeviceComponent({
     Key? key,
     required this.device,
   }) : super(key: key);
 
-  @override
-  State<DeviceComponent> createState() => _DeviceComponentState();
-}
-
-class _DeviceComponentState extends State<DeviceComponent> {
-  bool isLoading = false;
-
   Future<void> updateRelayStatus(BuildContext context, String relayID, bool isOpen) async {
     final DeviceController controller = Provider.of<DeviceController>(context, listen: false);
-    final Device device = controller.devices[widget.device.id]!;
+    final Device device = controller.devices[this.device.id]!;
 
-    setState(() {
-      isLoading = true;
-    });
+    controller.isLoading = true;
 
     try {
       device.update('isOpen', isOpen, relayID: relayID);
@@ -39,14 +30,12 @@ class _DeviceComponentState extends State<DeviceComponent> {
       showMessage(context, e.toString());
     }
 
-    setState(() {
-      isLoading = false;
-    });
+    controller.isLoading = false;
   }
 
-  Widget renderRelays() {
+  Widget renderRelays(BuildContext context) {
     final List<Widget> children = [];
-    final relays = widget.device.relays.values.toList();
+    final relays = device.relays.values.toList();
 
     for (int i = 0; i < (relays.length / 2).ceil(); i++) {
       final List<Widget> rowItems = [];
@@ -108,9 +97,9 @@ class _DeviceComponentState extends State<DeviceComponent> {
 
   @override
   Widget build(BuildContext context) {
-    final String humidity = widget.device.humidity == null ? '...' : widget.device.humidity!.ceil().toString();
+    final String humidity = device.humidity == null ? '...' : device.humidity!.ceil().toString();
 
-    final String deviceName = widget.device.name;
+    final String deviceName = device.name;
 
     return Stack(
       children: [
@@ -121,7 +110,7 @@ class _DeviceComponentState extends State<DeviceComponent> {
               Navigator.pushNamed(
                 context,
                 Screen.device,
-                arguments: widget.device,
+                arguments: device,
               );
             },
             padding: const EdgeInsets.all(12.5),
@@ -180,7 +169,7 @@ class _DeviceComponentState extends State<DeviceComponent> {
                                         fontSize: 15,
                                       ),
                                       children: [
-                                        TextSpan(text: getTemperatureValue(context, widget.device.temperature, withUnit: false)),
+                                        TextSpan(text: getTemperatureValue(context, device.temperature, withUnit: false)),
                                         const TextSpan(text: "\u00b0"),
                                         TextSpan(text: unit),
                                       ],
@@ -241,7 +230,7 @@ class _DeviceComponentState extends State<DeviceComponent> {
                           ),
                           icon: const Icon(Icons.settings),
                           onPressed: () {
-                            Navigator.pushNamed(context, Screen.deviceSettings, arguments: widget.device);
+                            Navigator.pushNamed(context, Screen.deviceSettings, arguments: device);
                           },
                         ),
                       ],
@@ -261,7 +250,7 @@ class _DeviceComponentState extends State<DeviceComponent> {
                 /**
                  * Bottom Section
                  */
-                renderRelays(),
+                renderRelays(context),
               ],
             ),
           ),

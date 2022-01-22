@@ -1,6 +1,5 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:iot/models/relay.model.dart';
-import 'package:iot/util/functions.util.dart';
 
 class Device {
   String id;
@@ -93,19 +92,19 @@ class Device {
   }
 
   void updateUsingMap(Map<String, dynamic> mappedData) {
-    dynamic temperature = mappedData['temperature'];
-    dynamic temperatureAlert = mappedData['temperatureAlert'];
-    dynamic humidity = mappedData['humidity'];
+    dynamic _temperature = mappedData['temperature'];
+    dynamic _temperatureAlert = mappedData['temperatureAlert'];
+    dynamic _humidity = mappedData['humidity'];
 
     id = mappedData['id'];
     name = mappedData['name'];
-    temperature = temperature.runtimeType.toString() == "int" ? (temperature as int).toDouble() : temperature;
-    humidity = humidity.runtimeType.toString() == "int" ? (humidity as int).toDouble() : humidity;
+    temperature = _temperature.runtimeType.toString() == "int" ? (_temperature as int).toDouble() : _temperature;
+    humidity = _humidity.runtimeType.toString() == "int" ? (_humidity as int).toDouble() : _humidity;
     onOpenAlert = mappedData['onOpenAlert'];
     onCloseAlert = mappedData['onCloseAlert'];
     remainedOpenAlert = mappedData['remainedOpenAlert'];
     nightAlert = mappedData['nightAlert'];
-    temperatureAlert = temperatureAlert.runtimeType.toString() == "int" ? (temperatureAlert as int).toDouble() : temperatureAlert;
+    temperatureAlert = _temperatureAlert.runtimeType.toString() == "int" ? (_temperatureAlert as int).toDouble() : _temperatureAlert;
     firmware = mappedData['firmware'];
     networkStrength = mappedData['networkStrength'];
     macID = mappedData['macID'];
@@ -121,8 +120,8 @@ class Device {
 
   void update(String key, dynamic value, {String? relayID}) {
     final Map<String, dynamic> mappedData = toJSON();
-    relayID != null
-        ? (mappedData['relays'] as Map<String, Map<String, dynamic>>).values.firstWhere((relay) => relay['id'] == relayID)[key] = value
+    relayID != null && (mappedData['relays'] as Map<String, Map<String, dynamic>>).containsKey(relayID)
+        ? (mappedData['relays'] as Map<String, Map<String, dynamic>>)[relayID]![key] = value
         : mappedData[key] = value;
 
     updateUsingMap(mappedData);

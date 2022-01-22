@@ -1,6 +1,5 @@
 import 'dart:collection';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -12,7 +11,6 @@ class UserController extends ChangeNotifier {
   late final FirebaseAuth auth;
   late final DatabaseReference users;
   Profile? profile;
-  DocumentSnapshot? profileRef;
   bool _isLoading = false;
 
   /// Loader getter and setter
@@ -38,40 +36,6 @@ class UserController extends ChangeNotifier {
       throw "Error occured while initializing the app: ${e.message}";
     } catch (e) {
       throw "Failed to initialize the app: ${e.toString()}";
-    }
-  }
-
-  Future<void> linkDeviceToUser(String deviceID) async {
-    try {
-      if (profileRef == null) {
-        throw Exception("Failed to get user profile");
-      }
-
-      final Map<String, dynamic> data = profile!.toJSON();
-      (data['devices'] as List<dynamic>).cast<String>().add(deviceID);
-
-      await profileRef!.reference.set(data);
-    } on FirebaseException catch (e) {
-      throw "Error occured while linking the device to user: ${e.message}";
-    } catch (e) {
-      throw "Failed to link the device to user: ${e.toString()}";
-    }
-  }
-
-  Future<void> unlinkDeviceFromUser(String deviceID) async {
-    try {
-      if (profile == null) {
-        throw Exception("Failed to get user profile");
-      }
-
-      final Map<String, dynamic> data = profile!.toJSON();
-      (data["devices"] as List<dynamic>).cast<String>().remove(deviceID);
-
-      await profileRef!.reference.set(data);
-    } on FirebaseException catch (e) {
-      throw "Error occured while removing the device from user: ${e.message}";
-    } catch (e) {
-      throw "Failed to remove the device from user: ${e.toString()}";
     }
   }
 
@@ -193,7 +157,7 @@ class UserController extends ChangeNotifier {
 
   Future<void> updateProfile() async {
     try {
-      // notifyListeners();
+      notifyListeners();
 
       if (profile == null) {
         throw "Failed to get the profile data";
@@ -201,7 +165,7 @@ class UserController extends ChangeNotifier {
 
       final Map<String, dynamic> data = profile!.toJSON();
 
-      // await users.doc(profile!.email).set(data);
+      await users.child(auth.currentUser!.uid).set(data);
     } on FirebaseException catch (e) {
       throw "Error occured while trying to update the profile: ${e.message}";
     } catch (e) {
@@ -224,7 +188,6 @@ class UserController extends ChangeNotifier {
     try {
       await auth.signOut();
       profile = null;
-      profileRef = null;
     } on FirebaseException catch (e) {
       throw "Error occured while logging out the user: ${e.message}";
     } catch (e) {

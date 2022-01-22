@@ -61,8 +61,8 @@ class AppSettings extends StatelessWidget {
                       title: "Email",
                       trailingText: profile.email,
                     ),
-                    Selector<UserController, String>(
-                      selector: (context, controller) => controller.profile!.name,
+                    Selector<UserController, String?>(
+                      selector: (context, controller) => controller.profile?.name,
                       builder: (context, name, __) {
                         return SectionItem(
                           title: "Name",
@@ -74,19 +74,21 @@ class AppSettings extends StatelessWidget {
                         );
                       },
                     ),
-                    Selector<UserController, Tuple2<String, String>>(
-                      selector: (context, controller) => Tuple2(controller.profile!.code, controller.profile!.phone),
+                    Selector<UserController, Tuple2<String?, String?>>(
+                      selector: (context, controller) => Tuple2(controller.profile?.code, controller.profile?.phone),
                       builder: (context, values, _) {
-                        final String code = values.item1;
-                        final String phone = values.item2;
-                        return SectionItem(
-                          title: "Phone",
-                          onTap: () {
-                            Navigator.pushNamed(context, Screen.editPhone);
-                          },
-                          showEditIcon: true,
-                          trailingText: "+" + code + " " + phone,
-                        );
+                        final String? code = values.item1;
+                        final String? phone = values.item2;
+                        return code == null || phone == null
+                            ? Container()
+                            : SectionItem(
+                                title: "Phone",
+                                onTap: () {
+                                  Navigator.pushNamed(context, Screen.editPhone);
+                                },
+                                showEditIcon: true,
+                                trailingText: "+" + code + " " + phone,
+                              );
                       },
                     ),
                     SectionItem(
@@ -114,8 +116,8 @@ class AppSettings extends StatelessWidget {
                 Section(
                   header: "Settings",
                   children: [
-                    Selector<UserController, String>(
-                      selector: (context, controller) => controller.profile!.temperatureUnit,
+                    Selector<UserController, String?>(
+                      selector: (context, controller) => controller.profile?.temperatureUnit,
                       builder: (context, unit, __) {
                         return SectionItem(
                           title: "Temperature Unit",
@@ -136,22 +138,24 @@ class AppSettings extends StatelessWidget {
                         );
                       },
                     ),
-                    Selector<UserController, bool>(
-                      selector: (context, controller) => controller.profile!.is24Hours,
+                    Selector<UserController, bool?>(
+                      selector: (context, controller) => controller.profile?.is24Hours,
                       builder: (context, is24Hours, __) {
-                        return SectionItem(
-                          title: "24-Hour Time",
-                          trailing: Switch(
-                            value: is24Hours,
-                            onChanged: (bool value) {
-                              onTimeFormatUpdated(context, value);
-                            },
-                          ),
-                          onTap: () {
-                            onTimeFormatUpdated(context, !is24Hours);
-                          },
-                          showSeparator: false,
-                        );
+                        return is24Hours == null
+                            ? Container()
+                            : SectionItem(
+                                title: "24-Hour Time",
+                                trailing: Switch(
+                                  value: is24Hours,
+                                  onChanged: (bool value) {
+                                    onTimeFormatUpdated(context, value);
+                                  },
+                                ),
+                                onTap: () {
+                                  onTimeFormatUpdated(context, !is24Hours);
+                                },
+                                showSeparator: false,
+                              );
                       },
                     ),
                   ],
