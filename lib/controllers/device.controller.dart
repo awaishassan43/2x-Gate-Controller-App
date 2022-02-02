@@ -40,16 +40,14 @@ class DeviceController extends ChangeNotifier {
         final DataSnapshot deviceData = await deviceCollection.child(id).get();
         final DataSnapshot deviceSettings = await settingsCollection.child(id).get();
         final DataSnapshot deviceCommands = await commandsCollection.child(id).get();
-        final DataSnapshot deviceLogs = await logsCollection.child(id).get();
 
         final Map<String, dynamic> map = {};
-        map['data'] = objectToMap(deviceData.value);
-        map['settings'] = objectToMap(deviceSettings.value);
-        map['commands'] = objectToMap(deviceCommands.value);
-        map['logs'] = objectToMap(deviceLogs.value);
+        map['deviceData'] = objectToMap(deviceData.value);
+        map['deviceSettings'] = objectToMap(deviceSettings.value);
+        map['deviceCommands'] = objectToMap(deviceCommands.value);
 
-        final Device device = Device.fromRawData(map);
-        // devices[id] = device;
+        final Device device = Device.fromJson(map);
+        devices[id] = device;
       }
     } on FirebaseException catch (e) {
       throw Exception("Error occured while loading devices: ${e.message}");

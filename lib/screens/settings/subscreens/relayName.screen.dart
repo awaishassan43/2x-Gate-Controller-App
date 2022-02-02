@@ -59,83 +59,84 @@ class _EditRelayNameScreenState extends State<EditRelayNameScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Edit relay name"),
-        centerTitle: true,
-      ),
-      body: Stack(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      CustomInput(
-                        label: "Name of the relay",
-                        icon: Icons.sensors,
-                        error: nameError,
-                        controller: name,
-                      ),
-                      if (formError != '')
-                        Padding(
-                          padding: const EdgeInsets.all(20),
-                          child: Text(
-                            formError,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              color: Colors.red,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-                CustomButton(
-                  text: "Update name",
-                  onPressed: () async {
-                    final bool isNameValid = validateName();
+    return Container();
+    // return Scaffold(
+    //   appBar: AppBar(
+    //     title: const Text("Edit relay name"),
+    //     centerTitle: true,
+    //   ),
+    //   body: Stack(
+    //     children: [
+    //       Padding(
+    //         padding: const EdgeInsets.all(20.0),
+    //         child: Column(
+    //           crossAxisAlignment: CrossAxisAlignment.stretch,
+    //           children: [
+    //             Expanded(
+    //               child: Column(
+    //                 crossAxisAlignment: CrossAxisAlignment.stretch,
+    //                 children: [
+    //                   CustomInput(
+    //                     label: "Name of the relay",
+    //                     icon: Icons.sensors,
+    //                     error: nameError,
+    //                     controller: name,
+    //                   ),
+    //                   if (formError != '')
+    //                     Padding(
+    //                       padding: const EdgeInsets.all(20),
+    //                       child: Text(
+    //                         formError,
+    //                         textAlign: TextAlign.center,
+    //                         style: const TextStyle(
+    //                           color: Colors.red,
+    //                           fontSize: 12,
+    //                         ),
+    //                       ),
+    //                     ),
+    //                 ],
+    //               ),
+    //             ),
+    //             CustomButton(
+    //               text: "Update name",
+    //               onPressed: () async {
+    //                 final bool isNameValid = validateName();
 
-                    if (!isNameValid) {
-                      return;
-                    }
+    //                 if (!isNameValid) {
+    //                   return;
+    //                 }
 
-                    setState(() {
-                      isLoading = true;
-                    });
+    //                 setState(() {
+    //                   isLoading = true;
+    //                 });
 
-                    final String previousName = relay.name;
+    //                 final String previousName = relay.name;
 
-                    try {
-                      controller.devices[widget.device.id]!.relays.values.toList().firstWhere((element) => element.id == relay.id).name =
-                          name.text.trim();
-                      await controller.updateDevice(controller.devices[widget.device.id]!);
+    //                 try {
+    //                   controller.devices[widget.device.id]!.relays.values.toList().firstWhere((element) => element.id == relay.id).name =
+    //                       name.text.trim();
+    //                   await controller.updateDevice(controller.devices[widget.device.id]!);
 
-                      showMessage(context, "Name updated successfully!");
-                      Navigator.pop(context);
-                    } catch (e) {
-                      setState(() {
-                        formError = e.toString();
-                        isLoading = false;
-                      });
+    //                   showMessage(context, "Name updated successfully!");
+    //                   Navigator.pop(context);
+    //                 } catch (e) {
+    //                   setState(() {
+    //                     formError = e.toString();
+    //                     isLoading = false;
+    //                   });
 
-                      controller.devices[widget.device.id]!.relays.values.toList().firstWhere((element) => element.id == relay.id).name =
-                          previousName;
-                      showMessage(context, "Failed to update the relay name");
-                    }
-                  },
-                ),
-              ],
-            ),
-          ),
-          if (isLoading) const Loader(message: "Updating controller"),
-        ],
-      ),
-    );
+    //                   controller.devices[widget.device.id]!.relays.values.toList().firstWhere((element) => element.id == relay.id).name =
+    //                       previousName;
+    //                   showMessage(context, "Failed to update the relay name");
+    //                 }
+    //               },
+    //             ),
+    //           ],
+    //         ),
+    //       ),
+    //       if (isLoading) const Loader(message: "Updating controller"),
+    //     ],
+    //   ),
+    // );
   }
 }
