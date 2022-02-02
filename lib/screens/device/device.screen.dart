@@ -51,127 +51,130 @@ class _DeviceScreenState extends State<DeviceScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.device.name),
-        centerTitle: true,
-      ),
-      body: Stack(
-        children: [
-          Column(
-            children: [
-              /**
-               * Scrollable area
-               */
-              Expanded(
-                child: StreamBuilder<DatabaseEvent>(
-                    stream: widget.device.stream,
-                    builder: (context, snapshot) {
-                      if (snapshot.hasError || snapshot.error != null) {
-                        return ErrorMessage(message: snapshot.error.toString());
-                      }
+    return Container();
+    // return Scaffold(
+    //   appBar: AppBar(
+    //     title: Text(widget.device.name),
+    //     centerTitle: true,
+    //   ),
+    //   body: Stack(
+    //     children: [
+    //       Column(
+    //         children: [
+    //           /**
+    //            * Scrollable area
+    //            */
+    //           /*
+    //           Expanded(
+    //             child: StreamBuilder<DatabaseEvent>(
+    //                 stream: widget.device.stream,
+    //                 builder: (context, snapshot) {
+    //                   if (snapshot.hasError || snapshot.error != null) {
+    //                     return ErrorMessage(message: snapshot.error.toString());
+    //                   }
 
-                      Device tempDevice = widget.device;
+    //                   Device tempDevice = widget.device;
 
-                      if (snapshot.data != null) {
-                        final DataSnapshot snapshotData = snapshot.data!.snapshot;
+    //                   if (snapshot.data != null) {
+    //                     final DataSnapshot snapshotData = snapshot.data!.snapshot;
 
-                        if (!snapshotData.exists) {
-                          return Container();
-                        }
+    //                     if (!snapshotData.exists) {
+    //                       return Container();
+    //                     }
 
-                        final Map<String, dynamic> streamData = (snapshotData.value as Map<Object?, Object?>).cast<String, dynamic>();
-                        streamData['id'] = tempDevice.id;
+    //                     final Map<String, dynamic> streamData = (snapshotData.value as Map<Object?, Object?>).cast<String, dynamic>();
+    //                     streamData['id'] = tempDevice.id;
 
-                        tempDevice.updateUsingMap(streamData);
-                      }
+    //                     tempDevice.updateUsingMap(streamData);
+    //                   }
 
-                      final String temperature = getTemperatureValue(context, tempDevice.temperature, withUnit: false);
-                      final String humidity = tempDevice.humidity == null ? '...' : tempDevice.humidity!.toStringAsFixed(1);
-                      final List<Relay> relays = tempDevice.relays.values.toList();
+    //                   final String temperature = getTemperatureValue(context, tempDevice.temperature, withUnit: false);
+    //                   final String humidity = tempDevice.humidity == null ? '...' : tempDevice.humidity!.toStringAsFixed(1);
+    //                   final List<Relay> relays = tempDevice.relays.values.toList();
 
-                      return SingleChildScrollView(
-                        child: Padding(
-                          padding: const EdgeInsets.all(20),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              Row(
-                                children: [
-                                  DeviceSensor(
-                                    sensorName: "Temperature",
-                                    value: temperature,
-                                    showDegrees: true,
-                                    unit: Provider.of<UserController>(context, listen: false).profile!.temperatureUnit,
-                                    icon: 'assets/icons/temp.png',
-                                  ),
-                                  const SizedBox(width: 10),
-                                  DeviceSensor(
-                                    sensorName: "Humidity",
-                                    value: humidity,
-                                    showPercent: true,
-                                    icon: 'assets/icons/humidity.png',
-                                  ),
-                                ],
-                              ),
-                              ...relays.map((relay) {
-                                final String name = relay.name;
-                                final bool isOpen = relay.isOpen;
+    //                   return SingleChildScrollView(
+    //                     child: Padding(
+    //                       padding: const EdgeInsets.all(20),
+    //                       child: Column(
+    //                         mainAxisAlignment: MainAxisAlignment.spaceAround,
+    //                         children: [
+    //                           Row(
+    //                             children: [
+    //                               DeviceSensor(
+    //                                 sensorName: "Temperature",
+    //                                 value: temperature,
+    //                                 showDegrees: true,
+    //                                 unit: Provider.of<UserController>(context, listen: false).profile!.temperatureUnit,
+    //                                 icon: 'assets/icons/temp.png',
+    //                               ),
+    //                               const SizedBox(width: 10),
+    //                               DeviceSensor(
+    //                                 sensorName: "Humidity",
+    //                                 value: humidity,
+    //                                 showPercent: true,
+    //                                 icon: 'assets/icons/humidity.png',
+    //                               ),
+    //                             ],
+    //                           ),
+    //                           ...relays.map((relay) {
+    //                             final String name = relay.name;
+    //                             final bool isOpen = relay.isOpen;
 
-                                return Column(
-                                  children: [
-                                    const SizedBox(height: 30),
-                                    LargeButton(
-                                      icon: isOpen ? Icons.lock_open_rounded : Icons.lock_rounded,
-                                      label: isOpen ? "Opened" : "Closed",
-                                      iconColor: isOpen ? const Color(0xFFfc4646) : const Color(0xFF00e6c3),
-                                      onPressed: () {
-                                        updateRelayStatus(context, relay.id, !isOpen);
-                                      },
-                                      bottomText: name,
-                                    ),
-                                  ],
-                                );
-                              }).toList(),
-                            ],
-                          ),
-                        ),
-                      );
-                    }),
-              ),
-              /**
-               * End of scrollable area
-               */
+    //                             return Column(
+    //                               children: [
+    //                                 const SizedBox(height: 30),
+    //                                 LargeButton(
+    //                                   icon: isOpen ? Icons.lock_open_rounded : Icons.lock_rounded,
+    //                                   label: isOpen ? "Opened" : "Closed",
+    //                                   iconColor: isOpen ? const Color(0xFFfc4646) : const Color(0xFF00e6c3),
+    //                                   onPressed: () {
+    //                                     updateRelayStatus(context, relay.id, !isOpen);
+    //                                   },
+    //                                   bottomText: name,
+    //                                 ),
+    //                               ],
+    //                             );
+    //                           }).toList(),
+    //                         ],
+    //                       ),
+    //                     ),
+    //                   );
+    //                 }),
+    //           ),
+    //           */
+    //           /**
+    //            * End of scrollable area
+    //            */
 
-              /**
-               * Bottom Section
-               */
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.all(10),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    BottomSectionItem(text: "History", onPressed: () {}, icon: Icons.history),
-                    BottomSectionItem(text: "Schedule", icon: Icons.history, onPressed: () {}),
-                    BottomSectionItem(
-                      text: "Settings",
-                      icon: Icons.settings,
-                      onPressed: () {
-                        Navigator.pushNamed(context, Screen.deviceSettings, arguments: widget.device);
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              /**
-               * End of bottom section
-               */
-            ],
-          ),
-          if (isLoading) const Loader(message: "Updating controller"),
-        ],
-      ),
-    );
+    //           /**
+    //            * Bottom Section
+    //            */
+    //           SingleChildScrollView(
+    //             scrollDirection: Axis.horizontal,
+    //             padding: const EdgeInsets.all(10),
+    //             child: Row(
+    //               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    //               children: [
+    //                 BottomSectionItem(text: "History", onPressed: () {}, icon: Icons.history),
+    //                 BottomSectionItem(text: "Schedule", icon: Icons.history, onPressed: () {}),
+    //                 BottomSectionItem(
+    //                   text: "Settings",
+    //                   icon: Icons.settings,
+    //                   onPressed: () {
+    //                     Navigator.pushNamed(context, Screen.deviceSettings, arguments: widget.device);
+    //                   },
+    //                 ),
+    //               ],
+    //             ),
+    //           ),
+    //           /**
+    //            * End of bottom section
+    //            */
+    //         ],
+    //       ),
+    //       if (isLoading) const Loader(message: "Updating controller"),
+    //     ],
+    //   ),
+    // );
   }
 }

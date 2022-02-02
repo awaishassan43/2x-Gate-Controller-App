@@ -2,8 +2,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:iot/components/input.component.dart';
 import 'package:iot/controllers/device.controller.dart';
-import 'package:iot/models/device.model.dart';
-import 'package:iot/models/relay.model.dart';
 import 'package:iot/util/functions.util.dart';
 import 'package:provider/provider.dart';
 import 'package:iot/components/loader.component.dart';
@@ -29,10 +27,10 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
 
   bool isLoading = false;
 
-  String? id;
+  String? id = 'esp-3c71bfab3e6c';
   String? loaderMessage;
 
-  int currentStep = 0;
+  int currentStep = 3;
   final int totalSteps = 3;
 
   @override
@@ -70,40 +68,30 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
   }
 
   Future<void> sendCreds() async {
-    try {
-      final Uri url = Uri.parse(getDeviceURL(ssid.text, password.text));
-      final http.Response response = await http.post(url).timeout(
-        const Duration(milliseconds: 7500),
-        onTimeout: () {
-          throw "Timed out while trying to send credentials to the device";
-        },
-      );
-
-      final String deviceID = response.body;
-
-      setState(() {
-        id = deviceID;
-      });
-    } catch (e) {
+    try {} catch (e) {
       rethrow;
     }
   }
 
   Future<void> connectDevice(BuildContext context) async {
     try {
+      // Resetting the form error state
       if (formError != '') {
         setState(() {
           formError = '';
         });
       }
 
+      // validating the fields
       validateSSID();
       validatePassword();
 
+      // In case of an error, show error (error is handled in the respective functions above)
       if (ssidError.isNotEmpty || passwordError.isNotEmpty) {
         return;
       }
 
+      // Get rid of the keyboard
       if (FocusScope.of(context).hasFocus) {
         FocusScope.of(context).unfocus();
       }
@@ -113,14 +101,24 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
         loaderMessage = "Sending WiFi credentials to the device";
       });
 
-      await sendCreds();
+      // Send the request to the device to get the device id
+      final Uri url = Uri.parse(getDeviceURL(ssid.text, password.text));
+      final http.Response response = await http.post(url).timeout(
+        const Duration(milliseconds: 7500),
+        onTimeout: () {
+          throw "Timed out while trying to send credentials to the device";
+        },
+      );
 
-      if (id == null) {
+      // Check if the device id was received successfully, and in case of success update the state
+      final String? deviceID = response.body;
+      if (deviceID == null) {
         throw Exception("Failed to get response from the device");
       }
 
       setState(() {
         isLoading = false;
+        id = deviceID;
         currentStep++;
       });
 
@@ -136,6 +134,11 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
 
   Future<void> addDevice(BuildContext context) async {
     try {
+      if (id == null) {
+        throw "Device id is null!";
+      }
+
+      // Reset the error state and show the loading indicator
       setState(() {
         if (addError != '') {
           addError = '';
@@ -145,25 +148,12 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
         loaderMessage = "Adding device to database";
       });
 
-      Device device = Device(
-        id: 'demo',
-        name: "Gate Controller",
-        temperature: 0,
-        humidity: 0,
-        relays: {
-          'r1': Relay(id: 'r1', name: "Relay 1", isOpen: false, outputTime: 30, autoCloseTime: 30, scheduled: false, isEnabled: true),
-          'r2': Relay(id: 'r2', name: "Relay 2", isOpen: false, outputTime: 30, autoCloseTime: 30, scheduled: false, isEnabled: true),
-        },
-        onOpenAlert: false,
-        onCloseAlert: false,
-        remainedOpenAlert: null,
-        nightAlert: false,
-        temperatureAlert: null,
-      );
-
-      await Provider.of<DeviceController>(context, listen: false).addDevice(device, context);
+      // Add the device to the database
+      final DeviceController controller = Provider.of<DeviceController>(context, listen: false);
+      await controller.addDevice(id!, context);
       showMessage(context, "Device added successfully");
 
+      // Go to previous screen
       Navigator.pop(context);
     } catch (e) {
       setState(() {

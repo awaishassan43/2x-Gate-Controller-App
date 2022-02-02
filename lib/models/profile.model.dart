@@ -1,3 +1,5 @@
+import 'package:iot/util/functions.util.dart';
+
 class Profile {
   String email;
   String name;
@@ -5,6 +7,7 @@ class Profile {
   String phone;
   String temperatureUnit;
   bool is24Hours;
+  List<String> devices;
 
   Profile({
     required this.email,
@@ -13,6 +16,7 @@ class Profile {
     required this.phone,
     required this.temperatureUnit,
     required this.is24Hours,
+    required this.devices,
   });
 
   factory Profile.fromMap(Map<String, dynamic> data) {
@@ -23,6 +27,7 @@ class Profile {
       phone: data['phone'],
       temperatureUnit: data['temperatureUnit'],
       is24Hours: data['is24Hours'],
+      devices: castList<String>(data['devices']),
     );
   }
 
@@ -34,6 +39,7 @@ class Profile {
       "phone": phone,
       "temperatureUnit": temperatureUnit,
       "is24Hours": is24Hours,
+      "devices": devices,
     };
   }
 
@@ -47,5 +53,6 @@ class Profile {
     phone = data['phone'];
     temperatureUnit = data['temperatureUnit'];
     is24Hours = data['is24Hours'];
+    devices = data['devices'];
   }
 }

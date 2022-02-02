@@ -19,6 +19,23 @@ void showMessage(BuildContext context, String message) {
   );
 }
 
+List<T> mapToList<T>(Map data) {
+  return data.values.toList().cast<T>();
+}
+
+Map listToMap(List data) {
+  return data.asMap();
+}
+
+List<T> castList<T>(List? items) {
+  return items != null ? items.cast<T>() : [];
+}
+
+Map<String, dynamic> objectToMap(Object? value) {
+  final Map<String, dynamic> mappedValue = value == null ? {} : (value as Map<Object?, Object?>).cast<String, dynamic>();
+  return mappedValue;
+}
+
 String getDeviceURL(String ssid, String password) {
   // return 'http://localhost:3000/ssid?ssid=$ssid&password=$password';
   return 'http://192.168.4.1:80/ssid?ssid=$ssid&password=$password';

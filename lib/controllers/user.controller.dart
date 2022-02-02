@@ -1,11 +1,10 @@
 import 'dart:collection';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:iot/models/profile.model.dart';
+import 'package:iot/util/functions.util.dart';
 
 class UserController extends ChangeNotifier {
   late final FirebaseAuth auth;
@@ -99,6 +98,7 @@ class UserController extends ChangeNotifier {
         name: '$firstName $lastName',
         is24Hours: true,
         temperatureUnit: "C",
+        devices: [],
       );
 
       final Map<String, dynamic> profileData = tempProfile.toJSON();
@@ -151,7 +151,7 @@ class UserController extends ChangeNotifier {
         notifyListeners();
       });
     } catch (e) {
-      rethrow;
+      throw "Failed to attach listener to the profile: ${e.toString()}";
     }
   }
 
@@ -182,6 +182,36 @@ class UserController extends ChangeNotifier {
 
     newData['email'] = auth.currentUser!.email!;
     profile = Profile.fromMap(newData);
+  }
+
+  Future<void> addDevice(String id) async {
+    try {
+      final DatabaseReference devicesReference = users.child(auth.currentUser!.uid).child('devices').ref;
+      final DataSnapshot data = await devicesReference.get();
+      final List<String> devices = data.value != null ? mapToList(data.value as Map) : [];
+      devices.add(id);
+
+      await devicesReference.set(listToMap(devices));
+    } on FirebaseException catch (e) {
+      throw "Error occured while attaching the device to user: ${e.message}";
+    } catch (e) {
+      throw "Failed to attach the device to user: ${e.toString()}";
+    }
+  }
+
+  Future<void> removeDevice(String id) async {
+    try {
+      final DatabaseReference devicesReference = users.child(auth.currentUser!.uid).child('devices').ref;
+      final DataSnapshot data = await devicesReference.get();
+      final List<String> devices = data.value != null ? mapToList(data.value as Map) : [];
+      devices.remove(id);
+
+      await devicesReference.set(listToMap(devices));
+    } on FirebaseException catch (e) {
+      throw "Error occured while removing the device: ${e.message}";
+    } catch (e) {
+      throw "Failed to remove the device: ${e.toString()}";
+    }
   }
 
   Future<void> logout() async {

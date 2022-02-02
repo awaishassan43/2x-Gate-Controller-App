@@ -34,7 +34,7 @@ class _EditRelayNameScreenState extends State<EditRelayNameScreen> {
   @override
   void initState() {
     super.initState();
-    relay = widget.device.relays.values.toList().firstWhere((element) => element.id == widget.relayID);
+    // relay = widget.device.relays.values.toList().firstWhere((element) => element.id == widget.relayID);
 
     name = TextEditingController(text: relay.name);
     controller = Provider.of<DeviceController>(context, listen: false);

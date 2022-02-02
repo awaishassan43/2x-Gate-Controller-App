@@ -84,6 +84,7 @@ class _DeviceSettingsState extends State<DeviceSettings> {
         centerTitle: true,
       ),
       body: Stack(
+          /*
         children: [
           StreamBuilder<DatabaseEvent>(
               stream: widget.device.stream,
@@ -373,7 +374,7 @@ class _DeviceSettingsState extends State<DeviceSettings> {
                               isLoading = true;
                             });
 
-                            await Provider.of<DeviceController>(context, listen: false).removeDevice(device.id, context);
+                            await Provider.of<UserController>(context, listen: false).removeDevice(device.id);
                             Navigator.popUntil(context, ModalRoute.withName(Screen.dashboard));
                           } catch (e) {
                             setState(() {
@@ -394,7 +395,8 @@ class _DeviceSettingsState extends State<DeviceSettings> {
               }),
           if (isLoading) const Loader(),
         ],
-      ),
+     */
+          ),
     );
   }
 }

@@ -51,7 +51,7 @@ class Dashboard extends StatelessWidget {
           SingleChildScrollView(
             padding: const EdgeInsets.all(20),
             child: FutureBuilder<void>(
-              future: controller.loadDevices(),
+              future: controller.loadDevices(context),
               builder: (context, snapshot) {
                 if (snapshot.connectionState != ConnectionState.done) {
                   return Container();
@@ -66,7 +66,8 @@ class Dashboard extends StatelessWidget {
                     return Column(
                       children: controller.devices.entries.map((entry) {
                         final Device initialData = entry.value;
-
+                        return Container();
+                        /**
                         return StreamBuilder<DatabaseEvent>(
                           stream: initialData.stream!,
                           builder: (context, snapshot) {
@@ -96,6 +97,7 @@ class Dashboard extends StatelessWidget {
                             );
                           },
                         );
+                      */
                       }).toList(),
                     );
                   },
