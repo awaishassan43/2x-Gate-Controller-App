@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:iot/util/themes.util.dart';
+import '/util/themes.util.dart';
 
 class LargeButton extends StatelessWidget {
   final String? text;

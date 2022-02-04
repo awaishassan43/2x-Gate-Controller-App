@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:iot/components/button.component.dart';
-import 'package:iot/components/largeButton.component.dart';
-import 'package:iot/enum/route.enum.dart';
-import 'package:iot/util/themes.util.dart';
+import '/components/button.component.dart';
+import '/components/largeButton.component.dart';
+import '/enum/route.enum.dart';
+import '/util/themes.util.dart';
 
 class SuccessScreen extends StatelessWidget {
   const SuccessScreen({Key? key}) : super(key: key);

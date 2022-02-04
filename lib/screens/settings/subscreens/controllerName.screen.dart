@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:iot/components/button.component.dart';
-import 'package:iot/components/input.component.dart';
-import 'package:iot/components/loader.component.dart';
-import 'package:iot/controllers/device.controller.dart';
-import 'package:iot/models/device.model.dart';
-import 'package:iot/util/functions.util.dart';
+import '/components/button.component.dart';
+import '/components/input.component.dart';
+import '/components/loader.component.dart';
+import '/controllers/device.controller.dart';
+import '/models/device.model.dart';
+import '/util/functions.util.dart';
 import 'package:provider/provider.dart';
 
 class EditControllerNameScreen extends StatefulWidget {

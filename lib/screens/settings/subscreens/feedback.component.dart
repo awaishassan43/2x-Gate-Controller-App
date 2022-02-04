@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:iot/components/button.component.dart';
+import '/components/button.component.dart';
 
 class FeedbackScreen extends StatefulWidget {
   const FeedbackScreen({Key? key}) : super(key: key);

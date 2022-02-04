@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:iot/components/input.component.dart';
-import 'package:iot/controllers/device.controller.dart';
-import 'package:iot/util/functions.util.dart';
+import '/components/input.component.dart';
+import '/controllers/device.controller.dart';
+import '/util/functions.util.dart';
 import 'package:provider/provider.dart';
-import 'package:iot/components/loader.component.dart';
+import '/components/loader.component.dart';
 import 'package:http/http.dart' as http;
 import 'package:cross_connectivity/cross_connectivity.dart';
 

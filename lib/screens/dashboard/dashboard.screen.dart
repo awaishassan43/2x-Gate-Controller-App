@@ -1,11 +1,11 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'package:iot/components/error.component.dart';
-import 'package:iot/components/loader.component.dart';
-import 'package:iot/controllers/device.controller.dart';
-import 'package:iot/enum/route.enum.dart';
-import 'package:iot/models/device.model.dart';
-import 'package:iot/screens/dashboard/components/device.component.dart';
+import '/components/error.component.dart';
+import '/components/loader.component.dart';
+import '/controllers/device.controller.dart';
+import '/enum/route.enum.dart';
+import '/models/device.model.dart';
+import '/screens/dashboard/components/device.component.dart';
 import 'package:provider/provider.dart';
 
 class Dashboard extends StatelessWidget {

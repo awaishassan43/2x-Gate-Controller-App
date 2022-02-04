@@ -1,12 +1,12 @@
 import 'package:country_picker/country_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:iot/components/button.component.dart';
-import 'package:iot/components/input.component.dart';
-import 'package:iot/components/loader.component.dart';
-import 'package:iot/controllers/user.controller.dart';
-import 'package:iot/models/profile.model.dart';
-import 'package:iot/screens/signup/components/dropdown.component.dart';
-import 'package:iot/util/functions.util.dart';
+import '/components/button.component.dart';
+import '/components/input.component.dart';
+import '/components/loader.component.dart';
+import '/controllers/user.controller.dart';
+import '/models/profile.model.dart';
+import '/screens/signup/components/dropdown.component.dart';
+import '/util/functions.util.dart';
 import 'package:provider/provider.dart';
 
 class PhoneEditingScreen extends StatefulWidget {

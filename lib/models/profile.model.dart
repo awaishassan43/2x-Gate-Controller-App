@@ -1,4 +1,4 @@
-import 'package:iot/util/functions.util.dart';
+import '/util/functions.util.dart';
 
 class Profile {
   String email;

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:iot/components/loader.component.dart';
-import 'package:iot/components/selector.component.dart';
-import 'package:iot/controllers/device.controller.dart';
-import 'package:iot/controllers/user.controller.dart';
-import 'package:iot/models/device.model.dart';
-import 'package:iot/util/functions.util.dart';
+import '/components/loader.component.dart';
+import '/components/selector.component.dart';
+import '/controllers/device.controller.dart';
+import '/controllers/user.controller.dart';
+import '/models/device.model.dart';
+import '/util/functions.util.dart';
 import 'package:provider/provider.dart';
 
 /// Selector screen is sort of a wrapper for selector component

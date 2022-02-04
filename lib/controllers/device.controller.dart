@@ -2,9 +2,9 @@ import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'package:iot/controllers/user.controller.dart';
-import 'package:iot/models/device.model.dart';
-import 'package:iot/util/functions.util.dart';
+import '/controllers/user.controller.dart';
+import '/models/device.model.dart';
+import '/util/functions.util.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 

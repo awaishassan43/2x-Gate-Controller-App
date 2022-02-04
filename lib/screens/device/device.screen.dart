@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:iot/components/loader.component.dart';
-import 'package:iot/controllers/device.controller.dart';
-import 'package:iot/enum/route.enum.dart';
-import 'package:iot/screens/device/components/item.component.dart';
+import '/components/loader.component.dart';
+import '/controllers/device.controller.dart';
+import '/enum/route.enum.dart';
+import '/screens/device/components/item.component.dart';
 import 'package:provider/provider.dart';
 
 class DeviceScreen extends StatefulWidget {

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:iot/components/button.component.dart';
-import 'package:iot/controllers/device.controller.dart';
-import 'package:iot/controllers/user.controller.dart';
-import 'package:iot/enum/route.enum.dart';
-import 'package:iot/models/device.model.dart';
-import 'package:iot/util/functions.util.dart';
-import 'package:iot/util/themes.util.dart';
+import '/components/button.component.dart';
+import '/controllers/device.controller.dart';
+import '/controllers/user.controller.dart';
+import '/enum/route.enum.dart';
+import '/models/device.model.dart';
+import '/util/functions.util.dart';
+import '/util/themes.util.dart';
 import 'package:provider/provider.dart';
 
 class DeviceComponent extends StatelessWidget {

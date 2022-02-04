@@ -3,8 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'package:iot/models/profile.model.dart';
-import 'package:iot/util/functions.util.dart';
+import '/models/profile.model.dart';
+import '/util/functions.util.dart';
 
 class UserController extends ChangeNotifier {
   late final FirebaseAuth auth;

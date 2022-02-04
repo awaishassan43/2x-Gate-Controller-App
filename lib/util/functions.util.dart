@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:iot/controllers/user.controller.dart';
+import '/controllers/user.controller.dart';
 import 'package:provider/provider.dart';
 
 void showMessage(BuildContext context, String message) {
