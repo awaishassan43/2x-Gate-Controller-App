@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '/.util.dart';
+import 'package:iot/util/themes.util.dart';
 
 class DeviceSensor extends StatelessWidget {
   final String sensorName;

@@ -3,10 +3,8 @@ import '/components/error.component.dart';
 import '/components/loader.component.dart';
 import '/controllers/user.controller.dart';
 import '/enum/route.enum.dart';
-import '/models/device.model.dart';
 import '/screens/add/add.screen.dart';
 import '/screens/dashboard/dashboard.screen.dart';
-import '/screens/settings/subscreens/controllerName.screen.dart';
 import '/screens/settings/subscreens/feedback.component.dart';
 import '/screens/login/login.screen.dart';
 import '/screens/settings/subscreens/name.screen.dart';
@@ -14,7 +12,6 @@ import '/screens/settings/subscreens/password.screen.dart';
 import '/screens/settings/subscreens/phone.screen.dart';
 import '/screens/settings/app.settings.dart';
 import '/screens/settings/device.settings.dart';
-import '/screens/settings/subscreens/relayName.screen.dart';
 import '/screens/signup/signup.screen.dart';
 import '/screens/success/success.screen.dart';
 import '/util/themes.util.dart';
@@ -84,14 +81,13 @@ class _AppState extends State<App> {
                     return DeviceScreen(deviceID: device);
                   } else if (settings.name == Screen.deviceSettings) {
                     final String device = settings.arguments as String;
-                    return DeviceSettings(deviceID: device);
-                  } else if (settings.name == Screen.editControllerName) {
-                    return EditControllerNameScreen(device: settings.arguments as Device);
+                    return DeviceSettingsScreen(deviceID: device);
                   } else if (settings.name == Screen.editRelayName) {
-                    return EditRelayNameScreen(
-                      device: (settings.arguments as Map<String, dynamic>)['device'],
-                      relayID: (settings.arguments as Map<String, dynamic>)['relayID'],
-                    );
+                    return Container();
+                    // return EditRelayNameScreen(
+                    //   device: (settings.arguments as Map<String, dynamic>)['device'],
+                    //   relayID: (settings.arguments as Map<String, dynamic>)['relayID'],
+                    // );
                   } else {
                     return Container();
                   }

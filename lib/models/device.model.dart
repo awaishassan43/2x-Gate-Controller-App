@@ -5,25 +5,24 @@ class Device {
     required this.deviceData,
   });
 
-  final _DeviceCommands deviceCommands;
-  final _DeviceSettings deviceSettings;
-  final _DeviceData deviceData;
+  DeviceCommands deviceCommands;
+  DeviceSettings deviceSettings;
+  DeviceData deviceData;
 
-  Device updateWithJSON({
+  void updateWithJSON({
     Map<String, dynamic>? deviceCommands,
     Map<String, dynamic>? deviceSettings,
     Map<String, dynamic>? deviceData,
-  }) =>
-      Device(
-        deviceCommands: deviceCommands != null ? _DeviceCommands.fromJson(deviceCommands) : this.deviceCommands,
-        deviceSettings: deviceSettings != null ? _DeviceSettings.fromJson(deviceSettings) : this.deviceSettings,
-        deviceData: deviceData != null ? _DeviceData.fromJson(deviceData) : this.deviceData,
-      );
+  }) {
+    this.deviceCommands = deviceCommands != null ? DeviceCommands.fromJson(deviceCommands) : this.deviceCommands;
+    this.deviceSettings = deviceSettings != null ? DeviceSettings.fromJson(deviceSettings) : this.deviceSettings;
+    this.deviceData = deviceData != null ? DeviceData.fromJson(deviceData) : this.deviceData;
+  }
 
   factory Device.fromJson(Map<String, dynamic> json) => Device(
-        deviceCommands: _DeviceCommands.fromJson((json["deviceCommands"] as Map<Object?, Object?>).cast<String, dynamic>()),
-        deviceSettings: _DeviceSettings.fromJson((json["deviceSettings"] as Map<Object?, Object?>).cast<String, dynamic>()),
-        deviceData: _DeviceData.fromJson((json["deviceData"] as Map<Object?, Object?>).cast<String, dynamic>()),
+        deviceCommands: DeviceCommands.fromJson((json["deviceCommands"] as Map<Object?, Object?>).cast<String, dynamic>()),
+        deviceSettings: DeviceSettings.fromJson((json["deviceSettings"] as Map<Object?, Object?>).cast<String, dynamic>()),
+        deviceData: DeviceData.fromJson((json["deviceData"] as Map<Object?, Object?>).cast<String, dynamic>()),
       );
 
   Map<String, dynamic> toJson() => {
@@ -34,29 +33,18 @@ class Device {
       };
 }
 
-class _DeviceCommands {
-  _DeviceCommands({
+class DeviceCommands {
+  DeviceCommands({
     required this.request,
     required this.sendToDevice,
     required this.timestamp,
   });
 
-  final _Request request;
-  final String sendToDevice;
-  final int timestamp;
+  _Request request;
+  String sendToDevice;
+  int timestamp;
 
-  _DeviceCommands updateWithJSON({
-    _Request? request,
-    String? sendToDevice,
-    int? timestamp,
-  }) =>
-      _DeviceCommands(
-        request: request ?? this.request,
-        sendToDevice: sendToDevice ?? this.sendToDevice,
-        timestamp: timestamp ?? this.timestamp,
-      );
-
-  factory _DeviceCommands.fromJson(Map<String, dynamic> json) => _DeviceCommands(
+  factory DeviceCommands.fromJson(Map<String, dynamic> json) => DeviceCommands(
         request: _Request.fromJson((json["request"] as Map<Object?, Object?>).cast<String, dynamic>()),
         sendToDevice: json["sendToDevice"],
         timestamp: json["timestamp"],
@@ -76,20 +64,9 @@ class _Request {
     required this.reqId,
   });
 
-  final String action;
-  final _Payload payload;
-  final String reqId;
-
-  _Request updateWithJSON({
-    String? action,
-    _Payload? payload,
-    String? reqId,
-  }) =>
-      _Request(
-        action: action ?? this.action,
-        payload: payload ?? this.payload,
-        reqId: reqId ?? this.reqId,
-      );
+  String action;
+  _Payload payload;
+  String reqId;
 
   factory _Request.fromJson(Map<String, dynamic> json) => _Request(
         action: json["action"],
@@ -113,26 +90,11 @@ class _Payload {
     required this.dummy,
   });
 
-  final int exp;
-  final String pass;
-  final String state;
-  final int test;
-  final String? dummy;
-
-  _Payload updateWithJSON({
-    int? exp,
-    String? pass,
-    String? state,
-    int? test,
-    String? dummy,
-  }) =>
-      _Payload(
-        exp: exp ?? this.exp,
-        pass: pass ?? this.pass,
-        state: state ?? this.state,
-        test: test ?? this.test,
-        dummy: dummy ?? this.dummy,
-      );
+  int exp;
+  String pass;
+  String state;
+  int test;
+  String? dummy;
 
   factory _Payload.fromJson(Map<String, dynamic> json) => _Payload(
         exp: json["exp"],
@@ -151,8 +113,8 @@ class _Payload {
       };
 }
 
-class _DeviceData {
-  _DeviceData({
+class DeviceData {
+  DeviceData({
     required this.name,
     required this.online,
     required this.owner,
@@ -161,31 +123,14 @@ class _DeviceData {
     required this.type,
   });
 
-  final String name;
-  final bool online;
-  final String owner;
-  final _Request state;
-  final int timestamp;
-  final String type;
+  String name;
+  bool online;
+  String owner;
+  _Request state;
+  int timestamp;
+  String type;
 
-  _DeviceData updateWithJSON({
-    String? name,
-    bool? online,
-    String? owner,
-    _Request? state,
-    int? timestamp,
-    String? type,
-  }) =>
-      _DeviceData(
-        name: name ?? this.name,
-        online: online ?? this.online,
-        owner: owner ?? this.owner,
-        state: state ?? this.state,
-        timestamp: timestamp ?? this.timestamp,
-        type: type ?? this.type,
-      );
-
-  factory _DeviceData.fromJson(Map<String, dynamic> json) => _DeviceData(
+  factory DeviceData.fromJson(Map<String, dynamic> json) => DeviceData(
         name: json["name"],
         online: json["online"],
         owner: json["owner"],
@@ -204,33 +149,20 @@ class _DeviceData {
       };
 }
 
-class _DeviceSettings {
-  _DeviceSettings({
+class DeviceSettings {
+  DeviceSettings({
     required this.deviceId,
     required this.owner,
     required this.type,
     required this.value,
   });
 
-  final String deviceId;
-  final String owner;
-  final String type;
-  final _Value value;
+  String deviceId;
+  String owner;
+  String type;
+  _Value value;
 
-  _DeviceSettings updateWithJSON({
-    String? deviceId,
-    String? owner,
-    String? type,
-    _Value? value,
-  }) =>
-      _DeviceSettings(
-        deviceId: deviceId ?? this.deviceId,
-        owner: owner ?? this.owner,
-        type: type ?? this.type,
-        value: value ?? this.value,
-      );
-
-  factory _DeviceSettings.fromJson(Map<String, dynamic> json) => _DeviceSettings(
+  factory DeviceSettings.fromJson(Map<String, dynamic> json) => DeviceSettings(
         deviceId: json["deviceId"],
         owner: json["owner"],
         type: json["type"],
@@ -256,32 +188,13 @@ class _Value {
     required this.relay2,
   });
 
-  final bool alertOnClose;
-  final bool alertOnOpen;
-  final bool nightAlert;
-  final String region;
-  final double temperatureAlert;
-  final _RelaySettings relay1;
-  final _RelaySettings relay2;
-
-  _Value updateWithJSON({
-    bool? alertOnClose,
-    bool? alertOnOpen,
-    bool? nightAlert,
-    String? region,
-    double? temperatureAlert,
-    _RelaySettings? relay1,
-    _RelaySettings? relay2,
-  }) =>
-      _Value(
-        relay1: relay1 ?? this.relay1,
-        relay2: relay2 ?? this.relay2,
-        alertOnClose: alertOnClose ?? this.alertOnClose,
-        alertOnOpen: alertOnOpen ?? this.alertOnOpen,
-        nightAlert: nightAlert ?? this.nightAlert,
-        region: region ?? this.region,
-        temperatureAlert: temperatureAlert ?? this.temperatureAlert,
-      );
+  bool alertOnClose;
+  bool alertOnOpen;
+  bool nightAlert;
+  String region;
+  double temperatureAlert;
+  _RelaySettings relay1;
+  _RelaySettings relay2;
 
   factory _Value.fromJson(Map<String, dynamic> json) => _Value(
         relay1: _RelaySettings.fromJson((json["Relay1"] as Map<Object?, Object?>).cast<String, Object>()),
@@ -313,26 +226,11 @@ class _RelaySettings {
     required this.autoClose,
   });
 
-  final bool extInput;
-  final String name;
-  final int outTime;
-  final bool scheduled;
-  final int autoClose;
-
-  _RelaySettings updateWithJSON({
-    bool? extInput,
-    String? name,
-    int? outTime,
-    bool? scheduled,
-    int? autoClose,
-  }) =>
-      _RelaySettings(
-        extInput: extInput ?? this.extInput,
-        name: name ?? this.name,
-        outTime: outTime ?? this.outTime,
-        scheduled: scheduled ?? this.scheduled,
-        autoClose: autoClose ?? this.autoClose,
-      );
+  bool extInput;
+  String name;
+  int outTime;
+  bool scheduled;
+  int autoClose;
 
   factory _RelaySettings.fromJson(Map<String, dynamic> json) => _RelaySettings(
         extInput: json["ExtInput"],
@@ -359,23 +257,10 @@ class _DeviceLog {
     required this.timestamp,
   });
 
-  final String deviceId;
-  final DateTime publishedAt;
-  final _DeviceLogState state;
-  final int timestamp;
-
-  _DeviceLog updateWithJSON({
-    String? deviceId,
-    DateTime? publishedAt,
-    _DeviceLogState? state,
-    int? timestamp,
-  }) =>
-      _DeviceLog(
-        deviceId: deviceId ?? this.deviceId,
-        publishedAt: publishedAt ?? this.publishedAt,
-        state: state ?? this.state,
-        timestamp: timestamp ?? this.timestamp,
-      );
+  String deviceId;
+  DateTime publishedAt;
+  _DeviceLogState state;
+  int timestamp;
 
   factory _DeviceLog.fromJson(Map<String, dynamic> json) => _DeviceLog(
         deviceId: json["deviceId"],
@@ -405,38 +290,15 @@ class _DeviceLogState {
     required this.temperature,
   });
 
-  final String doorActiveState;
-  final int fw;
-  final int heap;
-  final double humidity;
-  final String mqttPublishType;
-  final double pressure;
-  final int rangeFound;
-  final int signalRssi;
-  final double temperature;
-
-  _DeviceLogState updateWithJSON({
-    String? doorActiveState,
-    int? fw,
-    int? heap,
-    double? humidity,
-    String? mqttPublishType,
-    double? pressure,
-    int? rangeFound,
-    int? signalRssi,
-    double? temperature,
-  }) =>
-      _DeviceLogState(
-        doorActiveState: doorActiveState ?? this.doorActiveState,
-        fw: fw ?? this.fw,
-        heap: heap ?? this.heap,
-        humidity: humidity ?? this.humidity,
-        mqttPublishType: mqttPublishType ?? this.mqttPublishType,
-        pressure: pressure ?? this.pressure,
-        rangeFound: rangeFound ?? this.rangeFound,
-        signalRssi: signalRssi ?? this.signalRssi,
-        temperature: temperature ?? this.temperature,
-      );
+  String doorActiveState;
+  int fw;
+  int heap;
+  double humidity;
+  String mqttPublishType;
+  double pressure;
+  int rangeFound;
+  int signalRssi;
+  double temperature;
 
   factory _DeviceLogState.fromJson(Map<String, dynamic> json) => _DeviceLogState(
         doorActiveState: json["doorActiveState"],

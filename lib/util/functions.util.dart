@@ -83,3 +83,7 @@ Map<String, dynamic> _converterIsolate(dynamic data) {
 
   return parsedData;
 }
+
+void navigateTo(BuildContext context, Widget screen) {
+  Navigator.push(context, MaterialPageRoute(builder: (context) => screen));
+}

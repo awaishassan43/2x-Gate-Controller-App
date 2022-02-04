@@ -34,30 +34,39 @@ class DeviceController extends ChangeNotifier {
 
   Future<void> loadDevices(BuildContext context) async {
     try {
-      print("Calling load devices");
       final List<String> deviceIDs = Provider.of<UserController>(context).profile!.devices;
 
       for (String id in deviceIDs) {
-        final DataSnapshot deviceData = await deviceCollection.child(id).get();
-        final DataSnapshot deviceSettings = await settingsCollection.child(id).get();
-        final DataSnapshot deviceLogs = await logsCollection.child(id).get();
-        final DataSnapshot deviceCommands = await commandsCollection.child(id).get();
+        if (!devices.containsKey(id)) {
+          final DataSnapshot deviceData = await deviceCollection.child(id).get();
+          final DataSnapshot deviceSettings = await settingsCollection.child(id).get();
+          final DataSnapshot deviceLogs = await logsCollection.child(id).get();
+          final DataSnapshot deviceCommands = await commandsCollection.child(id).get();
 
-        final Map<String, dynamic> map = {};
-        map['deviceData'] = objectToMap(deviceData.value);
-        map['deviceSettings'] = objectToMap(deviceSettings.value);
-        map['deviceCommands'] = objectToMap(deviceCommands.value);
-        map['deviceStateLogs'] = objectToMap(deviceLogs.value);
+          final Map<String, dynamic> map = {};
+          map['deviceData'] = objectToMap(deviceData.value);
+          map['deviceSettings'] = objectToMap(deviceSettings.value);
+          map['deviceCommands'] = objectToMap(deviceCommands.value);
+          map['deviceStateLogs'] = objectToMap(deviceLogs.value);
 
-        if (devices.containsKey(id)) {
-          deviceData.ref.onValue.listen((event) {
-            final Device device = devices[id]!.updateWithJSON(deviceData: objectToMap(event.snapshot.value));
-            devices[id] = device;
-            notifyListeners();
-          });
-        } else {
           final Device device = Device.fromJson(map);
           devices[id] = device;
+
+          /**
+           * Attaching data listener
+           */
+          deviceData.ref.onValue.listen((event) {
+            devices[id]!.updateWithJSON(deviceData: objectToMap(event.snapshot.value));
+            notifyListeners();
+          });
+
+          /**
+           * Attaching settings listener
+           */
+          deviceSettings.ref.onValue.listen((event) {
+            devices[id]!.updateWithJSON(deviceSettings: objectToMap(event.snapshot.value));
+            notifyListeners();
+          });
         }
       }
     } on FirebaseException catch (e) {
@@ -91,14 +100,23 @@ class DeviceController extends ChangeNotifier {
     }
   }
 
-  Future<void> updateDevice(Device device) async {
-    // try {
-    //   // await collection.child(device.id).set(device.toJSON());
-    // } on FirebaseException catch (e) {
-    //   throw "Error occured while updating the device: ${e.message}";
-    // } catch (e) {
-    //   throw "Failed to update the device: ${e.toString()}";
-    // }
+  Future<void> updateDevice(String id, String collectionKey) async {
+    try {
+      final Device device = devices[id]!;
+      print(device);
+
+      if (collectionKey == "deviceData") {
+        await deviceCollection.child(id).set(device.deviceData.toJson());
+      } else if (collectionKey == "deviceCommands") {
+        await commandsCollection.child(id).set(device.deviceCommands.toJson());
+      } else if (collectionKey == "deviceSettings") {
+        await settingsCollection.child(id).set(device.deviceSettings.toJson());
+      }
+    } on FirebaseException catch (e) {
+      throw "Error occured while updating the device: ${e.message}";
+    } catch (e) {
+      throw "Failed to update the device: ${e.toString()}";
+    }
   }
 
   removeDevices() {

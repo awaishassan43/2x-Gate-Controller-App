@@ -9,11 +9,11 @@ import '/util/functions.util.dart';
 import 'package:provider/provider.dart';
 
 class EditRelayNameScreen extends StatefulWidget {
-  final Device device;
+  final String deviceID;
   final String relayID;
   const EditRelayNameScreen({
     Key? key,
-    required this.device,
+    required this.deviceID,
     required this.relayID,
   }) : super(key: key);
 
@@ -34,10 +34,9 @@ class _EditRelayNameScreenState extends State<EditRelayNameScreen> {
   @override
   void initState() {
     super.initState();
-    // relay = widget.device.relays.values.toList().firstWhere((element) => element.id == widget.relayID);
-
-    name = TextEditingController(text: relay.name);
     controller = Provider.of<DeviceController>(context, listen: false);
+    controller.devices[widget.deviceID]!.deviceSettings.value.toJson();
+    name = TextEditingController(text: relay.name);
   }
 
   bool validateName() {
