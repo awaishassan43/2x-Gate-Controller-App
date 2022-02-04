@@ -66,35 +66,14 @@ class Dashboard extends StatelessWidget {
                     return Column(
                       children: controller.devices.entries.map((entry) {
                         final Device initialData = entry.value;
-                        // return Container();
-                        // return StreamBuilder<DatabaseEvent>(
-                        //   stream: initialData.stream!,
-                        //   builder: (context, snapshot) {
-                        //     if (snapshot.hasError || snapshot.error != null) {
-                        //       return ErrorMessage(message: snapshot.error.toString());
-                        //     }
 
                         final String deviceID = entry.key;
                         Device device = initialData;
-
-                        // if (snapshot.data != null) {
-                        //   final DataSnapshot snapshotData = snapshot.data!.snapshot;
-
-                        //   if (!snapshotData.exists) {
-                        //     return Container();
-                        //   }
-
-                        //   final Map<String, dynamic> streamData = (snapshotData.value as Map<Object?, Object?>).cast<String, dynamic>();
-                        //   streamData['id'] = device.id;
-
-                        //   device.updateUsingMap(streamData);
-                        // }
 
                         return DeviceComponent(
                           device: device,
                           key: ValueKey(deviceID),
                         );
-                        // },
                       }).toList(),
                     );
                   },

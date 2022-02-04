@@ -80,11 +80,11 @@ class _AppState extends State<App> {
               return MaterialPageRoute(
                 builder: (context) {
                   if (settings.name == Screen.device) {
-                    final Device device = settings.arguments as Device;
-                    return DeviceScreen(device: device);
+                    final String device = settings.arguments as String;
+                    return DeviceScreen(deviceID: device);
                   } else if (settings.name == Screen.deviceSettings) {
-                    final Device device = settings.arguments as Device;
-                    return DeviceSettings(device: device);
+                    final String device = settings.arguments as String;
+                    return DeviceSettings(deviceID: device);
                   } else if (settings.name == Screen.editControllerName) {
                     return EditControllerNameScreen(device: settings.arguments as Device);
                   } else if (settings.name == Screen.editRelayName) {

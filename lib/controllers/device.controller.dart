@@ -14,7 +14,7 @@ class DeviceController extends ChangeNotifier {
   final DatabaseReference deviceCollection = FirebaseDatabase.instance.ref('/devices');
   final DatabaseReference logsCollection = FirebaseDatabase.instance.ref('/deviceStateLogs');
 
-  Map<String, dynamic> devices = {};
+  Map<String, Device> devices = {};
   bool _isLoading = false;
   String _outputTimeError = '';
 
@@ -34,20 +34,31 @@ class DeviceController extends ChangeNotifier {
 
   Future<void> loadDevices(BuildContext context) async {
     try {
+      print("Calling load devices");
       final List<String> deviceIDs = Provider.of<UserController>(context).profile!.devices;
 
       for (String id in deviceIDs) {
         final DataSnapshot deviceData = await deviceCollection.child(id).get();
         final DataSnapshot deviceSettings = await settingsCollection.child(id).get();
+        final DataSnapshot deviceLogs = await logsCollection.child(id).get();
         final DataSnapshot deviceCommands = await commandsCollection.child(id).get();
 
         final Map<String, dynamic> map = {};
         map['deviceData'] = objectToMap(deviceData.value);
         map['deviceSettings'] = objectToMap(deviceSettings.value);
         map['deviceCommands'] = objectToMap(deviceCommands.value);
+        map['deviceStateLogs'] = objectToMap(deviceLogs.value);
 
-        final Device device = Device.fromJson(map);
-        devices[id] = device;
+        if (devices.containsKey(id)) {
+          deviceData.ref.onValue.listen((event) {
+            final Device device = devices[id]!.updateWithJSON(deviceData: objectToMap(event.snapshot.value));
+            devices[id] = device;
+            notifyListeners();
+          });
+        } else {
+          final Device device = Device.fromJson(map);
+          devices[id] = device;
+        }
       }
     } on FirebaseException catch (e) {
       throw Exception("Error occured while loading devices: ${e.message}");

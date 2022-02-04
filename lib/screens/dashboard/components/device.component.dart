@@ -97,7 +97,6 @@ class DeviceComponent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // final String humidity = device.humidity == null ? '...' : device.humidity!.ceil().toString();
     const String humidity = '0';
     final String deviceName = device.deviceData.name;
 
@@ -110,7 +109,7 @@ class DeviceComponent extends StatelessWidget {
               Navigator.pushNamed(
                 context,
                 Screen.device,
-                arguments: device,
+                arguments: device.deviceSettings.deviceId,
               );
             },
             padding: const EdgeInsets.all(12.5),
@@ -205,15 +204,15 @@ class DeviceComponent extends StatelessWidget {
                               ),
                             ),
                             RichText(
-                              text: TextSpan(
-                                style: const TextStyle(
+                              text: const TextSpan(
+                                style: TextStyle(
                                   color: textColor,
                                   fontWeight: FontWeight.bold,
                                   fontSize: 15,
                                 ),
                                 children: [
                                   TextSpan(text: humidity),
-                                  const TextSpan(text: "%"),
+                                  TextSpan(text: "%"),
                                 ],
                               ),
                             ),
@@ -230,7 +229,7 @@ class DeviceComponent extends StatelessWidget {
                           ),
                           icon: const Icon(Icons.settings),
                           onPressed: () {
-                            Navigator.pushNamed(context, Screen.deviceSettings, arguments: device);
+                            Navigator.pushNamed(context, Screen.deviceSettings, arguments: device.deviceSettings.deviceId);
                           },
                         ),
                       ],

@@ -1,23 +1,15 @@
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'package:iot/components/error.component.dart';
-import 'package:iot/components/largeButton.component.dart';
 import 'package:iot/components/loader.component.dart';
 import 'package:iot/controllers/device.controller.dart';
-import 'package:iot/controllers/user.controller.dart';
 import 'package:iot/enum/route.enum.dart';
-import 'package:iot/models/device.model.dart';
 import 'package:iot/screens/device/components/item.component.dart';
-import 'package:iot/screens/device/components/sensor.component.dart';
-import 'package:iot/models/relay.model.dart';
-import 'package:iot/util/functions.util.dart';
 import 'package:provider/provider.dart';
 
 class DeviceScreen extends StatefulWidget {
-  final Device device;
+  final String deviceID;
   const DeviceScreen({
     Key? key,
-    required this.device,
+    required this.deviceID,
   }) : super(key: key);
 
   @override
@@ -53,7 +45,10 @@ class _DeviceScreenState extends State<DeviceScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.device.deviceData.name),
+        title: Selector<DeviceController, String>(
+          selector: (context, controller) => controller.devices[widget.deviceID]!.deviceData.name,
+          builder: (context, name, _) => Text(name),
+        ),
         centerTitle: true,
       ),
       body: Stack(
@@ -63,84 +58,53 @@ class _DeviceScreenState extends State<DeviceScreen> {
               /**
                * Scrollable area
                */
-              /*
-              Expanded(
-                child: StreamBuilder<DatabaseEvent>(
-                    stream: widget.device.stream,
-                    builder: (context, snapshot) {
-                      if (snapshot.hasError || snapshot.error != null) {
-                        return ErrorMessage(message: snapshot.error.toString());
-                      }
-
-                      Device tempDevice = widget.device;
-
-                      if (snapshot.data != null) {
-                        final DataSnapshot snapshotData = snapshot.data!.snapshot;
-
-                        if (!snapshotData.exists) {
-                          return Container();
-                        }
-
-                        final Map<String, dynamic> streamData = (snapshotData.value as Map<Object?, Object?>).cast<String, dynamic>();
-                        streamData['id'] = tempDevice.id;
-
-                        tempDevice.updateUsingMap(streamData);
-                      }
-
-                      final String temperature = getTemperatureValue(context, tempDevice.temperature, withUnit: false);
-                      final String humidity = tempDevice.humidity == null ? '...' : tempDevice.humidity!.toStringAsFixed(1);
-                      final List<Relay> relays = tempDevice.relays.values.toList();
-
-                      return SingleChildScrollView(
-                        child: Padding(
-                          padding: const EdgeInsets.all(20),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              Row(
-                                children: [
-                                  DeviceSensor(
-                                    sensorName: "Temperature",
-                                    value: temperature,
-                                    showDegrees: true,
-                                    unit: Provider.of<UserController>(context, listen: false).profile!.temperatureUnit,
-                                    icon: 'assets/icons/temp.png',
-                                  ),
-                                  const SizedBox(width: 10),
-                                  DeviceSensor(
-                                    sensorName: "Humidity",
-                                    value: humidity,
-                                    showPercent: true,
-                                    icon: 'assets/icons/humidity.png',
-                                  ),
-                                ],
-                              ),
-                              ...relays.map((relay) {
-                                final String name = relay.name;
-                                final bool isOpen = relay.isOpen;
-
-                                return Column(
-                                  children: [
-                                    const SizedBox(height: 30),
-                                    LargeButton(
-                                      icon: isOpen ? Icons.lock_open_rounded : Icons.lock_rounded,
-                                      label: isOpen ? "Opened" : "Closed",
-                                      iconColor: isOpen ? const Color(0xFFfc4646) : const Color(0xFF00e6c3),
-                                      onPressed: () {
-                                        updateRelayStatus(context, relay.id, !isOpen);
-                                      },
-                                      bottomText: name,
-                                    ),
-                                  ],
-                                );
-                              }).toList(),
-                            ],
+              SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Row(
+                          // children: [
+                          // DeviceSensor(
+                          //   sensorName: "Temperature",
+                          //   value: temperature,
+                          //   showDegrees: true,
+                          //   unit: Provider.of<UserController>(context, listen: false).profile!.temperatureUnit,
+                          //   icon: 'assets/icons/temp.png',
+                          // ),
+                          // const SizedBox(width: 10),
+                          // DeviceSensor(
+                          //   sensorName: "Humidity",
+                          //   value: humidity,
+                          //   showPercent: true,
+                          //   icon: 'assets/icons/humidity.png',
+                          // ),
+                          // ],
                           ),
-                        ),
-                      );
-                    }),
+                      // ...relays.map((relay) {
+                      //   final String name = relay.name;
+                      //   final bool isOpen = relay.isOpen;
+
+                      //   return Column(
+                      //     children: [
+                      //       const SizedBox(height: 30),
+                      //       LargeButton(
+                      //         icon: isOpen ? Icons.lock_open_rounded : Icons.lock_rounded,
+                      //         label: isOpen ? "Opened" : "Closed",
+                      //         iconColor: isOpen ? const Color(0xFFfc4646) : const Color(0xFF00e6c3),
+                      //         onPressed: () {
+                      //           updateRelayStatus(context, relay.id, !isOpen);
+                      //         },
+                      //         bottomText: name,
+                      //       ),
+                      //     ],
+                      //   );
+                      // }).toList(),
+                    ],
+                  ),
+                ),
               ),
-              */
               /**
                * End of scrollable area
                */
@@ -160,7 +124,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
                       text: "Settings",
                       icon: Icons.settings,
                       onPressed: () {
-                        Navigator.pushNamed(context, Screen.deviceSettings, arguments: widget.device);
+                        Navigator.pushNamed(context, Screen.deviceSettings, arguments: widget.deviceID);
                       },
                     ),
                   ],
