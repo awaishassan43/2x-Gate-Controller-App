@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:iot/components/button.component.dart';
 import '/controllers/user.controller.dart';
 import '/enum/route.enum.dart';
 import '/models/device.model.dart';
@@ -32,70 +33,80 @@ class DeviceComponent extends StatelessWidget {
   }
 
   Widget renderRelays(BuildContext context) {
-    final List<Widget> children = [];
-    // final relays = device.relays.values.toList();
+    final deviceSettings = device.deviceSettings.value;
+    final deviceState = device.deviceData.state.payload;
 
-    // for (int i = 0; i < (relays.length / 2).ceil(); i++) {
-    //   final List<Widget> rowItems = [];
-
-    //   for (int j = 2 * i; j <= (2 * i) + 1; j++) {
-    //     if (j == relays.length) {
-    //       continue;
-    //     }
-
-    //     final String name = relays[j].name;
-    //     final bool isOpen = relays[j].isOpen;
-
-    //     rowItems.add(
-    //       Expanded(
-    //         child: Container(
-    //           padding: const EdgeInsets.all(10),
-    //           child: Column(
-    //             mainAxisAlignment: MainAxisAlignment.center,
-    //             crossAxisAlignment: CrossAxisAlignment.stretch,
-    //             children: [
-    //               Text(
-    //                 name,
-    //                 style: const TextStyle(
-    //                   fontSize: 13,
-    //                   color: textColor,
-    //                 ),
-    //                 textAlign: TextAlign.center,
-    //               ),
-    //               const SizedBox(height: 2.5),
-    //               CustomButton(
-    //                 text: isOpen ? "Open" : "Closed",
-    //                 onPressed: () {
-    //                   updateRelayStatus(context, relays[j].id, !isOpen);
-    //                 },
-    //                 backgroundColor: isOpen ? const Color(0xFFfc4646) : const Color(0xFF00e6c3),
-    //                 borderRadius: 7.5,
-    //                 padding: 0,
-    //                 textColor: Colors.white,
-    //               ),
-    //             ],
-    //           ),
-    //         ),
-    //       ),
-    //     );
-    //   }
-
-    //   children.add(
-    //     Row(
-    //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    //       children: rowItems,
-    //     ),
-    //   );
-    // }
-
-    return Column(
-      children: children,
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: Container(
+            padding: const EdgeInsets.all(10),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  deviceSettings.relay1.name,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: textColor,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 2.5),
+                CustomButton(
+                  text: deviceState.state1 == 1 ? "Open" : "Closed",
+                  onPressed: () {
+                    // updateRelayStatus(context, relays[j].id, !isOpen);
+                  },
+                  backgroundColor: deviceState.state1 == 1 ? const Color(0xFFfc4646) : const Color(0xFF00e6c3),
+                  borderRadius: 7.5,
+                  padding: 0,
+                  textColor: Colors.white,
+                ),
+              ],
+            ),
+          ),
+        ),
+        Expanded(
+          child: Container(
+            padding: const EdgeInsets.all(10),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  deviceSettings.relay2.name,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: textColor,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 2.5),
+                CustomButton(
+                  text: deviceState.state2 == 1 ? "Open" : "Closed",
+                  onPressed: () {
+                    // updateRelayStatus(context, relays[j].id, !isOpen);
+                  },
+                  backgroundColor: deviceState.state2 == 1 ? const Color(0xFFfc4646) : const Color(0xFF00e6c3),
+                  borderRadius: 7.5,
+                  padding: 0,
+                  textColor: Colors.white,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    const String humidity = '0';
+    final String humidity = device.deviceData.state.payload.humidity.toString();
+    final double temperature = device.deviceData.state.payload.Temp.toDouble();
     final String deviceName = device.deviceData.name;
 
     return Stack(
@@ -156,23 +167,24 @@ class DeviceComponent extends StatelessWidget {
                               ),
                             ),
                             Selector<UserController, String>(
-                                selector: (context, controller) => controller.profile!.temperatureUnit,
-                                builder: (context, unit, _) {
-                                  return RichText(
-                                    text: TextSpan(
-                                      style: const TextStyle(
-                                        color: textColor,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 15,
-                                      ),
-                                      children: [
-                                        TextSpan(text: getTemperatureValue(context, 0, withUnit: false)),
-                                        const TextSpan(text: "\u00b0"),
-                                        TextSpan(text: unit),
-                                      ],
+                              selector: (context, controller) => controller.profile!.temperatureUnit,
+                              builder: (context, unit, _) {
+                                return RichText(
+                                  text: TextSpan(
+                                    style: const TextStyle(
+                                      color: textColor,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 15,
                                     ),
-                                  );
-                                }),
+                                    children: [
+                                      TextSpan(text: getTemperatureValue(context, temperature, withUnit: false)),
+                                      const TextSpan(text: "\u00b0"),
+                                      TextSpan(text: unit),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
                           ],
                         ),
                         /**
@@ -202,15 +214,15 @@ class DeviceComponent extends StatelessWidget {
                               ),
                             ),
                             RichText(
-                              text: const TextSpan(
-                                style: TextStyle(
+                              text: TextSpan(
+                                style: const TextStyle(
                                   color: textColor,
                                   fontWeight: FontWeight.bold,
                                   fontSize: 15,
                                 ),
                                 children: [
                                   TextSpan(text: humidity),
-                                  TextSpan(text: "%"),
+                                  const TextSpan(text: "%"),
                                 ],
                               ),
                             ),

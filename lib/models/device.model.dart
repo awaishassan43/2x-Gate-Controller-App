@@ -1,3 +1,6 @@
+// ignore_for_file: non_constant_identifier_names
+// Just because bilal said
+
 class Device {
   Device({
     required this.deviceCommands,
@@ -283,7 +286,6 @@ class _StatePayload {
   String pass;
   int state1;
   int state2;
-  // ignore: non_constant_identifier_names ..... only ignoring because bilal said
   int Temp;
   int humidity;
 

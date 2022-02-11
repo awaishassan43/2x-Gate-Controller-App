@@ -190,16 +190,16 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   /**
-                       * End of top section
-                       */
+                   * End of top section
+                   */
 
                   const SizedBox(
                     height: 75,
                   ),
 
                   /**
-                       * Form Section
-                       */
+                   * Form Section
+                   */
                   Form(
                     key: formKey,
                     child: Column(

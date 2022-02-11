@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:iot/components/largeButton.component.dart';
+import 'package:iot/controllers/user.controller.dart';
+import 'package:iot/models/device.model.dart';
+import 'package:iot/screens/device/components/sensor.component.dart';
 import '/components/loader.component.dart';
 import '/controllers/device.controller.dart';
 import '/enum/route.enum.dart';
@@ -18,6 +22,16 @@ class DeviceScreen extends StatefulWidget {
 
 class _DeviceScreenState extends State<DeviceScreen> {
   bool isLoading = false;
+  late final Device device;
+
+  /// Initializer
+  @override
+  void initState() {
+    final DeviceController controller = Provider.of<DeviceController>(context, listen: false);
+    device = controller.devices[widget.deviceID]!;
+
+    super.initState();
+  }
 
   Future<void> updateRelayStatus(BuildContext context, String relayID, bool isOpen) async {
     // final DeviceController controller = Provider.of<DeviceController>(context, listen: false);
@@ -43,6 +57,9 @@ class _DeviceScreenState extends State<DeviceScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final deviceSettings = device.deviceSettings.value;
+    final deviceState = device.deviceData.state.payload;
+
     return Scaffold(
       appBar: AppBar(
         title: Selector<DeviceController, String>(
@@ -58,50 +75,53 @@ class _DeviceScreenState extends State<DeviceScreen> {
               /**
                * Scrollable area
                */
-              SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Row(
-                          // children: [
-                          // DeviceSensor(
-                          //   sensorName: "Temperature",
-                          //   value: temperature,
-                          //   showDegrees: true,
-                          //   unit: Provider.of<UserController>(context, listen: false).profile!.temperatureUnit,
-                          //   icon: 'assets/icons/temp.png',
-                          // ),
-                          // const SizedBox(width: 10),
-                          // DeviceSensor(
-                          //   sensorName: "Humidity",
-                          //   value: humidity,
-                          //   showPercent: true,
-                          //   icon: 'assets/icons/humidity.png',
-                          // ),
-                          // ],
-                          ),
-                      // ...relays.map((relay) {
-                      //   final String name = relay.name;
-                      //   final bool isOpen = relay.isOpen;
-
-                      //   return Column(
-                      //     children: [
-                      //       const SizedBox(height: 30),
-                      //       LargeButton(
-                      //         icon: isOpen ? Icons.lock_open_rounded : Icons.lock_rounded,
-                      //         label: isOpen ? "Opened" : "Closed",
-                      //         iconColor: isOpen ? const Color(0xFFfc4646) : const Color(0xFF00e6c3),
-                      //         onPressed: () {
-                      //           updateRelayStatus(context, relay.id, !isOpen);
-                      //         },
-                      //         bottomText: name,
-                      //       ),
-                      //     ],
-                      //   );
-                      // }).toList(),
-                    ],
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        Row(
+                          children: [
+                            DeviceSensor(
+                              sensorName: "Temperature",
+                              value: deviceState.Temp,
+                              showDegrees: true,
+                              unit: Provider.of<UserController>(context, listen: false).profile!.temperatureUnit,
+                              icon: 'assets/icons/temp.png',
+                            ),
+                            const SizedBox(width: 10),
+                            DeviceSensor(
+                              sensorName: "Humidity",
+                              value: deviceState.humidity,
+                              showPercent: true,
+                              icon: 'assets/icons/humidity.png',
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 30),
+                        LargeButton(
+                          icon: deviceState.state1 == 1 ? Icons.lock_open_rounded : Icons.lock_rounded,
+                          label: deviceState.state1 == 1 ? "Opened" : "Closed",
+                          iconColor: deviceState.state1 == 1 ? const Color(0xFFfc4646) : const Color(0xFF00e6c3),
+                          onPressed: () {
+                            // updateRelayStatus(context, relay.id, !isOpen);
+                          },
+                          bottomText: deviceSettings.relay1.name,
+                        ),
+                        const SizedBox(height: 30),
+                        LargeButton(
+                          icon: deviceState.state2 == 1 ? Icons.lock_open_rounded : Icons.lock_rounded,
+                          label: deviceState.state2 == 1 ? "Opened" : "Closed",
+                          iconColor: deviceState.state2 == 1 ? const Color(0xFFfc4646) : const Color(0xFF00e6c3),
+                          onPressed: () {
+                            // updateRelayStatus(context, relay.id, !isOpen);
+                          },
+                          bottomText: deviceSettings.relay2.name,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
