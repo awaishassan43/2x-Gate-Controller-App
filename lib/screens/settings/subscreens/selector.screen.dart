@@ -1,11 +1,4 @@
 import 'package:flutter/material.dart';
-import '/components/loader.component.dart';
-import '/components/selector.component.dart';
-import '/controllers/device.controller.dart';
-import '/controllers/user.controller.dart';
-import '/models/device.model.dart';
-import '/util/functions.util.dart';
-import 'package:provider/provider.dart';
 
 /// Selector screen is sort of a wrapper for selector component
 class SelectorScreen<T> extends StatefulWidget {

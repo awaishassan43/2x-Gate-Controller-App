@@ -34,7 +34,7 @@ class DeviceController extends ChangeNotifier {
 
   Future<void> loadDevices(BuildContext context) async {
     try {
-      final List<String> deviceIDs = Provider.of<UserController>(context).profile!.devices;
+      final List<String> deviceIDs = Provider.of<UserController>(context, listen: false).profile!.devices;
 
       for (String id in deviceIDs) {
         if (!devices.containsKey(id)) {
@@ -78,21 +78,21 @@ class DeviceController extends ChangeNotifier {
 
   Future<void> addDevice(String id, BuildContext context) async {
     try {
-      // Send the request to the device to get the device id
-      // final Uri url = Uri.parse('https://google.com/' + id);
-      // final http.Response response = await http.post(url).timeout(
-      //   const Duration(milliseconds: 7500),
-      //   onTimeout: () {
-      //     throw "Timed out while trying to send credentials to the device";
-      //   },
-      // );
+      final Uri url = Uri.parse('https://google.com/' + id);
+      final http.Response response = await http.post(url).timeout(
+        const Duration(milliseconds: 7500),
+        onTimeout: () {
+          throw "Timed out while trying to send credentials to the device";
+        },
+      );
 
-      // if (response.statusCode >= 300) {
-      //   throw "Failed to add the device";
-      // }
+      if (response.statusCode >= 300) {
+        throw "Failed to add the device";
+      }
 
       final UserController controller = Provider.of<UserController>(context, listen: false);
       await controller.addDevice(id);
+      await loadDevices(context);
     } on FirebaseException catch (e) {
       throw "Error occured while updating the device: ${e.message}";
     } catch (e) {
@@ -103,7 +103,6 @@ class DeviceController extends ChangeNotifier {
   Future<void> updateDevice(String id, String collectionKey) async {
     try {
       final Device device = devices[id]!;
-      print(device);
 
       if (collectionKey == "deviceData") {
         await deviceCollection.child(id).set(device.deviceData.toJson());

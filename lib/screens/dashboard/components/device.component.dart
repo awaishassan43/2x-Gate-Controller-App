@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:iot/components/button.component.dart';
+import 'package:iot/components/loader.component.dart';
+import 'package:iot/controllers/device.controller.dart';
 import '/controllers/user.controller.dart';
 import '/enum/route.enum.dart';
 import '/models/device.model.dart';
@@ -7,34 +9,56 @@ import '/util/functions.util.dart';
 import '/util/themes.util.dart';
 import 'package:provider/provider.dart';
 
-class DeviceComponent extends StatelessWidget {
+class DeviceComponent extends StatefulWidget {
   final Device device;
   const DeviceComponent({
     Key? key,
     required this.device,
   }) : super(key: key);
 
-  Future<void> updateRelayStatus(BuildContext context, String relayID, bool isOpen) async {
-    // final DeviceController controller = Provider.of<DeviceController>(context, listen: false);
-    // final Device device = controller.devices[this.device.id]!;
+  @override
+  State<DeviceComponent> createState() => _DeviceComponentState();
+}
 
-    // controller.isLoading = true;
+class _DeviceComponentState extends State<DeviceComponent> {
+  bool isLoading = false;
 
-    // try {
-    //   device.update('isOpen', isOpen, relayID: relayID);
-    //   await controller.updateDevice(device);
+  Future<void> updateRelayStatus(BuildContext context, int relayID) async {
+    final DeviceController controller = Provider.of<DeviceController>(context, listen: false);
 
-    //   showMessage(context, "Controller updated successfully!");
-    // } catch (e) {
-    //   showMessage(context, e.toString());
-    // }
+    final DeviceCommands deviceCommands = widget.device.deviceCommands;
+    final deviceData = widget.device.deviceData.state.payload;
+    final int initialState = relayID == 1 ? deviceData.state1 : deviceData.state2;
 
-    // controller.isLoading = false;
+    final String deviceID = widget.device.deviceSettings.deviceId;
+
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      /// Taking a shortcut due to time constraint
+      final Map<String, dynamic> mappedData = deviceCommands.toJson();
+
+      mappedData['request']['payload']['test'] = relayID;
+      mappedData['request']['payload']['state'] = initialState == 1 ? "CLOSE" : "OPEN";
+
+      controller.devices[deviceID]!.updateWithJSON(deviceCommands: mappedData);
+
+      await controller.updateDevice(deviceID, "deviceCommands");
+      showMessage(context, "Controller updated successfully!");
+    } catch (e) {
+      showMessage(context, e.toString());
+    }
+
+    setState(() {
+      isLoading = false;
+    });
   }
 
   Widget renderRelays(BuildContext context) {
-    final deviceSettings = device.deviceSettings.value;
-    final deviceState = device.deviceData.state.payload;
+    final deviceSettings = widget.device.deviceSettings.value;
+    final deviceState = widget.device.deviceData.state.payload;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -58,7 +82,7 @@ class DeviceComponent extends StatelessWidget {
                 CustomButton(
                   text: deviceState.state1 == 1 ? "Open" : "Closed",
                   onPressed: () {
-                    // updateRelayStatus(context, relays[j].id, !isOpen);
+                    updateRelayStatus(context, 1);
                   },
                   backgroundColor: deviceState.state1 == 1 ? const Color(0xFFfc4646) : const Color(0xFF00e6c3),
                   borderRadius: 7.5,
@@ -88,7 +112,7 @@ class DeviceComponent extends StatelessWidget {
                 CustomButton(
                   text: deviceState.state2 == 1 ? "Open" : "Closed",
                   onPressed: () {
-                    // updateRelayStatus(context, relays[j].id, !isOpen);
+                    updateRelayStatus(context, 2);
                   },
                   backgroundColor: deviceState.state2 == 1 ? const Color(0xFFfc4646) : const Color(0xFF00e6c3),
                   borderRadius: 7.5,
@@ -105,9 +129,9 @@ class DeviceComponent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String humidity = device.deviceData.state.payload.humidity.toString();
-    final double temperature = device.deviceData.state.payload.Temp.toDouble();
-    final String deviceName = device.deviceData.name;
+    final String humidity = widget.device.deviceData.state.payload.humidity.toString();
+    final double temperature = widget.device.deviceData.state.payload.Temp.toDouble();
+    final String deviceName = widget.device.deviceData.name;
 
     return Stack(
       children: [
@@ -118,7 +142,7 @@ class DeviceComponent extends StatelessWidget {
               Navigator.pushNamed(
                 context,
                 Screen.device,
-                arguments: device.deviceSettings.deviceId,
+                arguments: widget.device.deviceSettings.deviceId,
               );
             },
             padding: const EdgeInsets.all(12.5),
@@ -239,7 +263,7 @@ class DeviceComponent extends StatelessWidget {
                           ),
                           icon: const Icon(Icons.settings),
                           onPressed: () {
-                            Navigator.pushNamed(context, Screen.deviceSettings, arguments: device.deviceSettings.deviceId);
+                            Navigator.pushNamed(context, Screen.deviceSettings, arguments: widget.device.deviceSettings.deviceId);
                           },
                         ),
                       ],
@@ -264,7 +288,7 @@ class DeviceComponent extends StatelessWidget {
             ),
           ),
         ),
-        // if (isLoading) const Loader(stretched: false),
+        if (isLoading) const Loader(),
       ],
     );
   }

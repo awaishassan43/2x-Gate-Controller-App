@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:iot/controllers/device.controller.dart';
+import 'package:provider/provider.dart';
 import '/models/profile.model.dart';
 import '/util/functions.util.dart';
 
@@ -199,14 +201,15 @@ class UserController extends ChangeNotifier {
     }
   }
 
-  Future<void> removeDevice(String id) async {
+  Future<void> removeDevice(BuildContext context, String id) async {
     try {
       final DatabaseReference devicesReference = users.child(auth.currentUser!.uid).child('devices').ref;
       final DataSnapshot data = await devicesReference.get();
-      final List<String> devices = data.value != null ? mapToList(data.value as Map) : [];
+      final List<String> devices = data.value != null ? List.from((data.value as List<Object?>).cast<String>()) : [];
       devices.remove(id);
 
       await devicesReference.set(listToMap(devices));
+      await Provider.of<DeviceController>(context, listen: false).loadDevices(context);
     } on FirebaseException catch (e) {
       throw "Error occured while removing the device: ${e.message}";
     } catch (e) {

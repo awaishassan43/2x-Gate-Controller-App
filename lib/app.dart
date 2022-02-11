@@ -47,7 +47,7 @@ class _AppState extends State<App> {
               color: backgroundColor,
               child: const Padding(
                 padding: EdgeInsets.symmetric(vertical: 40.0),
-                child: Loader(),
+                child: Loader(stretched: false),
               ),
             ),
           );

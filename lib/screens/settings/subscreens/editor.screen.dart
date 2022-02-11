@@ -10,7 +10,7 @@ class EditorScreen extends StatefulWidget {
   final String initialValue;
   final String title;
   final IconData icon;
-  final Future<void> Function(String value) onSubmit;
+  final Future<void> Function(String value, BuildContext context) onSubmit;
   const EditorScreen({
     Key? key,
     required this.initialValue,
@@ -109,7 +109,7 @@ class _EditorScreenState extends State<EditorScreen> {
                     });
 
                     try {
-                      await widget.onSubmit(textController.text.trim());
+                      await widget.onSubmit(textController.text.trim(), context);
 
                       showMessage(context, "Device updated successfully!");
                       Navigator.pop(context);

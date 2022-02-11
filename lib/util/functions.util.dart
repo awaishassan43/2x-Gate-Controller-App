@@ -20,15 +20,27 @@ void showMessage(BuildContext context, String message) {
 }
 
 List<T> mapToList<T>(Map data) {
-  return data.values.toList().cast<T>();
+  try {
+    return data.values.toList().cast<T>();
+  } catch (e) {
+    throw "Failed to convert map to list: ${e.toString()}";
+  }
 }
 
 Map listToMap(List data) {
-  return data.asMap();
+  try {
+    return data.asMap();
+  } catch (e) {
+    throw "Failed to convert list to map: ${e.toString()}";
+  }
 }
 
 List<T> castList<T>(List? items) {
-  return items != null ? items.cast<T>() : [];
+  try {
+    return items != null ? items.cast<T>() : [];
+  } catch (e) {
+    throw "Failed to convert list type: ${e.toString()}";
+  }
 }
 
 Map<String, dynamic> objectToMap(Object? value) {
@@ -37,7 +49,6 @@ Map<String, dynamic> objectToMap(Object? value) {
 }
 
 String getDeviceURL(String ssid, String password) {
-  // return 'http://localhost:3000/ssid?ssid=$ssid&password=$password';
   return 'http://192.168.4.1:80/ssid?ssid=$ssid&password=$password';
 }
 

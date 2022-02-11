@@ -1,13 +1,8 @@
 import 'package:flutter/material.dart';
-import '/components/button.component.dart';
-import '/components/input.component.dart';
-import '/components/loader.component.dart';
 import '/controllers/device.controller.dart';
 import '/controllers/user.controller.dart';
 import '/models/device.model.dart';
 import '/models/relay.model.dart';
-import '/util/functions.util.dart';
-import 'package:provider/provider.dart';
 
 class TemperatureAlertScreen extends StatefulWidget {
   final Device device;
