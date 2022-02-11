@@ -27,10 +27,10 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
 
   bool isLoading = false;
 
-  String? id = 'esp-3c71bfab3e6c';
+  String? id;
   String? loaderMessage;
 
-  int currentStep = 3;
+  int currentStep = 0;
   final int totalSteps = 3;
 
   @override

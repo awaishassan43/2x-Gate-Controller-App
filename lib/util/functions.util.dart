@@ -52,6 +52,10 @@ String getDeviceURL(String ssid, String password) {
   return 'http://192.168.4.1:80/ssid?ssid=$ssid&password=$password';
 }
 
+Uri getCloudURL(String id) {
+  return Uri.parse('https://us-central1-luminous-shadow-330923.cloudfunctions.net/createDevice?uid=' + id);
+}
+
 double convertCelciusToFarenheit(double value) {
   return value * 9 / 5 + 32;
 }

@@ -78,13 +78,7 @@ class DeviceController extends ChangeNotifier {
 
   Future<void> addDevice(String id, BuildContext context) async {
     try {
-      final Uri url = Uri.parse('https://google.com/' + id);
-      final http.Response response = await http.post(url).timeout(
-        const Duration(milliseconds: 7500),
-        onTimeout: () {
-          throw "Timed out while trying to send credentials to the device";
-        },
-      );
+      final http.Response response = await http.post(getCloudURL(id));
 
       if (response.statusCode >= 300) {
         throw "Failed to add the device";
