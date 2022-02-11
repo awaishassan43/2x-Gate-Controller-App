@@ -224,4 +224,14 @@ class UserController extends ChangeNotifier {
       throw "Failed to logout the user: ${e.toString()}";
     }
   }
+
+  Future<void> forgotPassword(String email) async {
+    try {
+      await auth.sendPasswordResetEmail(email: email);
+    } on FirebaseException catch (e) {
+      throw "Error occured while sending the email to reset the password: ${e.message}";
+    } catch (e) {
+      throw "Failed to send the email to reset the password: ${e.toString()}";
+    }
+  }
 }

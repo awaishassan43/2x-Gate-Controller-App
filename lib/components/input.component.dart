@@ -11,6 +11,9 @@ class CustomInput extends StatefulWidget {
   final bool disabled;
   final String? suffixText;
   final void Function()? onDone;
+  final FocusNode? nextFocusNode;
+  final FocusNode? focusNode;
+  final TextInputType textInputType;
 
   const CustomInput({
     Key? key,
@@ -24,6 +27,9 @@ class CustomInput extends StatefulWidget {
     this.autoFocus = false,
     this.suffixText,
     this.onDone,
+    this.focusNode,
+    this.nextFocusNode,
+    this.textInputType = TextInputType.text,
   })  : assert((action == null && isPassword) || (action != null && !isPassword) || (action == null && !isPassword)),
         super(key: key);
 
@@ -47,9 +53,17 @@ class _CustomInputState extends State<CustomInput> {
         TextFormField(
           controller: widget.controller,
           autofocus: widget.autoFocus,
+          focusNode: widget.focusNode,
           obscureText: isHidden,
-          onEditingComplete: widget.onDone,
-          textInputAction: widget.onDone != null ? TextInputAction.done : TextInputAction.next,
+          keyboardType: widget.textInputType,
+          onFieldSubmitted: (_) {
+            if (widget.onDone != null) {
+              widget.onDone!();
+            }
+
+            if (widget.nextFocusNode != null) FocusScope.of(context).requestFocus(widget.nextFocusNode);
+          },
+          textInputAction: TextInputAction.next,
           style: const TextStyle(
             fontSize: 14,
           ),

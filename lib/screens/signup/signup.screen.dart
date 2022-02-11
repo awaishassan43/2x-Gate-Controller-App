@@ -22,6 +22,7 @@ class SignupScreen extends StatefulWidget {
 }
 
 class _SignupScreenState extends State<SignupScreen> {
+  /// Value holders
   late TextEditingController email;
   late TextEditingController password;
   late TextEditingController confirmPassword;
@@ -31,6 +32,7 @@ class _SignupScreenState extends State<SignupScreen> {
   bool isAgreed = false;
   Country? pickedCountry;
 
+  /// Error holders
   String emailError = '';
   String passwordError = '';
   String confirmPasswordError = '';
@@ -41,20 +43,19 @@ class _SignupScreenState extends State<SignupScreen> {
   String countryError = '';
   String formError = '';
 
-  bool isLoading = false;
+  /// Focus nodes
+  late final FocusNode emailFocusNode;
+  late final FocusNode passwordFocusNode;
+  late final FocusNode confirmPasswordFocusNode;
+  late final FocusNode firstNameFocusNode;
+  late final FocusNode lastNameFocusNode;
+  late final FocusNode phoneFocusNode;
 
+  /// Extraneous variables
+  bool isLoading = false;
   final GlobalKey<FormFieldState> formKey = GlobalKey<FormFieldState>();
 
-  Future<void> openTermsOfUse(BuildContext context) async {
-    try {
-      if (await canLaunch(linkToTermsOfUse)) {
-        await launch(linkToTermsOfUse);
-      }
-    } catch (e) {
-      showMessage(context, "Failed to open terms of use");
-    }
-  }
-
+  /// Initializers and disposers
   @override
   void initState() {
     super.initState();
@@ -64,6 +65,43 @@ class _SignupScreenState extends State<SignupScreen> {
     firstName = TextEditingController();
     lastName = TextEditingController();
     phone = TextEditingController();
+
+    emailFocusNode = FocusNode();
+    passwordFocusNode = FocusNode();
+    confirmPasswordFocusNode = FocusNode();
+    firstNameFocusNode = FocusNode();
+    lastNameFocusNode = FocusNode();
+    phoneFocusNode = FocusNode();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+
+    email.dispose();
+    password.dispose();
+    confirmPassword.dispose();
+    firstName.dispose();
+    lastName.dispose();
+    phone.dispose();
+
+    emailFocusNode.dispose();
+    passwordFocusNode.dispose();
+    confirmPasswordFocusNode.dispose();
+    firstNameFocusNode.dispose();
+    lastNameFocusNode.dispose();
+    phoneFocusNode.dispose();
+  }
+
+  /// Functions
+  Future<void> openTermsOfUse(BuildContext context) async {
+    try {
+      if (await canLaunch(linkToTermsOfUse)) {
+        await launch(linkToTermsOfUse);
+      }
+    } catch (e) {
+      showMessage(context, "Failed to open terms of use");
+    }
   }
 
   bool validateEmail() {
@@ -226,6 +264,20 @@ class _SignupScreenState extends State<SignupScreen> {
     return true;
   }
 
+  void showCountryPickerDialog(BuildContext context) {
+    showCountryPicker(
+      context: context,
+      showPhoneCode: true,
+      onSelect: (country) {
+        setState(() {
+          pickedCountry = country;
+        });
+
+        FocusScope.of(context).requestFocus(phoneFocusNode);
+      },
+    );
+  }
+
   Future<void> signup(BuildContext context) async {
     try {
       final bool isEmailValid = validateEmail();
@@ -326,6 +378,7 @@ class _SignupScreenState extends State<SignupScreen> {
                        * Form Section
                        */
                       Form(
+                        key: formKey,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
@@ -353,6 +406,10 @@ class _SignupScreenState extends State<SignupScreen> {
                               label: "Email Address *",
                               controller: email,
                               error: emailError,
+                              autoFocus: true,
+                              textInputType: TextInputType.emailAddress,
+                              focusNode: emailFocusNode,
+                              nextFocusNode: passwordFocusNode,
                             ),
                             const SizedBox(height: 12.5),
                             CustomInput(
@@ -361,6 +418,9 @@ class _SignupScreenState extends State<SignupScreen> {
                               isPassword: true,
                               controller: password,
                               error: passwordError,
+                              textInputType: TextInputType.visiblePassword,
+                              focusNode: passwordFocusNode,
+                              nextFocusNode: confirmPasswordFocusNode,
                             ),
                             const SizedBox(height: 12.5),
                             CustomInput(
@@ -368,7 +428,10 @@ class _SignupScreenState extends State<SignupScreen> {
                               label: "Confirm Password *",
                               isPassword: true,
                               controller: confirmPassword,
+                              textInputType: TextInputType.visiblePassword,
                               error: confirmPasswordError,
+                              focusNode: confirmPasswordFocusNode,
+                              nextFocusNode: firstNameFocusNode,
                             ),
                             const SizedBox(height: 12.5),
                             Row(
@@ -380,6 +443,8 @@ class _SignupScreenState extends State<SignupScreen> {
                                     label: "First Name *",
                                     controller: firstName,
                                     error: firstNameError,
+                                    focusNode: firstNameFocusNode,
+                                    nextFocusNode: lastNameFocusNode,
                                   ),
                                 ),
                                 const SizedBox(width: 10),
@@ -389,6 +454,8 @@ class _SignupScreenState extends State<SignupScreen> {
                                     label: "Last Name *",
                                     controller: lastName,
                                     error: lastNameError,
+                                    focusNode: lastNameFocusNode,
+                                    onDone: () => showCountryPickerDialog(context),
                                   ),
                                 ),
                               ],
@@ -401,17 +468,7 @@ class _SignupScreenState extends State<SignupScreen> {
                             Column(
                               children: [
                                 CustomDropDown(
-                                  onPressed: () {
-                                    showCountryPicker(
-                                      context: context,
-                                      showPhoneCode: true,
-                                      onSelect: (country) {
-                                        setState(() {
-                                          pickedCountry = country;
-                                        });
-                                      },
-                                    );
-                                  },
+                                  onPressed: () => showCountryPickerDialog(context),
                                   icon: Icons.flag,
                                   text: pickedCountry == null ? "Country *" : pickedCountry!.displayNameNoCountryCode,
                                 ),
@@ -451,9 +508,8 @@ class _SignupScreenState extends State<SignupScreen> {
                                     label: "Phone number",
                                     controller: phone,
                                     error: phoneError,
-                                    onDone: () {
-                                      signup(context);
-                                    },
+                                    textInputType: TextInputType.phone,
+                                    focusNode: phoneFocusNode,
                                   ),
                                 ),
                               ],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:iot/screens/forgotPassword/forgotPassword.screen.dart';
 import '/components/error.component.dart';
 import '/components/loader.component.dart';
 import '/controllers/user.controller.dart';
@@ -72,6 +73,7 @@ class _AppState extends State<App> {
               Screen.addDevice: (context) => const AddDeviceScreen(),
               Screen.editPhone: (context) => const PhoneEditingScreen(),
               Screen.editName: (context) => const UpdateNameScreen(),
+              Screen.forgotPassword: (context) => const CustomScreen(),
             },
             onGenerateRoute: (settings) {
               return MaterialPageRoute(
