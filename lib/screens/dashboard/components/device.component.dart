@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import '/components/button.component.dart';
-import '/controllers/device.controller.dart';
 import '/controllers/user.controller.dart';
 import '/enum/route.enum.dart';
 import '/models/device.model.dart';

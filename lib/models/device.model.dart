@@ -65,12 +65,12 @@ class _Request {
   });
 
   String action;
-  _Payload payload;
+  _RequestPayload payload;
   String reqId;
 
   factory _Request.fromJson(Map<String, dynamic> json) => _Request(
         action: json["action"],
-        payload: _Payload.fromJson((json["payload"] as Map<Object?, Object?>).cast<String, dynamic>()),
+        payload: _RequestPayload.fromJson((json["payload"] as Map<Object?, Object?>).cast<String, dynamic>()),
         reqId: json["reqId"],
       );
 
@@ -81,27 +81,24 @@ class _Request {
       };
 }
 
-class _Payload {
-  _Payload({
+class _RequestPayload {
+  _RequestPayload({
     required this.exp,
     required this.pass,
     required this.state,
     required this.test,
-    required this.dummy,
   });
 
   int exp;
   String pass;
   String state;
   int test;
-  String? dummy;
 
-  factory _Payload.fromJson(Map<String, dynamic> json) => _Payload(
+  factory _RequestPayload.fromJson(Map<String, dynamic> json) => _RequestPayload(
         exp: json["exp"],
         pass: json["pass"],
         state: json["state"],
         test: json["test"],
-        dummy: json["dummy"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -109,43 +106,6 @@ class _Payload {
         "pass": pass,
         "state": state,
         "test": test,
-        "dummy": dummy,
-      };
-}
-
-class DeviceData {
-  DeviceData({
-    required this.name,
-    required this.online,
-    required this.owner,
-    required this.state,
-    required this.timestamp,
-    required this.type,
-  });
-
-  String name;
-  bool online;
-  String owner;
-  _Request state;
-  int timestamp;
-  String type;
-
-  factory DeviceData.fromJson(Map<String, dynamic> json) => DeviceData(
-        name: json["name"],
-        online: json["online"],
-        owner: json["owner"],
-        state: _Request.fromJson((json["state"] as Map<Object?, Object?>).cast<String, dynamic>()),
-        timestamp: json["timestamp"],
-        type: json["type"],
-      );
-
-  Map<String, dynamic> toJson() => {
-        "name": name,
-        "online": online,
-        "owner": owner,
-        "state": state.toJson(),
-        "timestamp": timestamp,
-        "type": type,
       };
 }
 
@@ -249,78 +209,99 @@ class _RelaySettings {
       };
 }
 
-class _DeviceLog {
-  _DeviceLog({
-    required this.deviceId,
-    required this.publishedAt,
+class DeviceData {
+  DeviceData({
+    required this.name,
+    required this.online,
+    required this.owner,
     required this.state,
     required this.timestamp,
+    required this.type,
   });
 
-  String deviceId;
-  DateTime publishedAt;
-  _DeviceLogState state;
+  String name;
+  bool online;
+  String owner;
+  _DeviceState state;
   int timestamp;
+  String type;
 
-  factory _DeviceLog.fromJson(Map<String, dynamic> json) => _DeviceLog(
-        deviceId: json["deviceId"],
-        publishedAt: DateTime.parse(json["published_at"]),
-        state: _DeviceLogState.fromJson((json["state"] as Map<Object?, Object?>).cast<String, dynamic>()),
+  factory DeviceData.fromJson(Map<String, dynamic> json) => DeviceData(
+        name: json["name"],
+        online: json["online"],
+        owner: json["owner"],
+        state: _DeviceState.fromJson((json["state"] as Map<Object?, Object?>).cast<String, dynamic>()),
         timestamp: json["timestamp"],
+        type: json["type"],
       );
 
   Map<String, dynamic> toJson() => {
-        "deviceId": deviceId,
-        "published_at": publishedAt.toIso8601String(),
+        "name": name,
+        "online": online,
+        "owner": owner,
         "state": state.toJson(),
         "timestamp": timestamp,
+        "type": type,
       };
 }
 
-class _DeviceLogState {
-  _DeviceLogState({
-    required this.doorActiveState,
-    required this.fw,
-    required this.heap,
-    required this.humidity,
-    required this.mqttPublishType,
-    required this.pressure,
-    required this.rangeFound,
-    required this.signalRssi,
-    required this.temperature,
+class _DeviceState {
+  _DeviceState({
+    required this.action,
+    required this.payload,
+    required this.reqId,
   });
 
-  String doorActiveState;
-  int fw;
-  int heap;
-  double humidity;
-  String mqttPublishType;
-  double pressure;
-  int rangeFound;
-  int signalRssi;
-  double temperature;
+  String action;
+  _StatePayload payload;
+  String reqId;
 
-  factory _DeviceLogState.fromJson(Map<String, dynamic> json) => _DeviceLogState(
-        doorActiveState: json["doorActiveState"],
-        fw: json["fw"],
-        heap: json["heap"],
-        humidity: json["humidity"].toDouble(),
-        mqttPublishType: json["mqttPublishType"],
-        pressure: json["pressure"].toDouble(),
-        rangeFound: json["rangeFound"],
-        signalRssi: json["signalRssi"],
-        temperature: json["temperature"].toDouble(),
+  factory _DeviceState.fromJson(Map<String, dynamic> json) => _DeviceState(
+        action: json["action"],
+        payload: _StatePayload.fromJson((json["payload"] as Map<Object?, Object?>).cast<String, dynamic>()),
+        reqId: json["reqId"],
       );
 
   Map<String, dynamic> toJson() => {
-        "doorActiveState": doorActiveState,
-        "fw": fw,
-        "heap": heap,
+        "action": action,
+        "payload": payload.toJson(),
+        "reqId": reqId,
+      };
+}
+
+class _StatePayload {
+  _StatePayload({
+    required this.exp,
+    required this.pass,
+    required this.state1,
+    required this.state2,
+    required this.Temp,
+    required this.humidity,
+  });
+
+  int exp;
+  String pass;
+  int state1;
+  int state2;
+  // ignore: non_constant_identifier_names ..... only ignoring because bilal said
+  int Temp;
+  int humidity;
+
+  factory _StatePayload.fromJson(Map<String, dynamic> json) => _StatePayload(
+        exp: json["exp"],
+        pass: json["pass"],
+        state1: json["state1"],
+        state2: json["state2"],
+        Temp: json["Temp"],
+        humidity: json["humidity"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "exp": exp,
+        "pass": pass,
+        "state1": state1,
+        "state2": state2,
+        "Temp": Temp,
         "humidity": humidity,
-        "mqttPublishType": mqttPublishType,
-        "pressure": pressure,
-        "rangeFound": rangeFound,
-        "signalRssi": signalRssi,
-        "temperature": temperature,
       };
 }
