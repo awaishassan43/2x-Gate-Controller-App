@@ -56,6 +56,7 @@ class _CustomInputState extends State<CustomInput> {
           focusNode: widget.focusNode,
           obscureText: isHidden,
           keyboardType: widget.textInputType,
+          textCapitalization: TextCapitalization.sentences,
           onFieldSubmitted: (_) {
             if (widget.onDone != null) {
               widget.onDone!();

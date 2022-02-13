@@ -1,6 +1,8 @@
 // ignore_for_file: non_constant_identifier_names
 // Just because bilal said
 
+import 'package:iot/util/functions.util.dart';
+
 class Device {
   Device({
     required this.deviceCommands,
@@ -155,7 +157,7 @@ class _Value {
   bool alertOnOpen;
   bool nightAlert;
   String region;
-  double temperatureAlert;
+  double? temperatureAlert;
   _RelaySettings relay1;
   _RelaySettings relay2;
 
@@ -166,7 +168,7 @@ class _Value {
         alertOnOpen: json["alertOnOpen"],
         nightAlert: json["nightAlert"],
         region: json["region"],
-        temperatureAlert: json["temperatureAlert"].toDouble(),
+        temperatureAlert: json["temperatureAlert"] != null ? dynamicToDouble(json['temperatureAlert']) : null,
       );
 
   Map<String, dynamic> toJson() => {

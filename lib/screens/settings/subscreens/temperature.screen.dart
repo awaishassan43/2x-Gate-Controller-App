@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:iot/components/button.component.dart';
+import 'package:iot/components/input.component.dart';
+import 'package:iot/components/loader.component.dart';
+import 'package:iot/models/device.model.dart';
+import 'package:iot/util/functions.util.dart';
+import 'package:provider/provider.dart';
 import '/controllers/device.controller.dart';
 import '/controllers/user.controller.dart';
-import '/models/device.model.dart';
-import '/models/relay.model.dart';
 
 class TemperatureAlertScreen extends StatefulWidget {
-  final Device device;
-  const TemperatureAlertScreen({Key? key, required this.device}) : super(key: key);
+  final String deviceID;
+  const TemperatureAlertScreen({Key? key, required this.deviceID}) : super(key: key);
 
   @override
   State<TemperatureAlertScreen> createState() => _TemperatureAlertScreenState();
@@ -17,166 +21,166 @@ class _TemperatureAlertScreenState extends State<TemperatureAlertScreen> {
   late bool shouldAlert;
 
   late final TextEditingController temperature;
-  late final DeviceController controller;
+  late final DeviceController deviceController;
   late final UserController userController;
-  late final Relay relay;
+  late final Device device;
 
   String formError = '';
   String temperatureError = '';
 
-  // @override
-  // void initState() {
-  //   super.initState();
+  @override
+  void initState() {
+    super.initState();
 
-  //   final double? value = widget.device.temperatureAlert;
+    userController = Provider.of<UserController>(context, listen: false);
+    deviceController = Provider.of<DeviceController>(context, listen: false);
+    device = deviceController.devices[widget.deviceID]!;
 
-  //   temperature = TextEditingController(
-  //     text: value != null
-  //         ? getTemperatureValue(
-  //             context,
-  //             value,
-  //             withUnit: false,
-  //             decimalPlaces: 1,
-  //             onNullMessage: '',
-  //           )
-  //         : '0',
-  //   );
-  //   controller = Provider.of<DeviceController>(context, listen: false);
-  //   userController = Provider.of<UserController>(context, listen: false);
+    final double? value = device.deviceSettings.value.temperatureAlert;
 
-  //   shouldAlert = value != null;
-  // }
+    temperature = TextEditingController(
+      text: value != null
+          ? getTemperatureValue(
+              context,
+              value,
+              withUnit: false,
+              decimalPlaces: 1,
+              onNullMessage: '',
+            )
+          : '0',
+    );
 
-  // bool validateTemperature() {
-  //   if (!shouldAlert) {
-  //     return true;
-  //   }
+    shouldAlert = value != null;
+  }
 
-  //   if (temperature.text == "") {
-  //     setState(() {
-  //       temperatureError = "This field cannot be empty!";
-  //     });
+  bool validateTemperature() {
+    if (!shouldAlert) {
+      return true;
+    }
 
-  //     return false;
-  //   } else if (double.tryParse(temperature.text) == null) {
-  //     setState(() {
-  //       temperatureError = "Temperature must be a valid number";
-  //     });
+    if (temperature.text == "") {
+      setState(() {
+        temperatureError = "This field cannot be empty!";
+      });
 
-  //     return false;
-  //   }
+      return false;
+    } else if (double.tryParse(temperature.text) == null) {
+      setState(() {
+        temperatureError = "Temperature must be a valid number";
+      });
 
-  //   if (temperatureError != '') {
-  //     setState(() {
-  //       temperatureError = '';
-  //     });
-  //   }
-  //   return true;
-  // }
+      return false;
+    }
+
+    if (temperatureError != '') {
+      setState(() {
+        temperatureError = '';
+      });
+    }
+    return true;
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Container();
-    // return Scaffold(
-    //   appBar: AppBar(
-    //     title: const Text("Temperature alert"),
-    //     centerTitle: true,
-    //   ),
-    //   body: Stack(
-    //     children: [
-    //       Padding(
-    //         padding: const EdgeInsets.all(20.0),
-    //         child: Column(
-    //           crossAxisAlignment: CrossAxisAlignment.stretch,
-    //           children: [
-    //             Expanded(
-    //               child: Column(
-    //                 crossAxisAlignment: CrossAxisAlignment.stretch,
-    //                 children: [
-    //                   SwitchListTile(
-    //                     title: const Text(
-    //                       "Alert",
-    //                       style: TextStyle(fontWeight: FontWeight.bold),
-    //                     ),
-    //                     subtitle: Text(
-    //                       shouldAlert ? "Set to alert" : "Don't alert",
-    //                       style: const TextStyle(fontSize: 11),
-    //                     ),
-    //                     value: shouldAlert,
-    //                     onChanged: (value) {
-    //                       setState(() {
-    //                         shouldAlert = value;
-    //                       });
-    //                     },
-    //                   ),
-    //                   const SizedBox(height: 20),
-    //                   CustomInput(
-    //                     label: "Temperature Alert",
-    //                     icon: Icons.sensors,
-    //                     disabled: !shouldAlert,
-    //                     error: temperatureError,
-    //                     controller: temperature,
-    //                     suffixText: '\u00b0${userController.profile!.temperatureUnit}',
-    //                   ),
-    //                   if (formError != '')
-    //                     Padding(
-    //                       padding: const EdgeInsets.all(20),
-    //                       child: Text(
-    //                         formError,
-    //                         textAlign: TextAlign.center,
-    //                         style: const TextStyle(
-    //                           color: Colors.red,
-    //                           fontSize: 12,
-    //                         ),
-    //                       ),
-    //                     ),
-    //                 ],
-    //               ),
-    //             ),
-    //             CustomButton(
-    //               text: "Update temperature alert",
-    //               onPressed: () async {
-    //                 final bool isTemperatureValid = validateTemperature();
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Temperature alert"),
+        centerTitle: true,
+      ),
+      body: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      SwitchListTile(
+                        title: const Text(
+                          "Alert",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: Text(
+                          shouldAlert ? "Set to alert" : "Don't alert",
+                          style: const TextStyle(fontSize: 11),
+                        ),
+                        value: shouldAlert,
+                        onChanged: (value) {
+                          setState(() {
+                            shouldAlert = value;
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 20),
+                      CustomInput(
+                        label: "Temperature Alert",
+                        icon: Icons.sensors,
+                        disabled: !shouldAlert,
+                        error: temperatureError,
+                        controller: temperature,
+                        suffixText: '\u00b0${userController.profile!.temperatureUnit}',
+                      ),
+                      if (formError != '')
+                        Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: Text(
+                            formError,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: Colors.red,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                CustomButton(
+                  text: "Update temperature alert",
+                  onPressed: () async {
+                    final bool isTemperatureValid = validateTemperature();
 
-    //                 if (!isTemperatureValid) {
-    //                   return;
-    //                 }
+                    if (!isTemperatureValid) {
+                      return;
+                    }
 
-    //                 setState(() {
-    //                   isLoading = true;
-    //                 });
+                    setState(() {
+                      isLoading = true;
+                    });
 
-    //                 final double? previousValue = widget.device.temperatureAlert;
+                    // final double? previousValue = widget.device.temperatureAlert;
 
-    //                 try {
-    //                   final String unit = Provider.of<UserController>(context, listen: false).profile!.temperatureUnit;
+                    try {
+                      final String unit = Provider.of<UserController>(context, listen: false).profile!.temperatureUnit;
 
-    //                   controller.devices[widget.device.id]!.temperatureAlert = shouldAlert
-    //                       ? unit == "F"
-    //                           ? double.parse(convertFarenheitToCelcius(double.parse(temperature.text)).toStringAsFixed(1))
-    //                           : double.parse(temperature.text)
-    //                       : null;
-    //                   await controller.updateDevice(controller.devices[widget.device.id]!);
+                      // deviceController.devices[widget.id]!.temperatureAlert = shouldAlert
+                      //     ? unit == "F"
+                      //         ? double.parse(convertFarenheitToCelcius(double.parse(temperature.text)).toStringAsFixed(1))
+                      //         : double.parse(temperature.text)
+                      //     : null;
+                      // await deviceController.updateDevice(controller.devices[widget.device.id]!);
 
-    //                   showMessage(context, "Controller updated successfully!");
-    //                   Navigator.pop(context);
-    //                 } catch (e) {
-    //                   setState(() {
-    //                     formError = e.toString();
-    //                     isLoading = false;
-    //                   });
+                      showMessage(context, "Controller updated successfully!");
+                      Navigator.pop(context);
+                    } catch (e) {
+                      setState(() {
+                        formError = e.toString();
+                        isLoading = false;
+                      });
 
-    //                   controller.devices[widget.device.id]!.temperatureAlert = previousValue;
-    //                   showMessage(context, "Failed to update the controller");
-    //                 }
-    //               },
-    //             ),
-    //           ],
-    //         ),
-    //       ),
-    //       if (isLoading) const Loader(message: "Updating controller"),
-    //     ],
-    //   ),
-    // );
+                      showMessage(context, "Failed to update the controller");
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
+          if (isLoading) const Loader(message: "Updating controller"),
+        ],
+      ),
+    );
   }
 }

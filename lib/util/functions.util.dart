@@ -102,3 +102,11 @@ Map<String, dynamic> _converterIsolate(dynamic data) {
 void navigateTo(BuildContext context, Widget screen) {
   Navigator.push(context, MaterialPageRoute(builder: (context) => screen));
 }
+
+double dynamicToDouble(dynamic value) {
+  if (value.runtimeType.toString() == "int") {
+    return (value as int).toDouble();
+  }
+
+  return (value as double);
+}

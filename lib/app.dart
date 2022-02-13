@@ -6,9 +6,8 @@ import '/controllers/user.controller.dart';
 import '/enum/route.enum.dart';
 import '/screens/add/add.screen.dart';
 import '/screens/dashboard/dashboard.screen.dart';
-import '/screens/settings/subscreens/feedback.component.dart';
+import 'screens/settings/subscreens/feedback.screen.dart';
 import '/screens/login/login.screen.dart';
-import '/screens/settings/subscreens/name.screen.dart';
 import '/screens/settings/subscreens/password.screen.dart';
 import '/screens/settings/subscreens/phone.screen.dart';
 import '/screens/settings/app.settings.dart';
@@ -72,7 +71,6 @@ class _AppState extends State<App> {
               Screen.feedback: (context) => const FeedbackScreen(),
               Screen.addDevice: (context) => const AddDeviceScreen(),
               Screen.editPhone: (context) => const PhoneEditingScreen(),
-              Screen.editName: (context) => const UpdateNameScreen(),
               Screen.forgotPassword: (context) => const CustomScreen(),
             },
             onGenerateRoute: (settings) {
@@ -84,12 +82,6 @@ class _AppState extends State<App> {
                   } else if (settings.name == Screen.deviceSettings) {
                     final String device = settings.arguments as String;
                     return DeviceSettingsScreen(deviceID: device);
-                  } else if (settings.name == Screen.editRelayName) {
-                    return Container();
-                    // return EditRelayNameScreen(
-                    //   device: (settings.arguments as Map<String, dynamic>)['device'],
-                    //   relayID: (settings.arguments as Map<String, dynamic>)['relayID'],
-                    // );
                   } else {
                     return Container();
                   }

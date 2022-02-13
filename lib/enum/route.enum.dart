@@ -14,13 +14,5 @@ class Screen {
   // Settings Subscreens
   static String get resetPassword => '/resetPassword';
   static String get feedback => '/feedback';
-  static String get editControllerName => '/editControllerName';
-  static String get editRelayName => '/editRelayName';
-
   static String get editPhone => '/editPhone';
-  static String get editName => '/editName';
-
-  // General purpose screens
-  static String get editor => '/editor';
-  static String get selector => '/selector';
 }

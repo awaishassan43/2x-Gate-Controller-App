@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:iot/screens/settings/subscreens/editor.screen.dart';
 import '/components/button.component.dart';
 import '/components/loader.component.dart';
 import '/controllers/user.controller.dart';
@@ -15,6 +16,19 @@ import 'package:tuple/tuple.dart';
 
 class AppSettings extends StatelessWidget {
   const AppSettings({Key? key}) : super(key: key);
+
+  Future<void> updateProfile(BuildContext context, String key, dynamic value) async {
+    try {
+      final UserController controller = Provider.of<UserController>(context, listen: false);
+      final Map<String, dynamic> mappedData = controller.profile!.toJSON();
+      mappedData[key] = value;
+
+      controller.profile = Profile.fromMap(mappedData);
+      await controller.updateProfile();
+    } catch (e) {
+      showMessage(context, e.toString());
+    }
+  }
 
   Future<void> onTimeFormatUpdated(BuildContext context, bool value) async {
     final UserController controller = Provider.of<UserController>(context, listen: false);
@@ -61,16 +75,24 @@ class AppSettings extends StatelessWidget {
                       title: "Email",
                       trailingText: profile.email,
                     ),
-                    Selector<UserController, String?>(
-                      selector: (context, controller) => controller.profile?.name,
+                    Selector<UserController, String>(
+                      selector: (context, controller) => controller.profile!.name,
                       builder: (context, name, __) {
                         return SectionItem(
                           title: "Name",
                           trailingText: name,
                           showEditIcon: true,
-                          onTap: () {
-                            Navigator.pushNamed(context, Screen.editName);
-                          },
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => EditorScreen(
+                                initialValue: name,
+                                onSubmit: (value, _) => updateProfile(context, 'name', value),
+                                title: "Update name",
+                                icon: Icons.person,
+                              ),
+                            ),
+                          ),
                         );
                       },
                     ),
@@ -124,16 +146,19 @@ class AppSettings extends StatelessWidget {
                           trailingText: temperatureUnits[unit],
                           showChevron: true,
                           onTap: () {
-                            Navigator.push(context, MaterialPageRoute(builder: (context) {
-                              return SelectorScreen(
-                                title: "Temperature Unit",
-                                items: temperatureUnits.keys.toList(),
-                                selectedItem: unit,
-                                mapKey: 'temperatureUnit',
-                                isProfileKey: true,
-                                isTime: false,
-                              );
-                            }));
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) {
+                                  return SelectorScreen(
+                                    title: "Temperature Unit",
+                                    items: temperatureUnits.keys.toList(),
+                                    selectedItem: unit,
+                                    isTime: false,
+                                  );
+                                },
+                              ),
+                            );
                           },
                         );
                       },
@@ -236,6 +261,8 @@ class AppSettings extends StatelessWidget {
 
                       await Provider.of<UserController>(context, listen: false).logout();
                       Navigator.pushNamedAndRemoveUntil(context, Screen.login, (route) => false);
+
+                      controller.isLoading = false;
                     } catch (e) {
                       showMessage(context, "Failed to logout");
                     }
