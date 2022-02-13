@@ -1,42 +1,71 @@
 {
   "project_info": {
-    "project_number": "989633882204",
-    "firebase_url": "https://gate-controller-71987-default-rtdb.firebaseio.com",
-    "project_id": "gate-controller-71987",
-    "storage_bucket": "gate-controller-71987.appspot.com"
+    "project_number": "851883017429",
+    "firebase_url": "https://luminous-shadow-330923-default-rtdb.firebaseio.com",
+    "project_id": "luminous-shadow-330923",
+    "storage_bucket": "luminous-shadow-330923.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:989633882204:android:5eff4903a93cd0bdfb1e99",
+        "mobilesdk_app_id": "1:851883017429:android:8d0c5cff296f111a128e5c",
         "android_client_info": {
-          "package_name": "com.iot.gatecontroller"
+          "package_name": "com.designgems.gatecontroller"
         }
       },
       "oauth_client": [
         {
-          "client_id": "989633882204-2u5cl9d7j1b4cdm6hr5ner68k2sard1m.apps.googleusercontent.com",
+          "client_id": "851883017429-6k53eaieq2c07oci0k8n02ig473cmvr6.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.iot.gatecontroller",
-            "certificate_hash": "38637a4bc8d9ac6ae281165f3ef7e940a505e667"
+            "package_name": "com.designgems.gatecontroller",
+            "certificate_hash": "c56fb22d8db22ed2cc2cc4a2711a09dd9878f3e9"
           }
         },
         {
-          "client_id": "989633882204-9umil89pudqe4b9dqgj8iepe0jmspdg1.apps.googleusercontent.com",
+          "client_id": "851883017429-lahb9igcjidr3u68444ec3hs3158rpi6.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCdf6ToO6g7QL6TjrmNlb5SRhhQD_9ru-s"
+          "current_key": "AIzaSyCcTdz2qZlkWs5ktXcAKPyFqqhr2eX6Asc"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "989633882204-9umil89pudqe4b9dqgj8iepe0jmspdg1.apps.googleusercontent.com",
+              "client_id": "851883017429-lahb9igcjidr3u68444ec3hs3158rpi6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:851883017429:android:7a511c24c4ae0870128e5c",
+        "android_client_info": {
+          "package_name": "com.iot.gatecontroller"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "851883017429-lahb9igcjidr3u68444ec3hs3158rpi6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCcTdz2qZlkWs5ktXcAKPyFqqhr2eX6Asc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "851883017429-lahb9igcjidr3u68444ec3hs3158rpi6.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

@@ -82,7 +82,7 @@ class _CustomScreenState extends State<CustomScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          Expanded(
+          Align(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(20.0),
               child: Column(

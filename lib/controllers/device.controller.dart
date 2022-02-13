@@ -78,11 +78,9 @@ class DeviceController extends ChangeNotifier {
 
   Future<void> addDevice(String id, BuildContext context) async {
     try {
-      final http.Response response = await http.post(getCloudURL(id));
-
-      if (response.statusCode >= 300) {
-        throw "Failed to add the device";
-      }
+      /// TODO
+      /// WARNING ---- not checking for response type
+      await http.post(getCloudURL(id));
 
       final UserController controller = Provider.of<UserController>(context, listen: false);
       await controller.addDevice(id);
