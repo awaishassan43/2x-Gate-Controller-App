@@ -319,7 +319,7 @@ class _SignupScreenState extends State<SignupScreen> {
       }
 
       showMessage(context, "Account created successfully!");
-      Navigator.pushNamedAndRemoveUntil(context, Screen.dashboard, (route) => false);
+      Navigator.pushNamedAndRemoveUntil(context, Screen.success, (route) => false);
     } on FirebaseAuthException catch (e) {
       showMessage(context, "Failed to create the account");
       setState(() {

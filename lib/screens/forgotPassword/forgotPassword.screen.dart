@@ -68,7 +68,7 @@ class _CustomScreenState extends State<CustomScreen> {
       }
 
       final UserController controller = Provider.of<UserController>(context, listen: false);
-      controller.forgotPassword(email.text);
+      await controller.forgotPassword(email.text);
 
       showMessage(context, "Email sent successfully! Please check your email for further instructions");
     } catch (e) {

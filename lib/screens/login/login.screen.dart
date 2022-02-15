@@ -326,7 +326,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         CustomButton(
                           text: "Create an Account",
                           onPressed: () {
-                            Navigator.of(context).pushReplacementNamed(Screen.signup);
+                            Navigator.of(context).pushNamedAndRemoveUntil(Screen.signup, (_) => false);
                           },
                           backgroundColor: Colors.black,
                           textColor: Colors.white,

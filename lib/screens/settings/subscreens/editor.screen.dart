@@ -10,6 +10,7 @@ class EditorScreen extends StatefulWidget {
   final String initialValue;
   final String title;
   final IconData icon;
+  final bool isEditingDevice;
   final Future<void> Function(String value, BuildContext context) onSubmit;
   const EditorScreen({
     Key? key,
@@ -17,6 +18,7 @@ class EditorScreen extends StatefulWidget {
     required this.onSubmit,
     required this.title,
     required this.icon,
+    this.isEditingDevice = true,
   }) : super(key: key);
 
   @override
@@ -60,7 +62,7 @@ class _EditorScreenState extends State<EditorScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Edit controller name"),
+        title: Text(widget.title),
         centerTitle: true,
       ),
       body: Stack(
@@ -96,7 +98,7 @@ class _EditorScreenState extends State<EditorScreen> {
                   ),
                 ),
                 CustomButton(
-                  text: "Update name",
+                  text: "Update ${widget.isEditingDevice ? "device" : "profile"}",
                   onPressed: () async {
                     final bool isNameValid = validateName();
 
@@ -111,7 +113,7 @@ class _EditorScreenState extends State<EditorScreen> {
                     try {
                       await widget.onSubmit(textController.text.trim(), context);
 
-                      showMessage(context, "Device updated successfully!");
+                      showMessage(context, "${widget.isEditingDevice ? "Device" : "Profile"} updated successfully!");
                       Navigator.pop(context);
                     } catch (e) {
                       setState(() {
@@ -120,14 +122,14 @@ class _EditorScreenState extends State<EditorScreen> {
                       });
 
                       textController.text = widget.initialValue;
-                      showMessage(context, "Failed to update the device");
+                      showMessage(context, "Failed to update the ${widget.isEditingDevice ? "Device" : "Profile"}");
                     }
                   },
                 ),
               ],
             ),
           ),
-          if (isLoading) const Loader(message: "Updating controller "),
+          if (isLoading) Loader(message: "Updating ${widget.isEditingDevice ? "Device" : "Profile"}"),
         ],
       ),
     );

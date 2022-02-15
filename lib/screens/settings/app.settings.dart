@@ -90,6 +90,7 @@ class AppSettings extends StatelessWidget {
                                 onSubmit: (value, _) => updateProfile(context, 'name', value),
                                 title: "Update name",
                                 icon: Icons.person,
+                                isEditingDevice: false,
                               ),
                             ),
                           ),
@@ -155,6 +156,8 @@ class AppSettings extends StatelessWidget {
                                     items: temperatureUnits.keys.toList(),
                                     selectedItem: unit,
                                     isTime: false,
+                                    mapKey: 'temperatureUnit',
+                                    updateProfile: true,
                                   );
                                 },
                               ),

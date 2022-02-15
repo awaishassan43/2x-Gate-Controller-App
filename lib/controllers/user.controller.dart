@@ -166,6 +166,7 @@ class UserController extends ChangeNotifier {
       }
 
       final Map<String, dynamic> data = profile!.toJSON();
+      data.remove('email');
 
       await users.child(auth.currentUser!.uid).set(data);
     } on FirebaseException catch (e) {

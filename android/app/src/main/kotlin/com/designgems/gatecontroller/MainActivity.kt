@@ -1,4 +1,4 @@
-package com.designgems.gatecontroller
+package com.dev404.iot
 
 import io.flutter.embedding.android.FlutterActivity
 
