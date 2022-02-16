@@ -52,7 +52,7 @@ class _AppState extends State<App> {
           );
         } else {
           if (snapshot.hasError || !snapshot.hasData || snapshot.data == null) {
-            return Material(child: ErrorMessage(message: snapshot.error.toString()));
+            return MaterialApp(home: ErrorMessage(message: snapshot.error.toString()));
           }
 
           final bool isLoggedIn = snapshot.data!;
