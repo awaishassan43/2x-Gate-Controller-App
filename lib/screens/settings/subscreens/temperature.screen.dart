@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:iot/components/button.component.dart';
 import 'package:iot/components/input.component.dart';
 import 'package:iot/components/loader.component.dart';
-import 'package:iot/models/device.model.dart';
 import 'package:iot/util/functions.util.dart';
 import 'package:provider/provider.dart';
 import '/controllers/device.controller.dart';

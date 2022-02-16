@@ -18,6 +18,9 @@ class DeviceController extends ChangeNotifier {
   bool _isLoading = false;
   String _outputTimeError = '';
 
+  /// A local variable to keep and control the listeners
+  Map<String, List<StreamSubscription>> deviceListeners = {};
+
   /// Loader setter and getter
   bool get isLoading => _isLoading;
   set isLoading(bool value) {
@@ -34,10 +37,14 @@ class DeviceController extends ChangeNotifier {
 
   Future<void> loadDevices(BuildContext context) async {
     try {
-      final List<String> deviceIDs = Provider.of<UserController>(context, listen: false).profile!.devices;
+      print("Running load devices");
 
+      final List<String> deviceIDs = Provider.of<UserController>(context, listen: false).profile!.devices;
+      final List<String> devicesToBeRemoved = devices.keys.where((element) => !deviceIDs.contains(element)).toList();
+
+      /// Adding new devices
       for (String id in deviceIDs) {
-        if (!devices.containsKey(id)) {
+        if (!devices.containsKey(id) && deviceListeners[id] == null) {
           final DataSnapshot deviceData = await deviceCollection.child(id).get();
           final DataSnapshot deviceSettings = await settingsCollection.child(id).get();
           final DataSnapshot deviceLogs = await logsCollection.child(id).get();
@@ -55,18 +62,31 @@ class DeviceController extends ChangeNotifier {
           /**
            * Attaching data listener
            */
-          deviceData.ref.onValue.listen((event) {
-            devices[id]!.updateWithJSON(deviceData: objectToMap(event.snapshot.value));
-            notifyListeners();
-          });
+          deviceListeners[id] = [
+            deviceData.ref.onValue.listen((event) {
+              devices[id]!.updateWithJSON(deviceData: objectToMap(event.snapshot.value));
+              notifyListeners();
+            }),
 
-          /**
-           * Attaching settings listener
-           */
-          deviceSettings.ref.onValue.listen((event) {
-            devices[id]!.updateWithJSON(deviceSettings: objectToMap(event.snapshot.value));
-            notifyListeners();
-          });
+            /**
+             * Attaching settings listener
+             */
+            deviceSettings.ref.onValue.listen((event) {
+              devices[id]!.updateWithJSON(deviceSettings: objectToMap(event.snapshot.value));
+              notifyListeners();
+            }),
+          ];
+        }
+      }
+
+      /// Removing previous devices and cancelling subscriptions
+      for (String id in devicesToBeRemoved) {
+        devices.remove(id);
+
+        if (deviceListeners.containsKey(id)) {
+          for (StreamSubscription listener in deviceListeners[id]!) {
+            listener.cancel();
+          }
         }
       }
     } on FirebaseException catch (e) {
@@ -78,13 +98,22 @@ class DeviceController extends ChangeNotifier {
 
   Future<void> addDevice(String id, BuildContext context) async {
     try {
+      final UserController controller = Provider.of<UserController>(context, listen: false);
+
       /// TODO
       /// WARNING ---- not checking for response type
       await http.post(getCloudURL(id));
 
-      final UserController controller = Provider.of<UserController>(context, listen: false);
+      /// Create the json data for the device
+      final Device device = getEmptyDeviceData(id, controller.getUserID());
+
+      /// Add the device data to firebase
+      commandsCollection.child(id).set(device.deviceCommands.toJson());
+      deviceCollection.child(id).set(device.deviceData.toJson());
+      settingsCollection.child(id).set(device.deviceSettings.toJson());
+
+      // /// Attach device to the user profile
       await controller.addDevice(id);
-      await loadDevices(context);
     } on FirebaseException catch (e) {
       throw "Error occured while updating the device: ${e.message}";
     } catch (e) {

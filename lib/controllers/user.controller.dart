@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:collection';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -13,6 +14,7 @@ class UserController extends ChangeNotifier {
   late final DatabaseReference users;
   Profile? profile;
   bool _isLoading = false;
+  StreamSubscription? profileListener;
 
   /// Loader getter and setter
   bool get isLoading => _isLoading;
@@ -40,6 +42,10 @@ class UserController extends ChangeNotifier {
     }
   }
 
+  String getUserID() {
+    return auth.currentUser!.uid;
+  }
+
   Future<bool> getLoggedInUser() async {
     try {
       final User? user = FirebaseAuth.instance.currentUser;
@@ -63,6 +69,8 @@ class UserController extends ChangeNotifier {
 
       if (userCredential.user == null) {
         throw Exception("Error occured while trying to login");
+      } else if (!userCredential.user!.emailVerified) {
+        throw Exception("Email not verified - Please check your mail box");
       }
 
       final bool isLoggedIn = await getLoggedInUser();
@@ -75,7 +83,7 @@ class UserController extends ChangeNotifier {
     }
   }
 
-  Future<bool> register(
+  Future<void> register(
     String email,
     String password,
     String firstName,
@@ -109,9 +117,7 @@ class UserController extends ChangeNotifier {
       final String userID = auth.currentUser!.uid;
       await users.child(userID).set(profileData);
 
-      await attachProfileListener();
-
-      return true;
+      await userCredential.user?.sendEmailVerification();
     } on FirebaseException catch (e) {
       throw "Error occured while registering the user: ${e.message}";
     } catch (e) {
@@ -148,7 +154,7 @@ class UserController extends ChangeNotifier {
 
       transformMapToProfile(document.value);
 
-      users.child(userID).onValue.listen((event) {
+      profileListener = users.child(userID).onValue.listen((event) {
         transformMapToProfile(event.snapshot.value);
         notifyListeners();
       });
@@ -222,6 +228,10 @@ class UserController extends ChangeNotifier {
     try {
       await auth.signOut();
       profile = null;
+
+      /// Cancelling the subscription
+      profileListener?.cancel();
+      profileListener = null;
     } on FirebaseException catch (e) {
       throw "Error occured while logging out the user: ${e.message}";
     } catch (e) {

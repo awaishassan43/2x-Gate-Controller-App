@@ -309,3 +309,58 @@ class _StatePayload {
         "humidity": humidity,
       };
 }
+
+Device getEmptyDeviceData(String deviceID, String ownerID) {
+  final Device device = Device(
+    deviceCommands: DeviceCommands(
+      request: _Request(
+        action: 'OPEN GATE',
+        payload: _RequestPayload(
+          exp: DateTime.now().millisecondsSinceEpoch,
+          pass: "1234",
+          state: "OPEN",
+          test: 1,
+        ),
+        reqId: '1234',
+      ),
+      sendToDevice: "OK",
+      timestamp: DateTime.now().millisecondsSinceEpoch,
+    ),
+    deviceSettings: DeviceSettings(
+      deviceId: deviceID,
+      owner: ownerID,
+
+      ///TODO: That's a bit sus
+      type: "garage",
+      value: _Value(
+        alertOnClose: false,
+        alertOnOpen: false,
+        nightAlert: false,
+        region: "UK",
+        temperatureAlert: null,
+        relay1: _RelaySettings(extInput: true, name: 'Front Gate', outTime: 10, scheduled: false, autoClose: 20),
+        relay2: _RelaySettings(extInput: true, name: 'Back Gate', outTime: 10, scheduled: false, autoClose: 20),
+      ),
+    ),
+    deviceData: DeviceData(
+      name: 'Gate Controller',
+      online: true,
+      owner: ownerID,
+      state: _DeviceState(
+        action: "DOOR_ACTIVITY",
+        payload: _StatePayload(
+          exp: DateTime.now().millisecondsSinceEpoch,
+          pass: '1234',
+          state1: 0,
+          state2: 1,
+          Temp: 20,
+          humidity: 20,
+        ),
+        reqId: "123412412123124",
+      ),
+      timestamp: DateTime.now().millisecondsSinceEpoch,
+      type: "garage",
+    ),
+  );
+  return device;
+}

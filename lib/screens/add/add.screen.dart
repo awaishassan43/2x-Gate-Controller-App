@@ -27,10 +27,15 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
 
   bool isLoading = false;
 
-  String? id;
+  /// TODO: uncomment this line
+  // String? id;
+  String? id = 'sherry';
   String? loaderMessage;
 
-  int currentStep = 0;
+  /// TODO: uncomment this line
+  // int currentStep = 0;
+
+  int currentStep = 3;
   final int totalSteps = 3;
 
   @override
@@ -296,7 +301,8 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
                       ),
                     ),
                     Step(
-                      // state: currentStep > 3 ? StepState.complete : StepState.indexed,
+                      /// TODO: uncomment this line
+                      state: currentStep > 3 ? StepState.complete : StepState.indexed,
                       isActive: currentStep == 3,
                       title: const Text(
                         "Reconnect to internet",

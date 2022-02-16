@@ -305,7 +305,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
       FocusScope.of(context).unfocus();
 
-      final bool success = await Provider.of<UserController>(context, listen: false).register(
+      await Provider.of<UserController>(context, listen: false).register(
         email.text,
         password.text,
         firstName.text,
@@ -313,10 +313,6 @@ class _SignupScreenState extends State<SignupScreen> {
         pickedCountry!.phoneCode,
         phone.text,
       );
-
-      if (!success) {
-        throw Exception("Failed to register the user");
-      }
 
       showMessage(context, "Account created successfully!");
       Navigator.pushNamedAndRemoveUntil(context, Screen.success, (route) => false);
