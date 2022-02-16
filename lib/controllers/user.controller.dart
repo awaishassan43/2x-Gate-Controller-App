@@ -216,7 +216,6 @@ class UserController extends ChangeNotifier {
       devices.remove(id);
 
       await devicesReference.set(listToMap(devices));
-      await Provider.of<DeviceController>(context, listen: false).loadDevices(context);
     } on FirebaseException catch (e) {
       throw "Error occured while removing the device: ${e.message}";
     } catch (e) {
@@ -227,11 +226,13 @@ class UserController extends ChangeNotifier {
   Future<void> logout() async {
     try {
       await auth.signOut();
-      profile = null;
 
       /// Cancelling the subscription
       profileListener?.cancel();
       profileListener = null;
+
+      /// Setting profile to null
+      profile = null;
     } on FirebaseException catch (e) {
       throw "Error occured while logging out the user: ${e.message}";
     } catch (e) {

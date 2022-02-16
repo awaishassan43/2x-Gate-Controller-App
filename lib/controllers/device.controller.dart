@@ -39,7 +39,12 @@ class DeviceController extends ChangeNotifier {
     try {
       print("Running load devices");
 
-      final List<String> deviceIDs = Provider.of<UserController>(context, listen: false).profile!.devices;
+      final List<String>? deviceIDs = Provider.of<UserController>(context, listen: false).profile?.devices;
+
+      if (deviceIDs == null) {
+        return;
+      }
+
       final List<String> devicesToBeRemoved = devices.keys.where((element) => !deviceIDs.contains(element)).toList();
 
       /// Adding new devices

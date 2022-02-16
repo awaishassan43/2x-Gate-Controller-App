@@ -262,9 +262,9 @@ class AppSettings extends StatelessWidget {
                     try {
                       controller.isLoading = true;
 
-                      await Provider.of<UserController>(context, listen: false).logout();
-                      Navigator.pushNamedAndRemoveUntil(context, Screen.login, (route) => false);
+                      await Navigator.pushNamedAndRemoveUntil(context, Screen.login, (route) => false);
 
+                      await Provider.of<UserController>(context, listen: false).logout();
                       controller.isLoading = false;
                     } catch (e) {
                       showMessage(context, "Failed to logout");

@@ -48,8 +48,8 @@ class Dashboard extends StatelessWidget {
       ),
       body: Stack(
         children: [
-          Selector<UserController, List<String>>(
-            selector: (context, controller) => controller.profile!.devices,
+          Selector<UserController, List<String>?>(
+            selector: (context, controller) => controller.profile?.devices,
             builder: (context, _, __) {
               return SingleChildScrollView(
                 padding: const EdgeInsets.all(20),
