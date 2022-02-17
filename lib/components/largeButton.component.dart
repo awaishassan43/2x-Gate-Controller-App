@@ -14,6 +14,8 @@ class LargeButton extends StatelessWidget {
   final double outerSize;
   final double innerSize;
   final bool disableElevation;
+  final bool isDisabled;
+
   const LargeButton({
     Key? key,
     required this.icon,
@@ -28,6 +30,7 @@ class LargeButton extends StatelessWidget {
     this.outerSize = 200,
     this.innerSize = 115,
     this.disableElevation = true,
+    this.isDisabled = false,
   })  : assert(outerSize > innerSize && innerSize > iconSize),
         super(key: key);
 
@@ -94,7 +97,8 @@ class LargeButton extends StatelessWidget {
               ),
               Positioned.fill(
                 child: MaterialButton(
-                  onPressed: onPressed,
+                  disabledColor: Colors.black.withOpacity(0.5),
+                  onPressed: isDisabled ? null : onPressed,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(5000),
                   ),

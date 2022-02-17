@@ -248,7 +248,7 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                             navigateTo(
                               context,
                               EditorScreen(
-                                initialValue: relay1.name,
+                                initialValue: relay2.name,
                                 title: "Relay Name",
                                 icon: Icons.lock,
                                 onSubmit: (name, context) => updateRelay(context, name, 'Relay2', 'Name'),
@@ -463,6 +463,16 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                     CustomButton(
                       text: "Reboot",
                       onPressed: () {},
+                      backgroundColor: Colors.white,
+                      disableElevation: true,
+                    ),
+                    const SizedBox(height: 5),
+                    CustomButton(
+                      text: "Change WiFi credentials",
+                      onPressed: () {
+                        Navigator.pushNamed(context, Screen.addDevice, arguments: true);
+                      },
+                      textColor: Colors.blue,
                       backgroundColor: Colors.white,
                       disableElevation: true,
                     ),

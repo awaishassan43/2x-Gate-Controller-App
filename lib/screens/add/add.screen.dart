@@ -9,7 +9,11 @@ import 'package:http/http.dart' as http;
 import 'package:cross_connectivity/cross_connectivity.dart';
 
 class AddDeviceScreen extends StatefulWidget {
-  const AddDeviceScreen({Key? key}) : super(key: key);
+  final bool changeCredentialsOnly;
+  const AddDeviceScreen({
+    Key? key,
+    this.changeCredentialsOnly = false,
+  }) : super(key: key);
 
   @override
   State<AddDeviceScreen> createState() => _AddDeviceScreenState();
@@ -27,15 +31,10 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
 
   bool isLoading = false;
 
-  /// TODO: uncomment this line
-  // String? id;
-  String? id = 'sherry';
+  String? id;
   String? loaderMessage;
 
-  /// TODO: uncomment this line
-  // int currentStep = 0;
-
-  int currentStep = 3;
+  int currentStep = 0;
   final int totalSteps = 3;
 
   @override
@@ -119,6 +118,11 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
       final String? deviceID = response.body;
       if (deviceID == null) {
         throw Exception("Failed to get response from the device");
+      }
+
+      if (widget.changeCredentialsOnly) {
+        showMessage(context, "Credentials changed successfully!");
+        Navigator.pop(context);
       }
 
       setState(() {
@@ -300,64 +304,64 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
                         ],
                       ),
                     ),
-                    Step(
-                      /// TODO: uncomment this line
-                      state: currentStep > 3 ? StepState.complete : StepState.indexed,
-                      isActive: currentStep == 3,
-                      title: const Text(
-                        "Reconnect to internet",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      content: Column(
-                        children: [
-                          const Text(
-                            "Reconnect your device to internet to continue",
-                            style: TextStyle(fontSize: 12),
+                    if (!widget.changeCredentialsOnly)
+                      Step(
+                        state: currentStep > 3 ? StepState.complete : StepState.indexed,
+                        isActive: currentStep == 3,
+                        title: const Text(
+                          "Reconnect to internet",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
                           ),
-                          const SizedBox(height: 15),
-                          if (addError.isNotEmpty)
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                bottom: 10,
-                                left: 20,
-                                right: 20,
-                              ),
-                              child: Text(
-                                addError,
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.red,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
+                        ),
+                        content: Column(
+                          children: [
+                            const Text(
+                              "Reconnect your device to internet to continue",
+                              style: TextStyle(fontSize: 12),
                             ),
-                          ConnectivityBuilder(
-                            builder: (context, isConnected, _) {
-                              return Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: <Widget>[
-                                  Icon(
-                                    isConnected == true ? Icons.signal_wifi_4_bar : Icons.signal_wifi_off,
-                                    color: isConnected == true ? Colors.green : Colors.red,
+                            const SizedBox(height: 15),
+                            if (addError.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  bottom: 10,
+                                  left: 20,
+                                  right: 20,
+                                ),
+                                child: Text(
+                                  addError,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.red,
                                   ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    isConnected == true ? "Connected to internet" : "Disconnected from internet",
-                                    style: TextStyle(
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ConnectivityBuilder(
+                              builder: (context, isConnected, _) {
+                                return Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: <Widget>[
+                                    Icon(
+                                      isConnected == true ? Icons.signal_wifi_4_bar : Icons.signal_wifi_off,
                                       color: isConnected == true ? Colors.green : Colors.red,
                                     ),
-                                  ),
-                                ],
-                              );
-                            },
-                          ),
-                        ],
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      isConnected == true ? "Connected to internet" : "Disconnected from internet",
+                                      style: TextStyle(
+                                        color: isConnected == true ? Colors.green : Colors.red,
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
                   ],
                   currentStep: currentStep,
                 ),

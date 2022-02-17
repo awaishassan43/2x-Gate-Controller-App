@@ -26,7 +26,7 @@ class Dashboard extends StatelessWidget {
         ),
         actions: [
           Selector<DeviceController, int>(
-            selector: (context, controller) => controller.devices.length,
+            selector: (context, controller) => controller.devices.keys.length,
             builder: (context, devices, _) {
               return devices > 0
                   ? Container()

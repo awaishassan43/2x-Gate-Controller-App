@@ -44,6 +44,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
 
       mappedData['request']['payload']['test'] = relayID;
       mappedData['request']['payload']['state'] = initialState == 1 ? "CLOSE" : "OPEN";
+      mappedData['timestamp'] = DateTime.now().millisecond;
 
       controller.devices[deviceID]!.updateWithJSON(deviceCommands: mappedData);
 
@@ -73,6 +74,34 @@ class _DeviceScreenState extends State<DeviceScreen> {
           Column(
             children: [
               /**
+               * Note
+               */
+              Selector<DeviceController, bool>(
+                selector: (context, controller) => controller.devices[widget.deviceID]!.deviceData.online,
+                builder: (context, isOnline, _) {
+                  return isOnline
+                      ? Container()
+                      : Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 10.0),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.max,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              Icon(
+                                Icons.wifi_off,
+                                color: Colors.red,
+                              ),
+                              SizedBox(width: 10),
+                              Text(
+                                'Device is offline',
+                              ),
+                            ],
+                          ),
+                        );
+                },
+              ),
+
+              /**
                * Scrollable area
                */
               Expanded(
@@ -86,7 +115,8 @@ class _DeviceScreenState extends State<DeviceScreen> {
                       ),
                       builder: (context, tuple, _) {
                         final deviceSettings = tuple.item1.value;
-                        final deviceState = tuple.item2.state.payload;
+                        final deviceData = tuple.item2;
+                        final deviceState = deviceData.state.payload;
 
                         return Column(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -114,9 +144,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
                               icon: deviceState.state1 == 1 ? Icons.lock_open_rounded : Icons.lock_rounded,
                               label: deviceState.state1 == 1 ? "Opened" : "Closed",
                               iconColor: deviceState.state1 == 1 ? const Color(0xFFfc4646) : const Color(0xFF00e6c3),
-                              onPressed: () {
-                                updateRelayStatus(context, 1);
-                              },
+                              onPressed: deviceData.online ? () => updateRelayStatus(context, 1) : null,
                               bottomText: deviceSettings.relay1.name,
                             ),
                             const SizedBox(height: 30),
@@ -124,9 +152,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
                               icon: deviceState.state2 == 1 ? Icons.lock_open_rounded : Icons.lock_rounded,
                               label: deviceState.state2 == 1 ? "Opened" : "Closed",
                               iconColor: deviceState.state2 == 1 ? const Color(0xFFfc4646) : const Color(0xFF00e6c3),
-                              onPressed: () {
-                                updateRelayStatus(context, 2);
-                              },
+                              onPressed: deviceData.online ? () => updateRelayStatus(context, 2) : null,
                               bottomText: deviceSettings.relay2.name,
                             ),
                           ],

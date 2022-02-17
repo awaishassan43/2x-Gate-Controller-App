@@ -69,7 +69,6 @@ class _AppState extends State<App> {
               Screen.dashboard: (context) => const Dashboard(),
               Screen.resetPassword: (context) => const ChangePasswordScreen(),
               Screen.feedback: (context) => const FeedbackScreen(),
-              Screen.addDevice: (context) => const AddDeviceScreen(),
               Screen.editPhone: (context) => const PhoneEditingScreen(),
               Screen.forgotPassword: (context) => const CustomScreen(),
             },
@@ -82,6 +81,9 @@ class _AppState extends State<App> {
                   } else if (settings.name == Screen.deviceSettings) {
                     final String device = settings.arguments as String;
                     return DeviceSettingsScreen(deviceID: device);
+                  } else if (settings.name == Screen.addDevice) {
+                    final bool changeOnly = settings.arguments != null ? settings.arguments as bool : false;
+                    return AddDeviceScreen(changeCredentialsOnly: changeOnly);
                   } else {
                     return Container();
                   }
