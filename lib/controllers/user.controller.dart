@@ -4,8 +4,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'package:iot/controllers/device.controller.dart';
-import 'package:provider/provider.dart';
 import '/models/profile.model.dart';
 import '/util/functions.util.dart';
 

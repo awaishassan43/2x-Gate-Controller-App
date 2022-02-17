@@ -37,8 +37,6 @@ class DeviceController extends ChangeNotifier {
 
   Future<void> loadDevices(BuildContext context) async {
     try {
-      print("Running load devices");
-
       final List<String>? deviceIDs = Provider.of<UserController>(context, listen: false).profile?.devices;
 
       if (deviceIDs == null) {
