@@ -97,7 +97,7 @@ class LargeButton extends StatelessWidget {
               ),
               Positioned.fill(
                 child: MaterialButton(
-                  disabledColor: Colors.black.withOpacity(0.5),
+                  disabledColor: isDisabled ? Colors.black.withOpacity(0.5) : null,
                   onPressed: isDisabled ? null : onPressed,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(5000),

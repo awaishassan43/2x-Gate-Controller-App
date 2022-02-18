@@ -21,7 +21,7 @@ class UserController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> init() async {
+  Future<bool?> init() async {
     try {
       WidgetsFlutterBinding.ensureInitialized();
 
@@ -31,7 +31,7 @@ class UserController extends ChangeNotifier {
       users = FirebaseDatabase.instance.ref('users');
 
       // Getting logged in user
-      final bool isLoggedIn = await getLoggedInUser();
+      final bool? isLoggedIn = await getLoggedInUser();
       return isLoggedIn;
     } on FirebaseException catch (e) {
       throw "Error occured while initializing the app: ${e.message}";
@@ -44,13 +44,18 @@ class UserController extends ChangeNotifier {
     return auth.currentUser!.uid;
   }
 
-  Future<bool> getLoggedInUser() async {
+  Future<bool?> getLoggedInUser() async {
     try {
-      final User? user = FirebaseAuth.instance.currentUser;
+      final User? user = auth.currentUser;
 
       if (user != null) {
         await attachProfileListener();
-        return true;
+
+        if (user.emailVerified) {
+          return true;
+        } else {
+          return null;
+        }
       } else {
         return false;
       }
@@ -61,17 +66,15 @@ class UserController extends ChangeNotifier {
     }
   }
 
-  Future<bool> login(String email, String password) async {
+  Future<bool?> login(String email, String password) async {
     try {
       final UserCredential userCredential = await auth.signInWithEmailAndPassword(email: email, password: password);
 
       if (userCredential.user == null) {
         throw Exception("Error occured while trying to login");
-      } else if (!userCredential.user!.emailVerified) {
-        throw Exception("Email not verified - Please check your mail box");
       }
 
-      final bool isLoggedIn = await getLoggedInUser();
+      final bool? isLoggedIn = await getLoggedInUser();
 
       return isLoggedIn;
     } on FirebaseException catch (e) {
@@ -231,6 +234,7 @@ class UserController extends ChangeNotifier {
 
       /// Setting profile to null
       profile = null;
+      notifyListeners();
     } on FirebaseException catch (e) {
       throw "Error occured while logging out the user: ${e.message}";
     } catch (e) {

@@ -136,10 +136,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
       FocusScope.of(context).unfocus();
 
-      final bool success = await Provider.of<UserController>(context, listen: false).login(email.text, password.text);
+      /// Made nullable to handle the third state
+      /// 1. true means logged in successfully
+      /// 2. false means the user was not logged in
+      /// 3. null means the user was logged in but email needs verification
+      final bool? success = await Provider.of<UserController>(context, listen: false).login(email.text, password.text);
 
-      if (!success) {
-        throw Exception("Failed to login");
+      if (success == null) {
+        Navigator.pushNamed(context, Screen.success, arguments: true);
       }
 
       showMessage(context, "Logged in successfully!");
