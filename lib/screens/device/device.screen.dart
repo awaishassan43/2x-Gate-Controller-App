@@ -41,10 +41,15 @@ class _DeviceScreenState extends State<DeviceScreen> {
     try {
       /// Taking a shortcut due to time constraint
       final Map<String, dynamic> mappedData = deviceCommands.toJson();
+      final DateTime currentTime = DateTime.now();
+      final DateTime expiryTime = currentTime.add(const Duration(minutes: 1));
+
+      /// currently set to 60 seconds ahead of current time
 
       mappedData['request']['payload']['test'] = relayID;
       mappedData['request']['payload']['state'] = initialState == 1 ? "CLOSE" : "OPEN";
-      mappedData['timestamp'] = DateTime.now().millisecond;
+      mappedData['timestamp'] = currentTime.millisecondsSinceEpoch;
+      mappedData['request']['payload']['exp'] = expiryTime.millisecondsSinceEpoch;
 
       controller.devices[deviceID]!.updateWithJSON(deviceCommands: mappedData);
 
