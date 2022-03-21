@@ -68,7 +68,7 @@ class UserController extends ChangeNotifier {
 
   Future<bool?> login(String email, String password) async {
     try {
-      final UserCredential userCredential = await auth.signInWithEmailAndPassword(email: email, password: password);
+      final UserCredential userCredential = await auth.signInWithEmailAndPassword(email: email.trim(), password: password);
 
       if (userCredential.user == null) {
         throw Exception("Error occured while trying to login");

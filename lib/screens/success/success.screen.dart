@@ -140,8 +140,15 @@ class _SuccessScreenState extends State<SuccessScreen> {
                         text: "Continue",
                         isDisabled: !isEmailVerified,
                         onPressed: () {
-                          Navigator.pushNamed(context, Screen.dashboard);
+                          Navigator.pushNamedAndRemoveUntil(context, Screen.dashboard, (route) => false);
                         },
+                      ),
+                      const SizedBox(height: 20),
+                      const Text(
+                        "Note: Continue button will only enable if the account is verified",
+                        style: TextStyle(
+                          fontSize: 13,
+                        ),
                       ),
                     ],
                   ),

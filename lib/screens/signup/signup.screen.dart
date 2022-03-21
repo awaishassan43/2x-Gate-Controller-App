@@ -53,7 +53,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
   /// Extraneous variables
   bool isLoading = false;
-  final GlobalKey<FormFieldState> formKey = GlobalKey<FormFieldState>();
+  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
   /// Initializers and disposers
   @override
@@ -159,26 +159,39 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   bool validatePassword() {
+    bool checkPassed = true;
+    String validationError = '';
+
     if (password.text == "") {
-      setState(() {
-        passwordError = "Password cannot be empty!";
-      });
-
-      return false;
-    } else if (password.text.length < 6) {
-      setState(() {
-        passwordError = "Password must be atleast 6 characters in length!";
-      });
-
-      return false;
+      validationError = "Password cannot be empty!";
+      checkPassed = false;
+    } else if (password.text.length < minCharacters) {
+      validationError = "Password must be atleast $minCharacters characters in length!";
+      checkPassed = false;
+    } else if (!RegExp('[A-Z]').hasMatch(password.text)) {
+      validationError = "Password must contain at least one capital letter";
+      checkPassed = false;
+    } else if (!RegExp('[a-z]').hasMatch(password.text)) {
+      validationError = "Password must contain at least one small letter";
+      checkPassed = false;
+    } else if (!RegExp('[0-9]').hasMatch(password.text)) {
+      validationError = "Password must contain at least one digit";
+      checkPassed = false;
+      // ignore: unnecessary_string_escapes
+    } else if (!RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(password.text)) {
+      validationError = "Password must contain at least one special character";
+      checkPassed = false;
     }
 
-    if (passwordError != '') {
-      setState(() {
+    setState(() {
+      if (checkPassed && passwordError != '') {
         passwordError = '';
-      });
-    }
-    return true;
+      } else {
+        passwordError = validationError;
+      }
+    });
+
+    return checkPassed;
   }
 
   bool validateConfirmPassword() {
@@ -196,9 +209,9 @@ class _SignupScreenState extends State<SignupScreen> {
       return false;
     }
 
-    if (passwordError != '') {
+    if (confirmPasswordError != '') {
       setState(() {
-        passwordError = '';
+        confirmPasswordError = '';
       });
     }
     return true;
@@ -280,6 +293,11 @@ class _SignupScreenState extends State<SignupScreen> {
 
   Future<void> signup(BuildContext context) async {
     try {
+      if (!formKey.currentState!.validate()) {
+        debugPrint("Form is invalid");
+        return;
+      }
+
       final bool isEmailValid = validateEmail();
       final bool isPasswordValid = validatePassword();
       final bool isConfirmPasswordValid = validateConfirmPassword();
@@ -294,7 +312,8 @@ class _SignupScreenState extends State<SignupScreen> {
           !isLastNameValid ||
           !isPhoneValid ||
           !isCountryValid ||
-          !isConfirmPasswordValid | !isPasswordValid ||
+          !isPasswordValid ||
+          !isConfirmPasswordValid ||
           !isTOSAgreed) {
         return;
       }

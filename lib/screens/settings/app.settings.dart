@@ -263,16 +263,18 @@ class AppSettings extends StatelessWidget {
                     CustomButton(
                       text: "Sign Out",
                       onPressed: () async {
-                        try {
-                          final UserController controller = Provider.of<UserController>(context, listen: false);
+                        final UserController controller = Provider.of<UserController>(context, listen: false);
 
+                        try {
                           controller.isLoading = true;
 
                           await controller.logout();
                           showMessage(context, "Logged out successfully!");
 
+                          controller.isLoading = false;
                           await Navigator.pushNamedAndRemoveUntil(context, Screen.login, (route) => false);
                         } catch (e) {
+                          controller.isLoading = false;
                           showMessage(context, "Failed to logout");
                         }
                       },

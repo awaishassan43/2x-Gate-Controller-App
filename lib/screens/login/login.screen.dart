@@ -140,10 +140,10 @@ class _LoginScreenState extends State<LoginScreen> {
       /// 1. true means logged in successfully
       /// 2. false means the user was not logged in
       /// 3. null means the user was logged in but email needs verification
-      final bool? success = await Provider.of<UserController>(context, listen: false).login(email.text, password.text);
+      final bool? success = await Provider.of<UserController>(context, listen: false).login(email.text.trim(), password.text);
 
       if (success == null) {
-        Navigator.pushNamed(context, Screen.success, arguments: true);
+        Navigator.pushNamedAndRemoveUntil(context, Screen.success, (route) => false, arguments: true);
       }
 
       showMessage(context, "Logged in successfully!");

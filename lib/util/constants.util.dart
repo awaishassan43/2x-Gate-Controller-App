@@ -7,4 +7,7 @@ const Map<String, String> temperatureUnits = {"C": "Celcius", "F": "Fahrenheit"}
 const String deviceSSID = 'myssid';
 const String devicePassword = 'mypassword';
 
+// Password limit
+int minCharacters = 8;
+
 // TODO: handle the conversion for temperature units in all stuff

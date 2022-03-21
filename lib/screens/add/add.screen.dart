@@ -31,12 +31,10 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
 
   bool isLoading = false;
 
-  /// TODO: Remove the predefined id
-  String? id = 'gem';
+  String? id;
   String? loaderMessage;
 
-  /// TODO: change this line from 3 to 0
-  int currentStep = 3;
+  int currentStep = 0;
   final int totalSteps = 3;
 
   @override
