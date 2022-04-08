@@ -24,6 +24,8 @@ class DeviceScreen extends StatefulWidget {
 
 class _DeviceScreenState extends State<DeviceScreen> {
   bool isLoading = false;
+  bool isFirstRelayDisabled = false;
+  bool isSecondRelayDisabled = false;
 
   Future<void> updateRelayStatus(BuildContext context, int relayID) async {
     final DeviceController controller = Provider.of<DeviceController>(context, listen: false);
@@ -97,9 +99,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
                                 color: Colors.red,
                               ),
                               SizedBox(width: 10),
-                              Text(
-                                'Device is offline',
-                              ),
+                              Text('Device is offline'),
                             ],
                           ),
                         );
@@ -180,8 +180,8 @@ class _DeviceScreenState extends State<DeviceScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    BottomSectionItem(text: "History", onPressed: () {}, icon: Icons.history),
-                    BottomSectionItem(text: "Schedule", icon: Icons.history, onPressed: () {}),
+                    // BottomSectionItem(text: "History", onPressed: () {}, icon: Icons.history),
+                    // BottomSectionItem(text: "Schedule", icon: Icons.history, onPressed: () {}),
                     BottomSectionItem(
                       text: "Settings",
                       icon: Icons.settings,

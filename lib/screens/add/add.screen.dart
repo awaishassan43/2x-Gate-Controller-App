@@ -1,12 +1,14 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
-import '/components/input.component.dart';
-import '/controllers/device.controller.dart';
-import '/util/functions.util.dart';
-import 'package:provider/provider.dart';
-import '/components/loader.component.dart';
-import 'package:http/http.dart' as http;
 import 'package:cross_connectivity/cross_connectivity.dart';
+import 'package:flutter/material.dart';
+import 'package:iot/util/constants.util.dart';
+import 'package:provider/provider.dart';
+import 'package:wifi_scan/wifi_scan.dart';
+
+import '../../components/loader.component.dart';
+import '../../controllers/device.controller.dart';
+import '../../util/functions.util.dart';
+import 'components/ap.component.dart';
 
 class AddDeviceScreen extends StatefulWidget {
   final bool changeCredentialsOnly;
@@ -20,156 +22,165 @@ class AddDeviceScreen extends StatefulWidget {
 }
 
 class _AddDeviceScreenState extends State<AddDeviceScreen> {
-  late final PageController controller;
-  late final TextEditingController ssid;
-  late final TextEditingController password;
+  /// Process state
+  bool isLoading = true;
+  String? loaderMessage = "Waiting for the controller to be connected";
+  ConnectivityStatus status = ConnectivityStatus.none;
+  String? initialSSID;
 
-  String ssidError = '';
-  String passwordError = '';
-  String formError = '';
-  String addError = '';
+  // true means no need to rerun the prepare function
+  bool initialSetupDone = false;
 
-  bool isLoading = false;
+  // true means credentials have been sent... so no need to run
+  bool credentialsSent = false;
+  bool internetReconnected = false;
+  String? deviceID;
+  bool deviceRegistered = false;
 
-  String? id;
-  String? loaderMessage;
+  /// SSID and password state
+  String? selectedSSID;
+  String? password;
 
-  int currentStep = 0;
-  final int totalSteps = 3;
+  /// Errors
+  String? addError = '';
 
   @override
   void initState() {
     super.initState();
 
-    controller = PageController();
-    ssid = TextEditingController();
-    password = TextEditingController();
+    prepare(context);
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  void validateSSID() {
-    setState(() {
-      if (ssid.text.isEmpty) {
-        ssidError = "SSID cannot be empty!";
-      } else if (ssidError.isNotEmpty) {
-        ssidError = '';
-      }
-    });
-  }
-
-  void validatePassword() {
-    setState(() {
-      if (password.text.isEmpty) {
-        passwordError = "Password cannot be empty!";
-      } else if (passwordError.isNotEmpty) {
-        passwordError = '';
-      }
-    });
-  }
-
-  Future<void> sendCreds() async {
-    try {} catch (e) {
-      rethrow;
-    }
-  }
-
-  Future<void> connectDevice(BuildContext context) async {
+  Future<void> prepare(BuildContext context) async {
     try {
-      // Resetting the form error state
-      if (formError != '') {
+      if (addError != null) {
         setState(() {
-          formError = '';
+          addError = null;
         });
       }
 
-      // validating the fields
-      validateSSID();
-      validatePassword();
+      // Verifying that the permissions are granted and check the initial connection type
+      final ConnectivityStatus connectionType = await verifySetup();
 
-      // In case of an error, show error (error is handled in the respective functions above)
-      if (ssidError.isNotEmpty || passwordError.isNotEmpty) {
-        return;
+      if (connectionType != ConnectivityStatus.none) {
+        // In case if the connection type is wifi... then get ssid and set the value
+        if (connectionType != ConnectivityStatus.wifi) {
+          final String? connectedSSID = await getConnectedWiFi();
+
+          if (connectedSSID != null) {
+            setState(() {
+              initialSSID = connectedSSID;
+            });
+          }
+        } else {
+          setState(() {
+            status = connectionType;
+          });
+        }
       }
 
+      // Check if the mobile is connected to the device
+      final bool isDeviceConnected = await connectToDevice();
+
+      if (isDeviceConnected) {
+        setState(() {
+          isLoading = false;
+          initialSetupDone = true;
+        });
+      } else {
+        throw "Failed to connect to the device";
+      }
+    } catch (e) {
+      showMessage(context, "Failed to initialize the device setup");
+      debugPrint(e.toString());
+
+      setState(() {
+        isLoading = false;
+        initialSetupDone = false;
+        addError = e.toString();
+      });
+    }
+  }
+
+  Future<void> onSSIDPressed(String ssid, String password) async {
+    try {
+      debugPrint("Provided SSID: " + ssid + " and password: " + password);
       // Get rid of the keyboard
       if (FocusScope.of(context).hasFocus) {
         FocusScope.of(context).unfocus();
       }
 
       setState(() {
+        addError = null;
         isLoading = true;
-        loaderMessage = "Sending WiFi credentials to the device";
+        selectedSSID = ssid;
+        password = password;
       });
 
-      // Send the request to the device to get the device id
-      final Uri url = Uri.parse(getDeviceURL(ssid.text, password.text));
-      final http.Response response = await http.post(url).timeout(
-        const Duration(milliseconds: 7500),
-        onTimeout: () {
-          throw "Timed out while trying to send credentials to the device";
-        },
-      );
+      if (!credentialsSent) {
+        setState(() {
+          loaderMessage = "Sending WiFi credentials to the device";
+        });
 
-      // Check if the device id was received successfully, and in case of success update the state
-      final String? deviceID = response.body;
-      if (deviceID == null) {
-        throw Exception("Failed to get response from the device");
-      }
+        // Send the request to the device to get the device id
+        final String? id = await sendCredentialsToDevice(ssid, password);
 
-      if (widget.changeCredentialsOnly) {
-        showMessage(context, "Credentials changed successfully!");
-        Navigator.pop(context);
-      }
-
-      setState(() {
-        isLoading = false;
-        id = deviceID;
-        currentStep++;
-      });
-
-      showMessage(context, "Successfully updated credentials on device!");
-    } catch (e) {
-      setState(() {
-        isLoading = false;
-        loaderMessage = null;
-        formError = e.toString();
-      });
-    }
-  }
-
-  Future<void> addDevice(BuildContext context) async {
-    try {
-      if (id == null) {
-        throw "Device id is null!";
-      }
-
-      // Reset the error state and show the loading indicator
-      setState(() {
-        if (addError != '') {
-          addError = '';
+        // Check if the device id was received successfully, and in case of success update the state
+        if (id == null) {
+          throw Exception("Failed to get response from the device");
         }
 
-        isLoading = true;
-        loaderMessage = "Adding device to database";
-      });
+        showMessage(context, "Successfully updated credentials on device!");
+        if (widget.changeCredentialsOnly) {
+          Navigator.pop(context);
+        }
 
-      // Add the device to the database
-      final DeviceController controller = Provider.of<DeviceController>(context, listen: false);
-      await controller.addDevice(id!, context);
-      showMessage(context, "Device added successfully");
+        setState(() {
+          loaderMessage = "Switching to initial connection";
+          credentialsSent = true;
+          deviceID = deviceID;
+        });
+      }
 
-      // Go to previous screen
-      Navigator.pop(context);
+      if (!internetReconnected) {
+        await reconnectInternet(status, initialSSID);
+
+        setState(() {
+          internetReconnected = true;
+          loaderMessage = "Registering the device";
+        });
+      }
+
+      if (!deviceRegistered) {
+        // Add the device to the database
+        final DeviceController controller = Provider.of<DeviceController>(context, listen: false);
+        await controller.addDevice(deviceID!, context);
+        showMessage(context, "Device added successfully");
+
+        setState(() {
+          isLoading = false;
+          deviceRegistered = true;
+        });
+      }
     } catch (e) {
+      debugPrint(e.toString());
       setState(() {
         isLoading = false;
         loaderMessage = null;
         addError = e.toString();
       });
+    }
+  }
+
+  String getButtonText() {
+    if (!initialSetupDone) {
+      return "Retry device connection";
+    } else if (!credentialsSent) {
+      return "Resd wifi credentials";
+    } else if (!internetReconnected) {
+      return "Manually connect to internet and retry";
+    } else {
+      return "Please try again";
     }
   }
 
@@ -182,190 +193,74 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
       ),
       body: Stack(
         children: [
-          SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(vertical: 20.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Stepper(
-                  onStepContinue: () async {
-                    try {
-                      if (currentStep == 0 || currentStep == 1) {
-                        setState(() {
-                          currentStep++;
-                        });
-                      } else if (currentStep == 2) {
-                        await connectDevice(context);
-                      } else if (currentStep == 3 && await Connectivity().checkConnection()) {
-                        await addDevice(context);
-                      } else {
-                        showMessage(context, "Please check your internet connection");
-                      }
-                    } catch (e) {
-                      showMessage(context, "Failed to load next step");
-                    }
-                  },
-                  onStepCancel: () {
-                    if (currentStep != 0 && currentStep != 3) {
-                      setState(() {
-                        currentStep--;
-                      });
-                    }
-                  },
-                  steps: [
-                    Step(
-                      state: currentStep > 0 ? StepState.complete : StepState.indexed,
-                      isActive: currentStep == 0,
-                      title: const Text(
-                        "Set the device to access mode",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      content: const Text(
-                        "Before proceeding, please make sure that the device is in access mode",
-                        style: TextStyle(
+          SizedBox.expand(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Text(
+                    "Select a wifi for your controller to use",
+                  ),
+                  if (addError != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 20, left: 20, right: 20),
+                      child: Text(
+                        addError!,
+                        style: const TextStyle(
                           fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.red,
                         ),
+                        textAlign: TextAlign.center,
                       ),
                     ),
-                    Step(
-                      state: currentStep > 1 ? StepState.complete : StepState.indexed,
-                      isActive: currentStep == 1,
-                      title: const Text(
-                        "Connect to your device's WiFi",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      content: const Text(
-                        "Before proceeding, please make sure that your mobile is connected to the WiFi of the device",
-                        style: TextStyle(
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                    Step(
-                      state: currentStep > 2 ? StepState.complete : StepState.indexed,
-                      isActive: currentStep == 2,
-                      title: const Text(
-                        "Enter the WiFi credentials",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      content: Column(
-                        children: [
-                          const Text(
-                            "Please enter the credentials for the WiFi with which your IoT device will connect",
-                            style: TextStyle(fontSize: 12),
-                          ),
-                          const SizedBox(height: 15),
-                          Form(
-                            child: Column(
+                  const SizedBox(height: 20),
+                  ...!deviceRegistered
+                      ? [
+                          if (initialSetupDone && !credentialsSent && selectedSSID == null)
+                            StreamBuilder<List<WiFiAccessPoint>>(
+                              stream: WiFiScan.instance.onScannedResultsAvailable,
+                              builder: (context, snapshot) => Column(
+                                children: snapshot.data != null
+                                    ? snapshot.data!
+                                        .where((element) => element.ssid != deviceSSID)
+                                        .map((ap) => AccessPointComponent(ssid: ap.ssid, onPressed: onSSIDPressed))
+                                        .toList()
+                                    : [],
+                              ),
+                            ),
+                          if (addError != null)
+                            Column(
                               children: [
-                                if (formError.isNotEmpty)
-                                  Padding(
-                                    padding: const EdgeInsets.only(
-                                      bottom: 10,
-                                      left: 20,
-                                      right: 20,
-                                    ),
-                                    child: Text(
-                                      formError,
-                                      style: const TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.red,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ),
-                                CustomInput(
-                                  icon: Icons.network_wifi_rounded,
-                                  label: "WiFi SSID",
-                                  controller: ssid,
-                                  error: ssidError,
+                                IconButton(
+                                  onPressed: () => initialSetupDone ? onSSIDPressed(selectedSSID!, password!) : prepare(context),
+                                  icon: const Icon(Icons.restart_alt),
                                 ),
-                                const SizedBox(height: 12.5),
-                                CustomInput(
-                                  icon: Icons.wifi_lock_rounded,
-                                  label: "WiFi Password",
-                                  controller: password,
-                                  isPassword: true,
-                                  error: passwordError,
-                                ),
+                                const SizedBox(height: 10),
+                                Text(getButtonText()),
                               ],
                             ),
+                        ]
+                      : [
+                          const Text(
+                            "Device registered successfully",
+                            style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 20),
+                          Row(
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.arrow_back),
+                                onPressed: () => Navigator.pop(context),
+                              ),
+                              const Text("Go back"),
+                            ],
                           ),
                         ],
-                      ),
-                    ),
-                    if (!widget.changeCredentialsOnly)
-                      Step(
-                        state: currentStep > 3 ? StepState.complete : StepState.indexed,
-                        isActive: currentStep == 3,
-                        title: const Text(
-                          "Reconnect to internet",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        content: Column(
-                          children: [
-                            const Text(
-                              "Reconnect your device to internet to continue",
-                              style: TextStyle(fontSize: 12),
-                            ),
-                            const SizedBox(height: 15),
-                            if (addError.isNotEmpty)
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                  bottom: 10,
-                                  left: 20,
-                                  right: 20,
-                                ),
-                                child: Text(
-                                  addError,
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.red,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                            ConnectivityBuilder(
-                              builder: (context, isConnected, _) {
-                                return Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: <Widget>[
-                                    Icon(
-                                      isConnected == true ? Icons.signal_wifi_4_bar : Icons.signal_wifi_off,
-                                      color: isConnected == true ? Colors.green : Colors.red,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      isConnected == true ? "Connected to internet" : "Disconnected from internet",
-                                      style: TextStyle(
-                                        color: isConnected == true ? Colors.green : Colors.red,
-                                      ),
-                                    ),
-                                  ],
-                                );
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                  ],
-                  currentStep: currentStep,
-                ),
-              ],
+                ],
+              ),
             ),
           ),
           if (isLoading) Loader(message: loaderMessage),

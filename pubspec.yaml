@@ -43,9 +43,11 @@ dependencies:
   firebase_auth: ^3.2.0
   intl: ^0.17.0
   tuple: ^2.0.0
-  cross_connectivity: ^3.0.3
+  cross_connectivity: ^3.0.5
   firebase_database: ^9.0.4
   wifi_scan: ^0.1.0+3
+  wifi_iot: ^0.3.15+2
+  location: ^4.3.0
 
 dev_dependencies:
   flutter_test:

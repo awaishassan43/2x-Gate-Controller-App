@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:collection';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import '/models/profile.model.dart';
@@ -13,6 +12,7 @@ class UserController extends ChangeNotifier {
   Profile? profile;
   bool _isLoading = false;
   StreamSubscription? profileListener;
+  bool initialized = false;
 
   /// Loader getter and setter
   bool get isLoading => _isLoading;
@@ -21,31 +21,25 @@ class UserController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool?> init() async {
-    try {
-      WidgetsFlutterBinding.ensureInitialized();
-
-      // Initializing firebase and collections
-      await Firebase.initializeApp();
-      auth = FirebaseAuth.instance;
-      users = FirebaseDatabase.instance.ref('users');
-
-      // Getting logged in user
-      final bool? isLoggedIn = await getLoggedInUser();
-      return isLoggedIn;
-    } on FirebaseException catch (e) {
-      throw "Error occured while initializing the app: ${e.message}";
-    } catch (e) {
-      throw "Failed to initialize the app: ${e.toString()}";
-    }
-  }
-
+  /// Methods
   String getUserID() {
     return auth.currentUser!.uid;
   }
 
+  void initialize() {
+    if (!initialized) {
+      auth = FirebaseAuth.instance;
+      users = FirebaseDatabase.instance.ref('users');
+      FirebaseDatabase.instance.setPersistenceEnabled(true);
+
+      initialized = true;
+    }
+  }
+
   Future<bool?> getLoggedInUser() async {
     try {
+      initialize();
+
       final User? user = auth.currentUser;
 
       if (user != null) {
@@ -240,6 +234,10 @@ class UserController extends ChangeNotifier {
     } catch (e) {
       throw "Failed to logout the user: ${e.toString()}";
     }
+  }
+
+  String getUserEmail() {
+    return profile!.email;
   }
 
   Future<void> forgotPassword(String email) async {

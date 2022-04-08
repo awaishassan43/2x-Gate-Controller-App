@@ -1,9 +1,16 @@
 import 'dart:convert';
-
+import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import '/controllers/user.controller.dart';
+import 'package:iot/controllers/device.controller.dart';
+import 'package:location/location.dart';
+import 'package:wifi_iot/wifi_iot.dart';
 import 'package:provider/provider.dart';
+import 'package:cross_connectivity/cross_connectivity.dart';
+import 'package:wifi_scan/wifi_scan.dart';
+
+import '/controllers/user.controller.dart';
+import 'constants.util.dart';
 
 void showMessage(BuildContext context, String message) {
   ScaffoldMessenger.of(context).showSnackBar(
@@ -49,7 +56,7 @@ Map<String, dynamic> objectToMap(Object? value) {
 }
 
 String getDeviceURL(String ssid, String password) {
-  return 'http://192.168.4.1:80/ssid?ssid=$ssid&password=$password';
+  return 'http://$deviceIP/ssid?ssid=$ssid&password=$password';
 }
 
 Uri getCloudURL(String id) {
@@ -110,3 +117,157 @@ double dynamicToDouble(dynamic value) {
 
   return (value as double);
 }
+
+Future<ConnectivityStatus> verifySetup() async {
+  debugPrint("Verifying the setup");
+
+  // Check the location permission status
+  PermissionStatus requestPermission = await Location.instance.hasPermission();
+
+  // If not granted, then request the permission
+  if (requestPermission == PermissionStatus.deniedForever) {
+    throw "Please allow location permissions from the app settings";
+  } else if (requestPermission != PermissionStatus.granted) {
+    requestPermission = await Location.instance.requestPermission();
+
+    if (requestPermission != PermissionStatus.granted) {
+      throw "This feature requires location permission";
+    }
+  }
+
+  debugPrint("Location permission granted");
+
+  // Check if the location is enabled
+  bool isLocationEnabled = await Location.instance.serviceEnabled();
+
+  // If not enabled, then request the location to be enabled
+  if (!isLocationEnabled) {
+    isLocationEnabled = await Location.instance.requestService();
+
+    if (!isLocationEnabled) {
+      throw "Please enable the location services";
+    }
+  }
+
+  debugPrint("Location services enabled");
+
+  if (await WiFiScan.instance.canGetScannedResults(askPermissions: true) != CanGetScannedResults.yes) {
+    debugPrint("WiFi scan not allowed");
+
+    throw "WiFi scan not allowed";
+  }
+
+  final ConnectivityStatus status = await Connectivity().checkConnectivity();
+  return status;
+}
+
+Future<bool> connectToDevice() async {
+  // Enable wifi if not
+  if (!await WiFiForIoTPlugin.isEnabled()) {
+    debugPrint("Enabling wifi");
+    await WiFiForIoTPlugin.setEnabled(true, shouldOpenSettings: true);
+
+    debugPrint("Waiting for the results to come in");
+    await WiFiScan.instance.onScannedResultsAvailable.firstWhere((list) {
+      for (WiFiAccessPoint ap in list) {
+        if (ap.ssid == deviceSSID) {
+          return true;
+        }
+      }
+
+      return false;
+    }).timeout(const Duration(seconds: 15000));
+  }
+
+  debugPrint("Wifi enabled");
+
+  // Check if already connected
+  if (await WiFiForIoTPlugin.isConnected()) {
+    final String? connectedSSID = await getConnectedWiFi();
+
+    if (connectedSSID != null && connectedSSID == deviceSSID) {
+      debugPrint("WiFi is already connected with: " + connectedSSID.toString());
+      return true;
+    }
+  }
+
+  final bool isConnected =
+      await WiFiForIoTPlugin.findAndConnect(deviceSSID, password: devicePassword, withInternet: true).timeout(const Duration(seconds: 10));
+
+  debugPrint("WiFi connected: " + isConnected.toString());
+
+  return isConnected;
+}
+
+Future<String?> getConnectedWiFi() async {
+  final String? connectedSSID = await WiFiForIoTPlugin.getSSID();
+  return connectedSSID;
+}
+
+Future<String> sendCredentialsToDevice(String ssid, String password) async {
+  try {
+    final Uri url = Uri.parse(getDeviceURL(ssid, password));
+    final http.Response response = await http.post(url).timeout(
+      const Duration(milliseconds: 15000),
+      onTimeout: () {
+        throw "Timed out while trying to send credentials to the device";
+      },
+    );
+
+    debugPrint("Response: " + response.body.toString());
+
+    return response.body;
+  } catch (e) {
+    rethrow;
+  }
+}
+
+Future<void> reconnectInternet(ConnectivityStatus status, String? initialSSID) async {
+  try {
+    bool isConnected = false;
+
+    if (initialSSID != null) {
+      final bool isDisconnected = await WiFiForIoTPlugin.disconnect();
+
+      if (!isDisconnected) {
+        throw "Failed to disconnect from the device";
+      } else if (initialSSID == deviceSSID) {
+        throw "The initially connected WiFi was the device's - Please connect to another wifi or cellular network and press the continue button";
+      }
+
+      isConnected = await WiFiForIoTPlugin.connect(initialSSID);
+
+      if (!isConnected) {
+        throw "Failed to reconnect to " + initialSSID;
+      }
+    } else if (status == ConnectivityStatus.mobile) {
+      await WiFiForIoTPlugin.setEnabled(false);
+    }
+
+    await Connectivity().isConnected.firstWhere((element) => element).timeout(
+      const Duration(seconds: 5),
+      onTimeout: () {
+        throw "Timed out while waiting for internet connection";
+      },
+    );
+  } catch (e) {
+    rethrow;
+  }
+}
+
+Future<void> bypassDevice(BuildContext context) async {
+  const String deviceID = 'esp-3c71bfab3e6c';
+  final DeviceController controller = Provider.of<DeviceController>(context, listen: false);
+  await controller.addDevice(deviceID, context);
+  showMessage(context, "Device added successfully");
+}
+
+// Future<void> waitForInternetConnection() async {
+//   try {
+//     if (!await Connectivity().checkConnection()) {
+//       await Connectivity().isConnected.firstWhere((isConnected) => isConnected).timeout(timeLimit);
+//     }
+//   } catch (e) {
+//     rethrow;
+//   }
+// }

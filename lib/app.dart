@@ -19,26 +19,13 @@ import 'package:provider/provider.dart';
 
 import 'screens/device/device.screen.dart';
 
-class App extends StatefulWidget {
+class App extends StatelessWidget {
   const App({Key? key}) : super(key: key);
-
-  @override
-  _AppState createState() => _AppState();
-}
-
-class _AppState extends State<App> {
-  late final Future<bool?> initializer;
-
-  @override
-  void initState() {
-    super.initState();
-    initializer = Provider.of<UserController>(context, listen: false).init();
-  }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<bool?>(
-      future: initializer,
+      future: Provider.of<UserController>(context, listen: false).getLoggedInUser(),
       builder: (BuildContext context, AsyncSnapshot<bool?> snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
           return SizedBox.expand(

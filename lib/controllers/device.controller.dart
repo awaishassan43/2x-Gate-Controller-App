@@ -85,6 +85,7 @@ class DeviceController extends ChangeNotifier {
       /// Removing previous devices and cancelling subscriptions
       for (String id in devicesToBeRemoved) {
         devices.remove(id);
+        notifyListeners();
 
         if (deviceListeners.containsKey(id)) {
           for (StreamSubscription listener in deviceListeners[id]!) {
