@@ -30,23 +30,23 @@ class _AccessPointComponentState extends State<AccessPointComponent> {
   }
 
   void connect() {
-    // final String value = password.text;
+    final String value = password.text;
 
-    // // if (value.isEmpty) {
-    // //   setState(() {
-    // //     passwordError = "Password must not be empty";
-    // //   });
+    if (value.isEmpty) {
+      setState(() {
+        passwordError = "Password must not be empty";
+      });
 
-    // //   return;
-    // // } else if (passwordError.isNotEmpty) {
-    // //   setState(() {
-    // //     passwordError = '';
-    // //   });
+      return;
+    } else if (passwordError.isNotEmpty) {
+      setState(() {
+        passwordError = '';
+      });
 
-    // //   return;
-    // // }
+      return;
+    }
 
-    widget.onPressed(widget.ssid, "2242832farm");
+    widget.onPressed(widget.ssid, value);
   }
 
   @override

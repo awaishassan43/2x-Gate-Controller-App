@@ -60,12 +60,16 @@ class DeviceController extends ChangeNotifier {
           map['deviceStateLogs'] = objectToMap(deviceLogs.value);
 
           final Device device = Device.fromJson(map);
-          devices[id] = device;
+          final Map<String, Device> deviceList = Map.from(devices);
+          deviceList[id] = device;
+
+          devices = deviceList;
 
           /**
            * Attaching data listener
            */
-          deviceListeners[id] = [
+          final Map<String, List<StreamSubscription<dynamic>>> listenersList = Map.from(deviceListeners);
+          listenersList[id] = [
             deviceData.ref.onValue.listen((event) {
               devices[id]!.updateWithJSON(deviceData: objectToMap(event.snapshot.value));
               notifyListeners();
@@ -79,19 +83,30 @@ class DeviceController extends ChangeNotifier {
               notifyListeners();
             }),
           ];
+
+          deviceListeners = listenersList;
+          notifyListeners();
         }
       }
 
       /// Removing previous devices and cancelling subscriptions
       for (String id in devicesToBeRemoved) {
-        devices.remove(id);
-        notifyListeners();
+        final Map<String, Device> deviceList = Map.from(devices);
+        deviceList.remove(id);
+
+        devices = deviceList;
 
         if (deviceListeners.containsKey(id)) {
           for (StreamSubscription listener in deviceListeners[id]!) {
-            listener.cancel();
+            await listener.cancel();
           }
+
+          final Map<String, List<StreamSubscription<dynamic>>> listenersList = Map.from(deviceListeners);
+          listenersList.remove(id);
+          deviceListeners = listenersList;
         }
+
+        notifyListeners();
       }
     } on FirebaseException catch (e) {
       throw Exception("Error occured while loading devices: ${e.message}");

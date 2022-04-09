@@ -497,7 +497,7 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                             isLoading = true;
                           });
 
-                          await Provider.of<UserController>(context, listen: false).removeDevice(context, widget.deviceID);
+                          Provider.of<UserController>(context, listen: false).removeDevice(context, widget.deviceID);
                           Navigator.popUntil(context, ModalRoute.withName(Screen.dashboard));
                         } catch (e) {
                           setState(() {

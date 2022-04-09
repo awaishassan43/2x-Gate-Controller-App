@@ -162,6 +162,10 @@ Future<ConnectivityStatus> verifySetup() async {
 }
 
 Future<bool> connectToDevice() async {
+  if (await WiFiForIoTPlugin.isConnected()) {
+    await WiFiForIoTPlugin.disconnect();
+  }
+
   // Enable wifi if not
   if (!await WiFiForIoTPlugin.isEnabled()) {
     debugPrint("Enabling wifi");
@@ -187,16 +191,34 @@ Future<bool> connectToDevice() async {
 
     if (connectedSSID != null && connectedSSID == deviceSSID) {
       debugPrint("WiFi is already connected with: " + connectedSSID.toString());
+      await forceWiFiUsage();
       return true;
     }
   }
 
-  final bool isConnected =
-      await WiFiForIoTPlugin.findAndConnect(deviceSSID, password: devicePassword, withInternet: true).timeout(const Duration(seconds: 10));
+  debugPrint("Connecting to the device");
+
+  final bool isConnected = await WiFiForIoTPlugin.findAndConnect(deviceSSID, password: devicePassword).timeout(
+    const Duration(seconds: 20),
+    onTimeout: () {
+      throw "Timed out while waiting for the device to be connected";
+    },
+  );
 
   debugPrint("WiFi connected: " + isConnected.toString());
 
+  await forceWiFiUsage();
+
   return isConnected;
+}
+
+Future<void> forceWiFiUsage() async {
+  debugPrint("Enabling the use of wifi irrespective of internet status");
+  final bool areRequestsAllowed = await WiFiForIoTPlugin.forceWifiUsage(true);
+
+  if (!areRequestsAllowed) {
+    throw "Something went wrong while adding the device";
+  }
 }
 
 Future<String?> getConnectedWiFi() async {
@@ -214,6 +236,8 @@ Future<String> sendCredentialsToDevice(String ssid, String password) async {
       },
     );
 
+    await WiFiForIoTPlugin.forceWifiUsage(false);
+
     debugPrint("Response: " + response.body.toString());
 
     return response.body;
@@ -224,18 +248,12 @@ Future<String> sendCredentialsToDevice(String ssid, String password) async {
 
 Future<void> reconnectInternet(ConnectivityStatus status, String? initialSSID) async {
   try {
-    bool isConnected = false;
-
     if (initialSSID != null) {
-      final bool isDisconnected = await WiFiForIoTPlugin.disconnect();
-
-      if (!isDisconnected) {
-        throw "Failed to disconnect from the device";
-      } else if (initialSSID == deviceSSID) {
-        throw "The initially connected WiFi was the device's - Please connect to another wifi or cellular network and press the continue button";
+      if (initialSSID == deviceSSID || initialSSID == "<unknown ssid>") {
+        throw "Failed to automatically connect to internet - Please connect to wifi or cellular network manually and press the continue button";
       }
 
-      isConnected = await WiFiForIoTPlugin.connect(initialSSID);
+      final bool isConnected = await WiFiForIoTPlugin.connect(initialSSID, withInternet: true);
 
       if (!isConnected) {
         throw "Failed to reconnect to " + initialSSID;
@@ -244,12 +262,24 @@ Future<void> reconnectInternet(ConnectivityStatus status, String? initialSSID) a
       await WiFiForIoTPlugin.setEnabled(false);
     }
 
-    await Connectivity().isConnected.firstWhere((element) => element).timeout(
-      const Duration(seconds: 5),
+    debugPrint("Checking internet connection");
+
+    final bool isInternetConnected = await Connectivity()
+        .isConnected
+        .firstWhere(
+          (isConnected) => isConnected == true,
+          orElse: () => false,
+        )
+        .timeout(
+      const Duration(seconds: 10),
       onTimeout: () {
         throw "Timed out while waiting for internet connection";
       },
     );
+
+    if (!isInternetConnected) {
+      throw "Please make sure internet is connected";
+    }
   } catch (e) {
     rethrow;
   }
@@ -271,3 +301,11 @@ Future<void> bypassDevice(BuildContext context) async {
 //     rethrow;
 //   }
 // }
+
+Future<void> getWiFiDevices() async {
+  try {
+    await WiFiScan.instance.startScan();
+  } catch (e) {
+    throw "Failed to load wifi devices";
+  }
+}

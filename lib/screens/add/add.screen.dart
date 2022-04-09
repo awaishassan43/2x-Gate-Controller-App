@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:cross_connectivity/cross_connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:iot/util/constants.util.dart';
@@ -39,7 +40,7 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
 
   /// SSID and password state
   String? selectedSSID;
-  String? password;
+  String? selectedPassword;
 
   /// Errors
   String? addError = '';
@@ -81,6 +82,7 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
 
       // Check if the mobile is connected to the device
       final bool isDeviceConnected = await connectToDevice();
+      await getWiFiDevices();
 
       if (isDeviceConnected) {
         setState(() {
@@ -114,8 +116,10 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
         addError = null;
         isLoading = true;
         selectedSSID = ssid;
-        password = password;
+        selectedPassword = password;
       });
+
+      debugPrint("Checking if credentials are sent already");
 
       if (!credentialsSent) {
         setState(() {
@@ -138,9 +142,11 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
         setState(() {
           loaderMessage = "Switching to initial connection";
           credentialsSent = true;
-          deviceID = deviceID;
+          deviceID = id;
         });
       }
+
+      debugPrint("Checking if internet is reconnected");
 
       if (!internetReconnected) {
         await reconnectInternet(status, initialSSID);
@@ -150,6 +156,8 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
           loaderMessage = "Registering the device";
         });
       }
+
+      debugPrint("Checking if device is already registered");
 
       if (!deviceRegistered) {
         // Add the device to the database
@@ -162,12 +170,27 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
           deviceRegistered = true;
         });
       }
+    } on SocketException catch (e) {
+      debugPrint("Caught Socket exception: " + e.toString());
+      setState(() {
+        isLoading = false;
+        loaderMessage = null;
+        addError = e.message.toString();
+
+        if (credentialsSent && !internetReconnected) {
+          initialSSID = null;
+        }
+      });
     } catch (e) {
       debugPrint(e.toString());
       setState(() {
         isLoading = false;
         loaderMessage = null;
         addError = e.toString();
+
+        if (credentialsSent && !internetReconnected) {
+          initialSSID = null;
+        }
       });
     }
   }
@@ -188,7 +211,7 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Add Device"),
+        title: widget.changeCredentialsOnly ? const Text("Change device credentials") : const Text("Add Device"),
         centerTitle: true,
       ),
       body: Stack(
@@ -235,7 +258,7 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
                             Column(
                               children: [
                                 IconButton(
-                                  onPressed: () => initialSetupDone ? onSSIDPressed(selectedSSID!, password!) : prepare(context),
+                                  onPressed: () => initialSetupDone ? onSSIDPressed(selectedSSID!, selectedPassword!) : prepare(context),
                                   icon: const Icon(Icons.restart_alt),
                                 ),
                                 const SizedBox(height: 10),
