@@ -43,7 +43,7 @@ class _DeviceComponentState extends State<DeviceComponent> {
       final DateTime expiryTime = currentTime.add(const Duration(minutes: 1));
 
       /// currently set to 60 seconds ahead of current time
-
+      mappedData['request']['payload']['reboot'] = 0;
       mappedData['request']['payload']['test'] = relayID;
       mappedData['request']['payload']['state'] = initialState == 1 ? "CLOSE" : "OPEN";
       mappedData['timestamp'] = currentTime.millisecondsSinceEpoch;

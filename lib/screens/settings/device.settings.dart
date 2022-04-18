@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:iot/screens/settings/subscreens/editor.screen.dart';
@@ -31,6 +32,43 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
   bool isLoading = false;
   String? deleteError;
 
+    Future<void> reboot(BuildContext context) async {
+    final DeviceController controller = Provider.of<DeviceController>(context, listen: false);
+
+    final DeviceCommands deviceCommands = controller.devices[widget.deviceID]!.deviceCommands;
+    final String deviceID = widget.deviceID;
+
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      /// Taking a shortcut due to time constraint
+      final Map<String, dynamic> mappedData = deviceCommands.toJson();
+      final DateTime currentTime = DateTime.now();
+      final DateTime expiryTime = currentTime.add(const Duration(minutes: 1));
+
+      /// currently set to 60 seconds ahead of current time
+
+      mappedData['request']['payload']['online'] = 1;
+      mappedData['timestamp'] = currentTime.millisecondsSinceEpoch;
+      mappedData['request']['payload']['exp'] = expiryTime.millisecondsSinceEpoch;
+
+      controller.devices[deviceID]!.updateWithJSON(deviceCommands: mappedData);
+
+      await controller.updateDevice(deviceID, "deviceCommands");
+      showMessage(context, "Controller updated successfully!");
+    } on FirebaseException catch (e) {
+      showMessage(context, e.toString());
+    } catch(e) {
+      showMessage(context, e.toString());
+    }
+
+    setState(() {
+      isLoading = false;
+    });
+  }
+
   Future<void> updateRelay(BuildContext context, dynamic value, String relayID, String key) async {
     try {
       final DeviceController controller = Provider.of<DeviceController>(context, listen: false);
@@ -41,6 +79,8 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
 
       controller.devices[widget.deviceID]!.updateWithJSON(deviceSettings: mappedData);
       await controller.updateDevice(widget.deviceID, 'deviceSettings');
+    } on FirebaseException catch (e) {
+      showMessage(context, e.message ?? "Something went wrong while trying to update settings");
     } catch (e) {
       showMessage(context, e.toString());
     }
@@ -55,17 +95,19 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
       controller.devices[widget.deviceID]!.updateWithJSON(deviceData: deviceData);
 
       await controller.updateDevice(widget.deviceID, "deviceData");
+    } on FirebaseException catch (e) {
+      showMessage(context, e.message ?? "Something went wrong while trying to update settings");
     } catch (e) {
       showMessage(context, e.toString());
     }
   }
 
   Future<void> updateControllerSettings(BuildContext context, String key, dynamic value) async {
-    try {
-      setState(() {
-        isLoading = true;
-      });
+    setState(() {
+      isLoading = true;
+    });
 
+    try {
       final DeviceController controller = Provider.of<DeviceController>(context, listen: false);
       final Map<String, dynamic> deviceSettings = controller.devices[widget.deviceID]!.deviceSettings.toJson();
       deviceSettings['value'][key] = value;
@@ -73,6 +115,8 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
       controller.devices[widget.deviceID]!.updateWithJSON(deviceSettings: deviceSettings);
 
       await controller.updateDevice(widget.deviceID, "deviceSettings");
+    } on FirebaseException catch (e) {
+      showMessage(context, e.message ?? "Something went wrong while trying to update settings");
     } catch (e) {
       showMessage(context, e.toString());
     }
@@ -203,11 +247,11 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                               builder: (context) {
                                 return SelectorScreen<int?>(
                                   title: "Auto Close Time",
-                                  items: const [30, 60, 90, 120, 150, null],
+                                  items: const [0, 30, 60, 90, 120, 150],
                                   selectedItem: relay1.autoClose,
                                   deviceID: widget.deviceID,
-                                  nullText: "Disable Auto Close",
-                                  sendNullAsValue: 0,
+                                  disabledText: "Disable Auto Close",
+                                  disabledValue: 0,
                                   relayID: 'Relay1',
                                   mapKey: 'autoClose',
                                   updateDeviceSettings: true,
@@ -298,10 +342,10 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                               builder: (context) {
                                 return SelectorScreen<int?>(
                                   title: "Auto Close Time",
-                                  items: const [30, 60, 90, 120, 150, null],
-                                  selectedItem: relay2.autoClose == 0 ? null : relay2.autoClose,
-                                  nullText: "Disable Auto Close",
-                                  sendNullAsValue: 0,
+                                  items: const [0, 30, 60, 90, 120, 150],
+                                  selectedItem: relay2.autoClose,
+                                  disabledText: "Disable Auto Close",
+                                  disabledValue: 0,
                                   deviceID: widget.deviceID,
                                   relayID: 'Relay2',
                                   mapKey: 'autoClose',
@@ -466,7 +510,7 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                     const SizedBox(height: 40),
                     CustomButton(
                       text: "Reboot",
-                      onPressed: () {},
+                      onPressed: () => reboot(context),
                       backgroundColor: Colors.white,
                       disableElevation: true,
                     ),

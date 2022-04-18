@@ -6,6 +6,7 @@ class CustomSelector<T> extends StatelessWidget {
   final void Function(T? value) onSelected;
   final String Function(T value)? transformer;
   final String? nullText;
+  final T? nullValue;
 
   const CustomSelector({
     Key? key,
@@ -14,7 +15,12 @@ class CustomSelector<T> extends StatelessWidget {
     required this.onSelected,
     this.transformer,
     this.nullText,
-  }) : super(key: key);
+    this.nullValue,
+  })  : assert(
+          (nullText != null && nullValue != null) || (nullText == null && nullValue == null),
+          "Either provide both values or remove both values",
+        ),
+        super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +38,9 @@ class CustomSelector<T> extends StatelessWidget {
             final int index = entry.key;
             final String option = transformer != null ? transformer!(entry.value) : entry.value.toString();
 
+            print(nullText);
+            print(nullValue);
+            print(entry.value);
             return Column(
               children: [
                 MaterialButton(
@@ -44,7 +53,11 @@ class CustomSelector<T> extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        option == null.toString() ? (nullText ?? "None") : option,
+                        option == null.toString()
+                            ? "None"
+                            : nullValue != null && nullValue == entry.value
+                                ? nullText!
+                                : option,
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                       if (entry.value == selectedItem)
