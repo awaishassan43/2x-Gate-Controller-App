@@ -196,7 +196,7 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                         SectionItem(
                           title: "Auto Close",
                           subtitleText: "Automatically close the door at a specified time",
-                          trailingText: getTimeString(relay1.autoClose),
+                          trailingText: relay1.autoClose != 0 ? getTimeString(relay1.autoClose) : "Disabled",
                           showChevron: true,
                           onTap: () {
                             Navigator.push(context, MaterialPageRoute(
@@ -206,6 +206,8 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                                   items: const [30, 60, 90, 120, 150, null],
                                   selectedItem: relay1.autoClose,
                                   deviceID: widget.deviceID,
+                                  nullText: "Disable Auto Close",
+                                  sendNullAsValue: 0,
                                   relayID: 'Relay1',
                                   mapKey: 'autoClose',
                                   updateDeviceSettings: true,
@@ -289,7 +291,7 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                         SectionItem(
                           title: "Auto Close",
                           subtitleText: "Automatically close the door at a specified time",
-                          trailingText: getTimeString(relay2.autoClose),
+                          trailingText: relay2.autoClose != 0 ? getTimeString(relay2.autoClose) : "Disabled",
                           showChevron: true,
                           onTap: () {
                             Navigator.push(context, MaterialPageRoute(
@@ -297,7 +299,9 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                                 return SelectorScreen<int?>(
                                   title: "Auto Close Time",
                                   items: const [30, 60, 90, 120, 150, null],
-                                  selectedItem: relay2.autoClose,
+                                  selectedItem: relay2.autoClose == 0 ? null : relay2.autoClose,
+                                  nullText: "Disable Auto Close",
+                                  sendNullAsValue: 0,
                                   deviceID: widget.deviceID,
                                   relayID: 'Relay2',
                                   mapKey: 'autoClose',

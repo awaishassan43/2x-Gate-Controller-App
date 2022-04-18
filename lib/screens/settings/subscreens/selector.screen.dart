@@ -11,22 +11,24 @@ class SelectorScreen<T> extends StatefulWidget {
   final String title;
   final List<T> items;
   final T? selectedItem;
-  final bool includesNone;
   final bool isTime;
+  final String? nullText;
+  final dynamic? sendNullAsValue;
   final String mapKey;
   final String? relayID;
   final String? deviceID;
   final bool updateProfile;
   final bool updateDeviceSettings;
 
-  const SelectorScreen({
+  SelectorScreen({
     Key? key,
     required this.title,
     required this.items,
     required this.selectedItem,
     required this.mapKey,
     this.relayID,
-    this.includesNone = false,
+    this.nullText,
+    this.sendNullAsValue,
     this.deviceID,
     this.isTime = true,
     this.updateProfile = false,
@@ -39,6 +41,10 @@ class SelectorScreen<T> extends StatefulWidget {
         assert(
           !updateDeviceSettings || (updateDeviceSettings && deviceID != null),
           "Either provide a device id or set updateDeviceSettings to false",
+        ),
+        assert(
+          items.contains(null) && nullText != null && sendNullAsValue != null && !items.contains(sendNullAsValue),
+          "Either remove null from items, or profile the nullText and sendNullAsValue",
         ),
         super(key: key);
 
@@ -66,6 +72,7 @@ class _SelectorScreenState<T> extends State<SelectorScreen<T>> {
                 CustomSelector<T>(
                   items: widget.items,
                   selectedItem: widget.selectedItem,
+                  nullText: widget.nullText,
                   transformer: widget.isTime
                       ? (T value) {
                           if (value.runtimeType.toString() == "int") {
@@ -84,7 +91,7 @@ class _SelectorScreenState<T> extends State<SelectorScreen<T>> {
                       if (widget.updateProfile) {
                         final UserController controller = Provider.of<UserController>(context, listen: false);
 
-                        controller.profile!.updateProfile(widget.mapKey, selectedValue);
+                        controller.profile!.updateProfile(widget.mapKey, selectedValue ?? widget.sendNullAsValue);
                         await controller.updateProfile();
 
                         showMessage(context, "Profile updated successfully!");
@@ -94,9 +101,9 @@ class _SelectorScreenState<T> extends State<SelectorScreen<T>> {
                         final Map<String, dynamic> mappedData = controller.devices[widget.deviceID]!.deviceSettings.toJson();
 
                         if (widget.relayID != null) {
-                          mappedData['value'][widget.relayID][widget.mapKey] = selectedValue;
+                          mappedData['value'][widget.relayID][widget.mapKey] = selectedValue ?? widget.sendNullAsValue;
                         } else {
-                          mappedData['value'][widget.mapKey] = selectedValue;
+                          mappedData['value'][widget.mapKey] = selectedValue ?? widget.sendNullAsValue;
                         }
 
                         controller.devices[widget.deviceID!]!.updateWithJSON(deviceSettings: mappedData);

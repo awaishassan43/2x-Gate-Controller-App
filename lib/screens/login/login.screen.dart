@@ -148,13 +148,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
       showMessage(context, "Logged in successfully!");
       Navigator.pushNamedAndRemoveUntil(context, Screen.dashboard, (route) => false);
-    } on FirebaseAuthException catch (_) {
-      setState(() {
-        isLoading = false;
-        formError = 'Invalid credentials';
-      });
-
-      showMessage(context, "Login failed");
     } catch (e) {
       setState(() {
         isLoading = false;

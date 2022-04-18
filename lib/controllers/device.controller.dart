@@ -109,9 +109,11 @@ class DeviceController extends ChangeNotifier {
         notifyListeners();
       }
     } on FirebaseException catch (e) {
-      throw Exception("Error occured while loading devices: ${e.message}");
+      debugPrint("Firebase Exception: Failed to load devices: ${e.toString()}");
+      throw e.message ?? "Something went wrong while trying to load devices";
     } catch (e) {
-      throw Exception("Failed to load devices: ${e.toString()}");
+      debugPrint("Generic Exception: Failed to load devices: ${e.toString()}");
+      throw "Failed to load devices: ${e.toString()}";
     }
   }
 
@@ -134,9 +136,11 @@ class DeviceController extends ChangeNotifier {
       // /// Attach device to the user profile
       await controller.addDevice(id);
     } on FirebaseException catch (e) {
-      throw "Error occured while updating the device: ${e.message}";
+      debugPrint("Firebase Exception: Failed to add device: ${e.toString()}");
+      throw e.message ?? "Something went wrong while trying to add a device";
     } catch (e) {
-      throw "Failed to add the device: ${e.toString()}";
+      debugPrint("Generic Exception: Failed to add device: ${e.toString()}");
+      throw "Failed to attach the device to user: ${e.toString()}";
     }
   }
 
@@ -152,8 +156,10 @@ class DeviceController extends ChangeNotifier {
         await settingsCollection.child(id).set(device.deviceSettings.toJson());
       }
     } on FirebaseException catch (e) {
-      throw "Error occured while updating the device: ${e.message}";
+      debugPrint("Firebase Exception: Failed to update device: ${e.toString()}");
+      throw e.message ?? "Something went wrong while trying to update a device";
     } catch (e) {
+      debugPrint("Generic Exception: Failed to update device: ${e.toString()}");
       throw "Failed to update the device: ${e.toString()}";
     }
   }

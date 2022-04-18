@@ -5,6 +5,7 @@ class CustomSelector<T> extends StatelessWidget {
   final T? selectedItem;
   final void Function(T? value) onSelected;
   final String Function(T value)? transformer;
+  final String? nullText;
 
   const CustomSelector({
     Key? key,
@@ -12,6 +13,7 @@ class CustomSelector<T> extends StatelessWidget {
     required this.selectedItem,
     required this.onSelected,
     this.transformer,
+    this.nullText,
   }) : super(key: key);
 
   @override
@@ -42,7 +44,7 @@ class CustomSelector<T> extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        option == null.toString() ? "None" : option,
+                        option == null.toString() ? (nullText ?? "None") : option,
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                       if (entry.value == selectedItem)

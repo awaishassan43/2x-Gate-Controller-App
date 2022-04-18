@@ -54,9 +54,11 @@ class UserController extends ChangeNotifier {
         return false;
       }
     } on FirebaseException catch (e) {
-      throw "Error occured while getting the user profile: ${e.message}";
+      debugPrint("Firebase Exception: Failed to get logged in user: " + e.message.toString());
+      throw e.message ?? "Something went wrong while trying to login";
     } catch (e) {
-      throw "Failed to get the user profile: ${e.toString()}";
+      debugPrint("Generic Exeception: Failed to get logged in user: " + e.toString());
+      throw "Failed to get logged in user: " + e.toString();
     }
   }
 
@@ -72,8 +74,10 @@ class UserController extends ChangeNotifier {
 
       return isLoggedIn;
     } on FirebaseException catch (e) {
-      throw "Error occured while logging in the user: ${e.message}";
+      debugPrint("Firebase Exception: Login Failed: " + e.toString());
+      throw e.message ?? "Something went wrong while trying to login";
     } catch (e) {
+      debugPrint("FirebaseException: Login Failed: " + e.toString());
       throw "Failed to login the user: ${e.toString()}";
     }
   }
@@ -114,8 +118,10 @@ class UserController extends ChangeNotifier {
 
       await userCredential.user?.sendEmailVerification();
     } on FirebaseException catch (e) {
-      throw "Error occured while registering the user: ${e.message}";
+      debugPrint("Firebase Exception: Registration Failed: ${e.toString()}");
+      throw e.message ?? "Something went wrong while trying to register user";
     } catch (e) {
+      debugPrint("Generic Exeption: Registration Failed: ${e.toString()}");
       throw "Failed to register the user: ${e.toString()}";
     }
   }
@@ -131,6 +137,7 @@ class UserController extends ChangeNotifier {
 
       await auth.currentUser!.updatePassword(newPass);
     } on FirebaseAuthException catch (e) {
+      debugPrint("Firebase Exception: Failed to update password: ${e.toString()}");
       throw "Error occured while trying to update the password: ${e.message}";
     } catch (e) {
       throw "Failed to update the password: ${e.toString()}";
@@ -153,8 +160,12 @@ class UserController extends ChangeNotifier {
         transformMapToProfile(event.snapshot.value);
         notifyListeners();
       });
+    } on FirebaseException catch (e) {
+      debugPrint("Firebase Exception: Failed to attach listeners to user profile: ${e.toString()}");
+      throw e.message ?? "Something went wrong while trying to get user profile";
     } catch (e) {
-      throw "Failed to attach listener to the profile: ${e.toString()}";
+      debugPrint("Generic Exception: Failed to attach listeners to user profile: ${e.toString()}");
+      throw "Failed to attach listener to user profile: ${e.toString()}";
     }
   }
 
@@ -171,8 +182,10 @@ class UserController extends ChangeNotifier {
 
       await users.child(auth.currentUser!.uid).set(data);
     } on FirebaseException catch (e) {
-      throw "Error occured while trying to update the profile: ${e.message}";
+      debugPrint("Firebase Exception: Failed to update profile: ${e.toString()}");
+      throw e.message ?? "Something went wrong while trying to update profile";
     } catch (e) {
+      debugPrint("Generic Exception: Failed to update profile: ${e.toString()}");
       throw "Failed to update the profile: ${e.toString()}";
     }
   }
@@ -197,8 +210,10 @@ class UserController extends ChangeNotifier {
 
       await devicesReference.set(listToMap(devices));
     } on FirebaseException catch (e) {
-      throw "Error occured while attaching the device to user: ${e.message}";
+      debugPrint("Firebase Exception: Failed to add device: ${e.toString()}");
+      throw e.message ?? "Something went wrong while trying to add a device";
     } catch (e) {
+      debugPrint("Generic Exception: Failed to add device: ${e.toString()}");
       throw "Failed to attach the device to user: ${e.toString()}";
     }
   }
@@ -212,9 +227,11 @@ class UserController extends ChangeNotifier {
 
       await devicesReference.set(listToMap(devices));
     } on FirebaseException catch (e) {
-      throw "Error occured while removing the device: ${e.message}";
+      debugPrint("Firebase Exception: Failed to remove device: ${e.toString()}");
+      throw e.message ?? "Something went wrong while trying to remove a device";
     } catch (e) {
-      throw "Failed to remove the device: ${e.toString()}";
+      debugPrint("Generic Exception: Failed to remove device: ${e.toString()}");
+      throw "Failed to remove the device from user: ${e.toString()}";
     }
   }
 
@@ -230,9 +247,11 @@ class UserController extends ChangeNotifier {
       profile = null;
       notifyListeners();
     } on FirebaseException catch (e) {
-      throw "Error occured while logging out the user: ${e.message}";
+      debugPrint("Firebase Exception: Failed to logout: ${e.toString()}");
+      throw e.message ?? "Something went wrong while trying to logout";
     } catch (e) {
-      throw "Failed to logout the user: ${e.toString()}";
+      debugPrint("Generic Exception: Failed to logout: ${e.toString()}");
+      throw "Failed to logout: ${e.toString()}";
     }
   }
 
@@ -244,9 +263,11 @@ class UserController extends ChangeNotifier {
     try {
       await auth.sendPasswordResetEmail(email: email);
     } on FirebaseException catch (e) {
-      throw "Error occured while sending the email to reset the password: ${e.message}";
+      debugPrint("Firebase Exception: Failed to send password reset emali: ${e.toString()}");
+      throw e.message ?? "Something went wrong while trying to send the password reset email";
     } catch (e) {
-      throw "Failed to send the email to reset the password: ${e.toString()}";
+      debugPrint("Generic Exception: Failed to send password reset email: ${e.toString()}");
+      throw "Failed to send password reset email: ${e.toString()}";
     }
   }
 }

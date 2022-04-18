@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '/components/button.component.dart';
 import '/components/input.component.dart';
@@ -335,12 +334,6 @@ class _SignupScreenState extends State<SignupScreen> {
 
       showMessage(context, "Account created successfully!");
       Navigator.pushNamedAndRemoveUntil(context, Screen.success, (route) => false);
-    } on FirebaseAuthException catch (e) {
-      showMessage(context, "Failed to create the account");
-      setState(() {
-        isLoading = false;
-        formError = e.message != null ? e.message! : "Failed to complete the signup process";
-      });
     } catch (e) {
       showMessage(context, "Failed to create the account");
       setState(() {

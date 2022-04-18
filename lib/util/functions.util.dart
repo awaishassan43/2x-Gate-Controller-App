@@ -162,8 +162,16 @@ Future<ConnectivityStatus> verifySetup() async {
 }
 
 Future<bool> connectToDevice() async {
-  if (await WiFiForIoTPlugin.isConnected()) {
+  if (await WiFiForIoTPlugin.isConnected() && await WiFiForIoTPlugin.getSSID() != deviceSSID) {
     await WiFiForIoTPlugin.disconnect();
+
+    await Future.delayed(const Duration(seconds: 5));
+
+    final bool isConnected = await WiFiForIoTPlugin.isConnected();
+
+    if (isConnected) {
+      throw "Failed to disconnect from the connected network - Please manually disconnect and try again!";
+    }
   }
 
   // Enable wifi if not
