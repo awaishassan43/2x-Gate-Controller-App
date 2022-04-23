@@ -8,6 +8,7 @@ class Profile {
   String temperatureUnit;
   bool is24Hours;
   List<String> devices;
+  String fcmToken;
 
   Profile({
     required this.email,
@@ -17,6 +18,7 @@ class Profile {
     required this.temperatureUnit,
     required this.is24Hours,
     required this.devices,
+    required this.fcmToken,
   });
 
   factory Profile.fromMap(Map<String, dynamic> data) {
@@ -28,6 +30,7 @@ class Profile {
       temperatureUnit: data['temperatureUnit'],
       is24Hours: data['is24Hours'],
       devices: castList<String>(data['devices']),
+      fcmToken: data['fcmToken'],
     );
   }
 
@@ -40,6 +43,7 @@ class Profile {
       "temperatureUnit": temperatureUnit,
       "is24Hours": is24Hours,
       "devices": devices,
+      "fcmToken": fcmToken,
     };
   }
 
@@ -54,5 +58,6 @@ class Profile {
     temperatureUnit = data['temperatureUnit'];
     is24Hours = data['is24Hours'];
     devices = data['devices'];
+    fcmToken = data['fcmToken'];
   }
 }

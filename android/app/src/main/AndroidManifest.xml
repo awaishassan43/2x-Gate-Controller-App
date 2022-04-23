@@ -8,7 +8,7 @@
 
   <application
         android:label="iot"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/launcher_icon">
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"
@@ -38,6 +38,12 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+
+        <!-- High priority channel for notifications -->
+        <meta-data
+          android:name="com.google.firebase.messaging.default_notification_channel_id"
+          android:value="alerts" />
+
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

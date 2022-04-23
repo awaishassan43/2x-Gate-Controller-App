@@ -67,11 +67,19 @@ class _CustomScreenState extends State<CustomScreen> {
         return;
       }
 
+      setState(() {
+        isLoading = true;
+      });
+
       final UserController controller = Provider.of<UserController>(context, listen: false);
       await controller.forgotPassword(email.text);
 
       showMessage(context, "Email sent successfully! Please check your email for further instructions");
     } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+
       showMessage(context, e.toString());
     }
   }

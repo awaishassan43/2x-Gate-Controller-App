@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import '../util/notification.util.dart';
 import '/models/profile.model.dart';
 import '/util/functions.util.dart';
 
@@ -70,6 +71,10 @@ class UserController extends ChangeNotifier {
         throw Exception("Error occured while trying to login");
       }
 
+      /// FCM token is generated every time a user reinstalls the application or clears the cache
+      /// So, adding the fcm token in the login as well
+      users.child(userCredential.user!.uid).child('fcmToken').set(await getFCMToken());
+
       final bool? isLoggedIn = await getLoggedInUser();
 
       return isLoggedIn;
@@ -108,6 +113,7 @@ class UserController extends ChangeNotifier {
         is24Hours: true,
         temperatureUnit: "C",
         devices: [],
+        fcmToken: await getFCMToken(),
       );
 
       final Map<String, dynamic> profileData = tempProfile.toJSON();
