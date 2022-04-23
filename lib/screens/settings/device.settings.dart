@@ -1,6 +1,9 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:iot/screens/settings/subscreens/editor.screen.dart';
+import 'package:iot/screens/settings/subscreens/selector.screen.dart';
+import 'package:iot/screens/settings/subscreens/temperature.screen.dart';
 import 'package:tuple/tuple.dart';
 import '/components/button.component.dart';
 import '/components/loader.component.dart';
@@ -29,7 +32,48 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
   bool isLoading = false;
   String? deleteError;
 
+  Future<void> reboot(BuildContext context) async {
+    final DeviceController controller = Provider.of<DeviceController>(context, listen: false);
+
+    final DeviceCommands deviceCommands = controller.devices[widget.deviceID]!.deviceCommands;
+    final String deviceID = widget.deviceID;
+
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      /// Taking a shortcut due to time constraint
+      final Map<String, dynamic> mappedData = deviceCommands.toJson();
+      final DateTime currentTime = DateTime.now();
+      final DateTime expiryTime = currentTime.add(const Duration(minutes: 1));
+
+      /// currently set to 60 seconds ahead of current time
+
+      mappedData['request']['payload']['reboot'] = 1;
+      mappedData['timestamp'] = currentTime.millisecondsSinceEpoch;
+      mappedData['request']['payload']['exp'] = expiryTime.millisecondsSinceEpoch;
+
+      controller.devices[deviceID]!.updateWithJSON(deviceCommands: mappedData);
+
+      await controller.updateDevice(deviceID, "deviceCommands");
+      showMessage(context, "Controller updated successfully!");
+    } on FirebaseException catch (e) {
+      showMessage(context, e.toString());
+    } catch (e) {
+      showMessage(context, e.toString());
+    }
+
+    setState(() {
+      isLoading = false;
+    });
+  }
+
   Future<void> updateRelay(BuildContext context, dynamic value, String relayID, String key) async {
+    setState(() {
+      isLoading = true;
+    });
+
     try {
       final DeviceController controller = Provider.of<DeviceController>(context, listen: false);
       final DeviceSettings settings = controller.devices[widget.deviceID]!.deviceSettings;
@@ -39,9 +83,15 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
 
       controller.devices[widget.deviceID]!.updateWithJSON(deviceSettings: mappedData);
       await controller.updateDevice(widget.deviceID, 'deviceSettings');
+    } on FirebaseException catch (e) {
+      showMessage(context, e.message ?? "Something went wrong while trying to update settings");
     } catch (e) {
       showMessage(context, e.toString());
     }
+
+    setState(() {
+      isLoading = false;
+    });
   }
 
   Future<void> updateControllerData(BuildContext context, String key, dynamic value) async {
@@ -53,12 +103,18 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
       controller.devices[widget.deviceID]!.updateWithJSON(deviceData: deviceData);
 
       await controller.updateDevice(widget.deviceID, "deviceData");
+    } on FirebaseException catch (e) {
+      showMessage(context, e.message ?? "Something went wrong while trying to update settings");
     } catch (e) {
       showMessage(context, e.toString());
     }
   }
 
   Future<void> updateControllerSettings(BuildContext context, String key, dynamic value) async {
+    setState(() {
+      isLoading = true;
+    });
+
     try {
       final DeviceController controller = Provider.of<DeviceController>(context, listen: false);
       final Map<String, dynamic> deviceSettings = controller.devices[widget.deviceID]!.deviceSettings.toJson();
@@ -67,9 +123,15 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
       controller.devices[widget.deviceID]!.updateWithJSON(deviceSettings: deviceSettings);
 
       await controller.updateDevice(widget.deviceID, "deviceSettings");
+    } on FirebaseException catch (e) {
+      showMessage(context, e.message ?? "Something went wrong while trying to update settings");
     } catch (e) {
       showMessage(context, e.toString());
     }
+
+    setState(() {
+      isLoading = false;
+    });
   }
 
   @override
@@ -155,19 +217,23 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                         SectionItem(
                           title: "Output Time",
                           subtitleText: "Duration",
+                          trailingText: getTimeString(relay1.outTime),
+                          showChevron: true,
                           onTap: () {
-                            // Navigator.push(context, MaterialPageRoute(
-                            //   builder: (context) {
-                            // return SelectorScreen<int>(
-                            //   title: "Output Time",
-                            //   items: const [1, 5, 300, 1800],
-                            //   selectedItem: relay1.outTime,
-                            //   deviceID: device.id,
-                            //   relayID: relay.id,
-                            //   mapKey: 'outputTime',
-                            // );
-                            //   },
-                            // ));
+                            Navigator.push(context, MaterialPageRoute(
+                              builder: (context) {
+                                return SelectorScreen<int>(
+                                  title: "Output Time",
+                                  items: const [1, 5, 300, 1800],
+                                  selectedItem: relay1.outTime,
+                                  isTime: true,
+                                  deviceID: widget.deviceID,
+                                  relayID: 'Relay1',
+                                  mapKey: 'OutTime',
+                                  updateDeviceSettings: true,
+                                );
+                              },
+                            ));
                           },
                         ),
                         SectionItem(
@@ -182,21 +248,24 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                         SectionItem(
                           title: "Auto Close",
                           subtitleText: "Automatically close the door at a specified time",
-                          trailingText: getTimeString(relay1.autoClose),
+                          trailingText: relay1.autoClose != 0 ? getTimeString(relay1.autoClose) : "Disabled",
                           showChevron: true,
                           onTap: () {
-                            // Navigator.push(context, MaterialPageRoute(
-                            //   builder: (context) {
-                            //     return SelectorScreen<int?>(
-                            //       title: "Auto Close Time",
-                            //       items: const [30, 60, 90, 120, 150, null],
-                            //       selectedItem: relay.autoCloseTime,
-                            //       deviceID: device.id,
-                            //       relayID: relay.id,
-                            //       mapKey: 'autoClose',
-                            //     );
-                            //   },
-                            // ));
+                            Navigator.push(context, MaterialPageRoute(
+                              builder: (context) {
+                                return SelectorScreen<int?>(
+                                  title: "Auto Close Time",
+                                  items: const [0, 30, 60, 90, 120, 150],
+                                  selectedItem: relay1.autoClose,
+                                  deviceID: widget.deviceID,
+                                  disabledText: "Disable Auto Close",
+                                  disabledValue: 0,
+                                  relayID: 'Relay1',
+                                  mapKey: 'autoClose',
+                                  updateDeviceSettings: true,
+                                );
+                              },
+                            ));
                           },
                         ),
                         // SectionItem(
@@ -233,7 +302,7 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                             navigateTo(
                               context,
                               EditorScreen(
-                                initialValue: relay1.name,
+                                initialValue: relay2.name,
                                 title: "Relay Name",
                                 icon: Icons.lock,
                                 onSubmit: (name, context) => updateRelay(context, name, 'Relay2', 'Name'),
@@ -244,19 +313,22 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                         SectionItem(
                           title: "Output Time",
                           subtitleText: "Duration",
+                          trailingText: getTimeString(relay2.outTime),
+                          showChevron: true,
                           onTap: () {
-                            // Navigator.push(context, MaterialPageRoute(
-                            //   builder: (context) {
-                            //     return SelectorScreen<int>(
-                            //       title: "Output Time",
-                            //       items: const [1, 5, 300, 1800],
-                            //       selectedItem: relay.outputTime,
-                            //       deviceID: device.id,
-                            //       relayID: relay.id,
-                            //       mapKey: 'outputTime',
-                            //     );
-                            //   },
-                            // ));
+                            Navigator.push(context, MaterialPageRoute(
+                              builder: (context) {
+                                return SelectorScreen<int>(
+                                  title: "Output Time",
+                                  items: const [1, 5, 300, 1800],
+                                  selectedItem: relay2.outTime,
+                                  deviceID: widget.deviceID,
+                                  relayID: 'Relay2',
+                                  mapKey: 'OutTime',
+                                  updateDeviceSettings: true,
+                                );
+                              },
+                            ));
                           },
                         ),
                         SectionItem(
@@ -271,21 +343,24 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                         SectionItem(
                           title: "Auto Close",
                           subtitleText: "Automatically close the door at a specified time",
-                          trailingText: getTimeString(relay2.autoClose),
+                          trailingText: relay2.autoClose != 0 ? getTimeString(relay2.autoClose) : "Disabled",
                           showChevron: true,
                           onTap: () {
-                            // Navigator.push(context, MaterialPageRoute(
-                            //   builder: (context) {
-                            //     return SelectorScreen<int?>(
-                            //       title: "Auto Close Time",
-                            //       items: const [30, 60, 90, 120, 150, null],
-                            //       selectedItem: relay.autoCloseTime,
-                            //       deviceID: device.id,
-                            //       relayID: relay.id,
-                            //       mapKey: 'autoClose',
-                            //     );
-                            //   },
-                            // ));
+                            Navigator.push(context, MaterialPageRoute(
+                              builder: (context) {
+                                return SelectorScreen<int?>(
+                                  title: "Auto Close Time",
+                                  items: const [0, 30, 60, 90, 120, 150],
+                                  selectedItem: relay2.autoClose,
+                                  disabledText: "Disable Auto Close",
+                                  disabledValue: 0,
+                                  deviceID: widget.deviceID,
+                                  relayID: 'Relay2',
+                                  mapKey: 'autoClose',
+                                  updateDeviceSettings: true,
+                                );
+                              },
+                            ));
                           },
                         ),
                         // SectionItem(
@@ -320,7 +395,7 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                             onChanged: (value) => updateControllerSettings(context, 'alertOnClose', value),
                             value: deviceSettings.alertOnClose,
                           ),
-                          onTap: () => updateControllerData(context, 'alertOnClose', !deviceSettings.alertOnClose),
+                          onTap: () => updateControllerSettings(context, 'alertOnClose', !deviceSettings.alertOnClose),
                         ),
                         SectionItem(
                           title: "On Open",
@@ -328,7 +403,7 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                             onChanged: (value) => updateControllerSettings(context, 'alertOnOpen', value),
                             value: deviceSettings.alertOnOpen,
                           ),
-                          onTap: () => updateControllerData(context, 'alertOnOpen', !deviceSettings.alertOnOpen),
+                          onTap: () => updateControllerSettings(context, 'alertOnOpen', !deviceSettings.alertOnOpen),
                         ),
                         // SectionItem(
                         //   title: "Open Alert",
@@ -352,7 +427,7 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                         SectionItem(
                           title: "Night Alert",
                           subtitleText: "Alert if door is left open",
-                          onTap: () => updateControllerSettings(context, 'alertOnClose', !deviceSettings.nightAlert),
+                          onTap: () => updateControllerSettings(context, 'nightAlert', !deviceSettings.nightAlert),
                           trailing: Switch(
                             onChanged: (value) => updateControllerSettings(context, 'nightAlert', value),
                             value: deviceSettings.nightAlert,
@@ -363,9 +438,9 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                           showEditIcon: true,
                           subtitleText: "Alert if temperature exceeds",
                           onTap: () {
-                            // Navigator.push(context, MaterialPageRoute(builder: (context) {
-                            //   return TemperatureAlertScreen(device: device);
-                            // }));
+                            Navigator.push(context, MaterialPageRoute(builder: (context) {
+                              return TemperatureAlertScreen(deviceID: widget.deviceID);
+                            }));
                           },
                           trailingText:
                               getTemperatureValue(context, deviceSettings.temperatureAlert, onNullMessage: 'Don\'t Alert', decimalPlaces: 1),
@@ -390,38 +465,42 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                               ? DateFormat("HH:mm").format(today)
                               : DateFormat("hh:mm a").format(today),
                         ),
-                        SectionItem(
-                          title: "Network",
-                          subtitle: Column(
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: const [
-                                  Text("Strength", style: netTextStyle),
-                                  // Text(device.networkStrength ?? '...', style: netTextStyle),
-                                  Text('...', style: netTextStyle),
+                        Selector<DeviceController, DeviceData>(
+                          selector: (context, controller) => controller.devices[widget.deviceID]!.deviceData,
+                          builder: (context, data, _) {
+                            final payload = data.state.payload;
+
+                            return SectionItem(
+                              title: "Network",
+                              subtitle: Column(
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      const Text("Strength", style: netTextStyle),
+                                      Text(payload.Strength.toString(), style: netTextStyle),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 3.5),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      const Text("Mac ID", style: netTextStyle),
+                                      Text(payload.Mac, style: netTextStyle),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 3.5),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      const Text("IP Address", style: netTextStyle),
+                                      Text(payload.Ip, style: netTextStyle),
+                                    ],
+                                  ),
                                 ],
                               ),
-                              const SizedBox(height: 3.5),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: const [
-                                  Text("Mac ID", style: netTextStyle),
-                                  // Text(device.macID ?? '...', style: netTextStyle),
-                                  Text('...', style: netTextStyle),
-                                ],
-                              ),
-                              const SizedBox(height: 3.5),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: const [
-                                  Text("IP Address", style: netTextStyle),
-                                  // Text(device.ipAddress ?? '...', style: netTextStyle),
-                                  Text('...', style: netTextStyle),
-                                ],
-                              ),
-                            ],
-                          ),
+                            );
+                          },
                         ),
                       ],
                     ),
@@ -441,9 +520,23 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                       ],
                     ),
                     const SizedBox(height: 40),
+                    Selector<DeviceController, bool>(
+                      selector: (context, controller) => controller.devices[widget.deviceID]!.deviceData.online,
+                      builder: (context, isOnline, _) {
+                        return CustomButton(
+                          text: "Reboot",
+                          isDisabled: !isOnline,
+                          onPressed: () => reboot(context),
+                          backgroundColor: Colors.white,
+                          disableElevation: true,
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 5),
                     CustomButton(
-                      text: "Reboot",
-                      onPressed: () {},
+                      text: "Change WiFi credentials",
+                      onPressed: () => Navigator.pushNamed(context, Screen.addDevice, arguments: true),
+                      textColor: Colors.blue,
                       backgroundColor: Colors.white,
                       disableElevation: true,
                     ),
@@ -468,7 +561,9 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                             isLoading = true;
                           });
 
-                          await Provider.of<UserController>(context, listen: false).removeDevice(context, widget.deviceID);
+                          Provider.of<UserController>(context, listen: false).removeDevice(context, widget.deviceID);
+
+                          showMessage(context, "Device deleted successfully!");
                           Navigator.popUntil(context, ModalRoute.withName(Screen.dashboard));
                         } catch (e) {
                           setState(() {

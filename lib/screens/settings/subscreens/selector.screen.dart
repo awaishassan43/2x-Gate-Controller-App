@@ -3,7 +3,6 @@ import 'package:iot/components/loader.component.dart';
 import 'package:iot/components/selector.component.dart';
 import 'package:iot/controllers/device.controller.dart';
 import 'package:iot/controllers/user.controller.dart';
-import 'package:iot/models/device.model.dart';
 import 'package:iot/util/functions.util.dart';
 import 'package:provider/provider.dart';
 
@@ -12,17 +11,42 @@ class SelectorScreen<T> extends StatefulWidget {
   final String title;
   final List<T> items;
   final T? selectedItem;
-  final bool includesNone;
   final bool isTime;
+  final String? disabledText;
+  final T? disabledValue;
+  final String mapKey;
+  final String? relayID;
+  final String? deviceID;
+  final bool updateProfile;
+  final bool updateDeviceSettings;
 
   const SelectorScreen({
     Key? key,
     required this.title,
     required this.items,
     required this.selectedItem,
-    this.includesNone = false,
+    required this.mapKey,
+    this.relayID,
+    this.disabledText,
+    this.disabledValue,
+    this.deviceID,
     this.isTime = true,
-  }) : super(key: key);
+    this.updateProfile = false,
+    this.updateDeviceSettings = false,
+  })  : assert(updateProfile || updateDeviceSettings, "One of these must be true"),
+        assert(
+          (!updateProfile && updateDeviceSettings) || (updateProfile && !updateDeviceSettings),
+          "updateProfile or updateDeviceSettings - Only one must be true at a time",
+        ),
+        assert(
+          !updateDeviceSettings || (updateDeviceSettings && deviceID != null),
+          "Either provide a device id or set updateDeviceSettings to false",
+        ),
+        assert(
+          (disabledValue == null && disabledText == null) || (disabledValue != null && disabledText != null),
+          "Please keep disabledValue and disabledText as either null or provide both",
+        ),
+        super(key: key);
 
   @override
   State<SelectorScreen<T>> createState() => _SelectorScreenState<T>();
@@ -48,6 +72,8 @@ class _SelectorScreenState<T> extends State<SelectorScreen<T>> {
                 CustomSelector<T>(
                   items: widget.items,
                   selectedItem: widget.selectedItem,
+                  nullText: widget.disabledText,
+                  nullValue: widget.disabledValue,
                   transformer: widget.isTime
                       ? (T value) {
                           if (value.runtimeType.toString() == "int") {
@@ -63,24 +89,34 @@ class _SelectorScreenState<T> extends State<SelectorScreen<T>> {
                         isLoading = true;
                       });
 
-                      // if (widget.isProfileKey) {
-                      //   final UserController controller = Provider.of<UserController>(context, listen: false);
+                      if (widget.updateProfile) {
+                        final UserController controller = Provider.of<UserController>(context, listen: false);
 
-                      //   controller.profile!.updateProfile(widget.mapKey, selectedValue);
-                      //   await controller.updateProfile();
+                        controller.profile!.updateProfile(widget.mapKey, selectedValue);
+                        await controller.updateProfile();
 
-                      //   showMessage(context, "Profile updated successfully!");
-                      // } else if (widget.deviceID != null) {
-                      //   final DeviceController controller = Provider.of<DeviceController>(context, listen: false);
+                        showMessage(context, "Profile updated successfully!");
+                      } else if (widget.updateDeviceSettings && widget.deviceID != null) {
+                        final DeviceController controller = Provider.of<DeviceController>(context, listen: false);
 
-                      //   final Device device = controller.devices[widget.deviceID]!;
-                      //   device.update(widget.mapKey, selectedValue, relayID: widget.relayID);
-                      //   await controller.updateDevice(device);
+                        final Map<String, dynamic> mappedData = controller.devices[widget.deviceID]!.deviceSettings.toJson();
 
-                      //   showMessage(context, "Controller updated successfully!");
-                      // } else {
-                      //   throw "No device ID was provided";
-                      // }
+                        if (widget.relayID != null) {
+                          mappedData['value'][widget.relayID][widget.mapKey] = selectedValue;
+                        } else {
+                          mappedData['value'][widget.mapKey] = selectedValue;
+                        }
+
+                        controller.devices[widget.deviceID!]!.updateWithJSON(deviceSettings: mappedData);
+                        await controller.updateDevice(widget.deviceID!, 'deviceSettings');
+                        showMessage(context, "Controller updated successfully!");
+                      } else {
+                        throw "No device ID was provided";
+                      }
+
+                      setState(() {
+                        isLoading = false;
+                      });
 
                       Navigator.pop(context);
                     } catch (e) {
@@ -96,7 +132,7 @@ class _SelectorScreenState<T> extends State<SelectorScreen<T>> {
               ],
             ),
           ),
-          // if (isLoading) Loader(message: widget.isProfileKey ? "Updating profile" : "Updating controller"),
+          if (isLoading) Loader(message: widget.updateProfile ? "Updating profile" : "Updating controller"),
         ],
       ),
     );

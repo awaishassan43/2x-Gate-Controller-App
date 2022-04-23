@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:iot/components/button.component.dart';
 import 'package:iot/components/input.component.dart';
 import 'package:iot/components/loader.component.dart';
-import 'package:iot/models/device.model.dart';
 import 'package:iot/util/functions.util.dart';
 import 'package:provider/provider.dart';
 import '/controllers/device.controller.dart';
@@ -19,11 +18,9 @@ class TemperatureAlertScreen extends StatefulWidget {
 class _TemperatureAlertScreenState extends State<TemperatureAlertScreen> {
   bool isLoading = false;
   late bool shouldAlert;
+  late final String temperatureUnit;
 
   late final TextEditingController temperature;
-  late final DeviceController deviceController;
-  late final UserController userController;
-  late final Device device;
 
   String formError = '';
   String temperatureError = '';
@@ -32,11 +29,10 @@ class _TemperatureAlertScreenState extends State<TemperatureAlertScreen> {
   void initState() {
     super.initState();
 
-    userController = Provider.of<UserController>(context, listen: false);
-    deviceController = Provider.of<DeviceController>(context, listen: false);
-    device = deviceController.devices[widget.deviceID]!;
+    temperatureUnit = Provider.of<UserController>(context, listen: false).profile!.temperatureUnit;
 
-    final double? value = device.deviceSettings.value.temperatureAlert;
+    final DeviceController deviceController = Provider.of<DeviceController>(context, listen: false);
+    final double? value = deviceController.devices[widget.deviceID]!.deviceSettings.value.temperatureAlert;
 
     temperature = TextEditingController(
       text: value != null
@@ -121,7 +117,7 @@ class _TemperatureAlertScreenState extends State<TemperatureAlertScreen> {
                         disabled: !shouldAlert,
                         error: temperatureError,
                         controller: temperature,
-                        suffixText: '\u00b0${userController.profile!.temperatureUnit}',
+                        suffixText: '\u00b0$temperatureUnit',
                       ),
                       if (formError != '')
                         Padding(
@@ -151,17 +147,18 @@ class _TemperatureAlertScreenState extends State<TemperatureAlertScreen> {
                       isLoading = true;
                     });
 
-                    // final double? previousValue = widget.device.temperatureAlert;
-
                     try {
-                      final String unit = Provider.of<UserController>(context, listen: false).profile!.temperatureUnit;
+                      final DeviceController deviceController = Provider.of<DeviceController>(context, listen: false);
+                      final Map<String, dynamic> mappedData = deviceController.devices[widget.deviceID]!.deviceSettings.toJson();
 
-                      // deviceController.devices[widget.id]!.temperatureAlert = shouldAlert
-                      //     ? unit == "F"
-                      //         ? double.parse(convertFarenheitToCelcius(double.parse(temperature.text)).toStringAsFixed(1))
-                      //         : double.parse(temperature.text)
-                      //     : null;
-                      // await deviceController.updateDevice(controller.devices[widget.device.id]!);
+                      mappedData['value']['temperatureAlert'] = shouldAlert
+                          ? temperatureUnit == "F"
+                              ? double.parse(convertFarenheitToCelcius(double.parse(temperature.text)).toStringAsFixed(1))
+                              : double.parse(temperature.text)
+                          : null;
+
+                      deviceController.devices[widget.deviceID]!.updateWithJSON(deviceSettings: mappedData);
+                      await deviceController.updateDevice(widget.deviceID, 'deviceSettings');
 
                       showMessage(context, "Controller updated successfully!");
                       Navigator.pop(context);

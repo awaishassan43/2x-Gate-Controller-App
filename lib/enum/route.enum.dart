@@ -10,6 +10,7 @@ class Screen {
   static String get device => '/device';
   static String get addDevice => '/addDevice';
   static String get forgotPassword => '/forgotPassword';
+  static String get error => '/error';
 
   // Settings Subscreens
   static String get resetPassword => '/resetPassword';

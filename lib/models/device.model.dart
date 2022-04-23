@@ -92,18 +92,21 @@ class _RequestPayload {
     required this.pass,
     required this.state,
     required this.test,
+    required this.reboot,
   });
 
   int exp;
   String pass;
   String state;
   int test;
+  int reboot;
 
   factory _RequestPayload.fromJson(Map<String, dynamic> json) => _RequestPayload(
         exp: json["exp"],
         pass: json["pass"],
         state: json["state"],
         test: json["test"],
+        reboot: json["reboot"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -111,6 +114,7 @@ class _RequestPayload {
         "pass": pass,
         "state": state,
         "test": test,
+        "reboot": reboot,
       };
 }
 
@@ -282,6 +286,9 @@ class _StatePayload {
     required this.state2,
     required this.Temp,
     required this.humidity,
+    required this.Ip,
+    required this.Mac,
+    required this.Strength,
   });
 
   int exp;
@@ -290,6 +297,9 @@ class _StatePayload {
   int state2;
   int Temp;
   int humidity;
+  String Ip;
+  String Mac;
+  int Strength;
 
   factory _StatePayload.fromJson(Map<String, dynamic> json) => _StatePayload(
         exp: json["exp"],
@@ -298,6 +308,9 @@ class _StatePayload {
         state2: json["state2"],
         Temp: json["Temp"],
         humidity: json["humidity"],
+        Ip: json["Ip"],
+        Mac: json["Mac"],
+        Strength: json["Strength"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -307,5 +320,67 @@ class _StatePayload {
         "state2": state2,
         "Temp": Temp,
         "humidity": humidity,
+        "Ip": Ip,
+        "Mac": Mac,
+        "Strength": Strength,
       };
+}
+
+Device getEmptyDeviceData(String deviceID, String ownerID) {
+  final Device device = Device(
+    deviceCommands: DeviceCommands(
+      request: _Request(
+        action: 'OPEN GATE',
+        payload: _RequestPayload(
+          exp: DateTime.now().millisecondsSinceEpoch,
+          pass: "1234",
+          state: "OPEN",
+          reboot: 0,
+          test: 1,
+        ),
+        reqId: '1234',
+      ),
+      sendToDevice: "OK",
+      timestamp: DateTime.now().millisecondsSinceEpoch,
+    ),
+    deviceSettings: DeviceSettings(
+      deviceId: deviceID,
+      owner: ownerID,
+
+      ///TODO: That's a bit sus
+      type: "garage",
+      value: _Value(
+        alertOnClose: false,
+        alertOnOpen: false,
+        nightAlert: false,
+        region: "UK",
+        temperatureAlert: null,
+        relay1: _RelaySettings(extInput: true, name: 'Front Gate', outTime: 10, scheduled: false, autoClose: 20),
+        relay2: _RelaySettings(extInput: true, name: 'Back Gate', outTime: 10, scheduled: false, autoClose: 20),
+      ),
+    ),
+    deviceData: DeviceData(
+      name: 'Gate Controller',
+      online: true,
+      owner: ownerID,
+      state: _DeviceState(
+        action: "DOOR_ACTIVITY",
+        payload: _StatePayload(
+          exp: DateTime.now().millisecondsSinceEpoch,
+          pass: '1234',
+          state1: 0,
+          Ip: "",
+          Mac: "",
+          Strength: 0,
+          state2: 1,
+          Temp: 20,
+          humidity: 20,
+        ),
+        reqId: "123412412123124",
+      ),
+      timestamp: DateTime.now().millisecondsSinceEpoch,
+      type: "garage",
+    ),
+  );
+  return device;
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:iot/controllers/user.controller.dart';
 import '/components/error.component.dart';
 import '/components/loader.component.dart';
 import '/controllers/device.controller.dart';
@@ -25,7 +26,7 @@ class Dashboard extends StatelessWidget {
         ),
         actions: [
           Selector<DeviceController, int>(
-            selector: (context, controller) => controller.devices.length,
+            selector: (context, controller) => controller.devices.keys.length,
             builder: (context, devices, _) {
               return devices > 0
                   ? Container()
@@ -47,38 +48,43 @@ class Dashboard extends StatelessWidget {
       ),
       body: Stack(
         children: [
-          SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
-            child: FutureBuilder<void>(
-              future: controller.loadDevices(context),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState != ConnectionState.done) {
-                  return Container();
-                }
+          Selector<UserController, List<String>?>(
+            selector: (context, controller) => controller.profile?.devices,
+            builder: (context, _, __) {
+              return SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: FutureBuilder<void>(
+                  future: controller.loadDevices(context),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState != ConnectionState.done) {
+                      return Container();
+                    }
 
-                if (snapshot.hasError || snapshot.error != null) {
-                  return ErrorMessage(message: snapshot.error.toString());
-                }
+                    if (snapshot.hasError || snapshot.error != null) {
+                      return ErrorMessage(message: snapshot.error.toString());
+                    }
 
-                return Consumer<DeviceController>(
-                  builder: (context, controller, _) {
-                    return Column(
-                      children: controller.devices.entries.map((entry) {
-                        final Device initialData = entry.value;
+                    return Consumer<DeviceController>(
+                      builder: (context, controller, _) {
+                        return Column(
+                          children: controller.devices.entries.map((entry) {
+                            final Device initialData = entry.value;
 
-                        final String deviceID = entry.key;
-                        Device device = initialData;
+                            final String deviceID = entry.key;
+                            Device device = initialData;
 
-                        return DeviceComponent(
-                          device: device,
-                          key: ValueKey(deviceID),
+                            return DeviceComponent(
+                              device: device,
+                              key: ValueKey(deviceID),
+                            );
+                          }).toList(),
                         );
-                      }).toList(),
+                      },
                     );
                   },
-                );
-              },
-            ),
+                ),
+              );
+            },
           ),
           Selector<DeviceController, bool>(
             selector: (context, controller) => controller.isLoading,

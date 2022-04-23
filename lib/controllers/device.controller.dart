@@ -18,6 +18,9 @@ class DeviceController extends ChangeNotifier {
   bool _isLoading = false;
   String _outputTimeError = '';
 
+  /// A local variable to keep and control the listeners
+  Map<String, List<StreamSubscription>> deviceListeners = {};
+
   /// Loader setter and getter
   bool get isLoading => _isLoading;
   set isLoading(bool value) {
@@ -34,10 +37,17 @@ class DeviceController extends ChangeNotifier {
 
   Future<void> loadDevices(BuildContext context) async {
     try {
-      final List<String> deviceIDs = Provider.of<UserController>(context, listen: false).profile!.devices;
+      final List<String>? deviceIDs = Provider.of<UserController>(context, listen: false).profile?.devices;
 
+      if (deviceIDs == null) {
+        return;
+      }
+
+      final List<String> devicesToBeRemoved = devices.keys.where((element) => !deviceIDs.contains(element)).toList();
+
+      /// Adding new devices
       for (String id in deviceIDs) {
-        if (!devices.containsKey(id)) {
+        if (!devices.containsKey(id) && deviceListeners[id] == null) {
           final DataSnapshot deviceData = await deviceCollection.child(id).get();
           final DataSnapshot deviceSettings = await settingsCollection.child(id).get();
           final DataSnapshot deviceLogs = await logsCollection.child(id).get();
@@ -50,45 +60,87 @@ class DeviceController extends ChangeNotifier {
           map['deviceStateLogs'] = objectToMap(deviceLogs.value);
 
           final Device device = Device.fromJson(map);
-          devices[id] = device;
+          final Map<String, Device> deviceList = Map.from(devices);
+          deviceList[id] = device;
+
+          devices = deviceList;
 
           /**
            * Attaching data listener
            */
-          deviceData.ref.onValue.listen((event) {
-            devices[id]!.updateWithJSON(deviceData: objectToMap(event.snapshot.value));
-            notifyListeners();
-          });
+          final Map<String, List<StreamSubscription<dynamic>>> listenersList = Map.from(deviceListeners);
+          listenersList[id] = [
+            deviceData.ref.onValue.listen((event) {
+              devices[id]!.updateWithJSON(deviceData: objectToMap(event.snapshot.value));
+              notifyListeners();
+            }),
 
-          /**
-           * Attaching settings listener
-           */
-          deviceSettings.ref.onValue.listen((event) {
-            devices[id]!.updateWithJSON(deviceSettings: objectToMap(event.snapshot.value));
-            notifyListeners();
-          });
+            /**
+             * Attaching settings listener
+             */
+            deviceSettings.ref.onValue.listen((event) {
+              devices[id]!.updateWithJSON(deviceSettings: objectToMap(event.snapshot.value));
+              notifyListeners();
+            }),
+          ];
+
+          deviceListeners = listenersList;
+          notifyListeners();
         }
       }
+
+      /// Removing previous devices and cancelling subscriptions
+      for (String id in devicesToBeRemoved) {
+        final Map<String, Device> deviceList = Map.from(devices);
+        deviceList.remove(id);
+
+        devices = deviceList;
+
+        if (deviceListeners.containsKey(id)) {
+          for (StreamSubscription listener in deviceListeners[id]!) {
+            await listener.cancel();
+          }
+
+          final Map<String, List<StreamSubscription<dynamic>>> listenersList = Map.from(deviceListeners);
+          listenersList.remove(id);
+          deviceListeners = listenersList;
+        }
+
+        notifyListeners();
+      }
     } on FirebaseException catch (e) {
-      throw Exception("Error occured while loading devices: ${e.message}");
+      debugPrint("Firebase Exception: Failed to load devices: ${e.toString()}");
+      throw e.message ?? "Something went wrong while trying to load devices";
     } catch (e) {
-      throw Exception("Failed to load devices: ${e.toString()}");
+      debugPrint("Generic Exception: Failed to load devices: ${e.toString()}");
+      throw "Failed to load devices: ${e.toString()}";
     }
   }
 
   Future<void> addDevice(String id, BuildContext context) async {
     try {
+      final UserController controller = Provider.of<UserController>(context, listen: false);
+
       /// TODO
       /// WARNING ---- not checking for response type
       await http.post(getCloudURL(id));
 
-      final UserController controller = Provider.of<UserController>(context, listen: false);
+      /// Create the json data for the device
+      final Device device = getEmptyDeviceData(id, controller.getUserID());
+
+      /// Add the device data to firebase
+      commandsCollection.child(id).set(device.deviceCommands.toJson());
+      deviceCollection.child(id).set(device.deviceData.toJson());
+      settingsCollection.child(id).set(device.deviceSettings.toJson());
+
+      // /// Attach device to the user profile
       await controller.addDevice(id);
-      await loadDevices(context);
     } on FirebaseException catch (e) {
-      throw "Error occured while updating the device: ${e.message}";
+      debugPrint("Firebase Exception: Failed to add device: ${e.toString()}");
+      throw e.message ?? "Something went wrong while trying to add a device";
     } catch (e) {
-      throw "Failed to add the device: ${e.toString()}";
+      debugPrint("Generic Exception: Failed to add device: ${e.toString()}");
+      throw "Failed to attach the device to user: ${e.toString()}";
     }
   }
 
@@ -104,8 +156,10 @@ class DeviceController extends ChangeNotifier {
         await settingsCollection.child(id).set(device.deviceSettings.toJson());
       }
     } on FirebaseException catch (e) {
-      throw "Error occured while updating the device: ${e.message}";
+      debugPrint("Firebase Exception: Failed to update device: ${e.toString()}");
+      throw e.message ?? "Something went wrong while trying to update a device";
     } catch (e) {
+      debugPrint("Generic Exception: Failed to update device: ${e.toString()}");
       throw "Failed to update the device: ${e.toString()}";
     }
   }

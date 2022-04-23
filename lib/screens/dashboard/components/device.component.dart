@@ -39,9 +39,15 @@ class _DeviceComponentState extends State<DeviceComponent> {
     try {
       /// Taking a shortcut due to time constraint
       final Map<String, dynamic> mappedData = deviceCommands.toJson();
+      final DateTime currentTime = DateTime.now();
+      final DateTime expiryTime = currentTime.add(const Duration(minutes: 1));
 
+      /// currently set to 60 seconds ahead of current time
+      mappedData['request']['payload']['reboot'] = 0;
       mappedData['request']['payload']['test'] = relayID;
       mappedData['request']['payload']['state'] = initialState == 1 ? "CLOSE" : "OPEN";
+      mappedData['timestamp'] = currentTime.millisecondsSinceEpoch;
+      mappedData['request']['payload']['exp'] = expiryTime.millisecondsSinceEpoch;
 
       controller.devices[deviceID]!.updateWithJSON(deviceCommands: mappedData);
 
@@ -58,7 +64,8 @@ class _DeviceComponentState extends State<DeviceComponent> {
 
   Widget renderRelays(BuildContext context) {
     final deviceSettings = widget.device.deviceSettings.value;
-    final deviceState = widget.device.deviceData.state.payload;
+    final deviceData = widget.device.deviceData;
+    final deviceState = deviceData.state.payload;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -88,6 +95,8 @@ class _DeviceComponentState extends State<DeviceComponent> {
                   borderRadius: 7.5,
                   padding: 0,
                   textColor: Colors.white,
+                  disableElevation: deviceData.online,
+                  isDisabled: !deviceData.online,
                 ),
               ],
             ),
@@ -118,6 +127,7 @@ class _DeviceComponentState extends State<DeviceComponent> {
                   borderRadius: 7.5,
                   padding: 0,
                   textColor: Colors.white,
+                  isDisabled: !deviceData.online,
                 ),
               ],
             ),
@@ -132,6 +142,7 @@ class _DeviceComponentState extends State<DeviceComponent> {
     final String humidity = widget.device.deviceData.state.payload.humidity.toString();
     final double temperature = widget.device.deviceData.state.payload.Temp.toDouble();
     final String deviceName = widget.device.deviceData.name;
+    final bool online = widget.device.deviceData.online;
 
     return Stack(
       children: [
@@ -160,12 +171,14 @@ class _DeviceComponentState extends State<DeviceComponent> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      deviceName,
-                      style: const TextStyle(
-                        color: textColor,
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
+                    Expanded(
+                      child: Text(
+                        deviceName,
+                        style: const TextStyle(
+                          color: textColor,
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                     Row(
@@ -278,6 +291,41 @@ class _DeviceComponentState extends State<DeviceComponent> {
                   color: Colors.black12,
                   height: 0.5,
                   margin: const EdgeInsets.symmetric(vertical: 7.5),
+                ),
+
+                /**
+                 * Mid section
+                 */
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: online
+                        ? const [
+                            Icon(
+                              Icons.wifi,
+                              color: Colors.green,
+                              size: 14,
+                            ),
+                            SizedBox(width: 7),
+                            Text(
+                              'Device is online',
+                              style: TextStyle(fontSize: 12),
+                            ),
+                          ]
+                        : const [
+                            Icon(
+                              Icons.wifi_off,
+                              color: Colors.red,
+                              size: 14,
+                            ),
+                            SizedBox(width: 7),
+                            Text(
+                              'Device is offline',
+                              style: TextStyle(fontSize: 12),
+                            ),
+                          ],
+                  ),
                 ),
 
                 /**

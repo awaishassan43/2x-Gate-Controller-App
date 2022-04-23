@@ -9,6 +9,8 @@ class CustomButton extends StatelessWidget {
   final bool disableElevation;
   final double borderRadius;
   final double padding;
+  final bool isDisabled;
+
   const CustomButton({
     Key? key,
     required this.text,
@@ -18,6 +20,7 @@ class CustomButton extends StatelessWidget {
     this.disableElevation = false,
     this.borderRadius = 5,
     this.padding = 15.0,
+    this.isDisabled = false,
   }) : super(key: key);
 
   @override
@@ -26,14 +29,15 @@ class CustomButton extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(borderRadius),
       ),
-      onPressed: onPressed,
+      onPressed: isDisabled ? null : onPressed,
       child: Text(
         text,
         style: TextStyle(
-          color: textColor,
+          color: isDisabled ? Colors.white60 : textColor,
           fontWeight: FontWeight.bold,
         ),
       ),
+      disabledColor: Colors.black.withOpacity(0.6),
       padding: EdgeInsets.all(padding),
       color: backgroundColor,
       elevation: disableElevation ? 0 : 2,

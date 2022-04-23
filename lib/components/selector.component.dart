@@ -5,6 +5,8 @@ class CustomSelector<T> extends StatelessWidget {
   final T? selectedItem;
   final void Function(T? value) onSelected;
   final String Function(T value)? transformer;
+  final String? nullText;
+  final T? nullValue;
 
   const CustomSelector({
     Key? key,
@@ -12,7 +14,13 @@ class CustomSelector<T> extends StatelessWidget {
     required this.selectedItem,
     required this.onSelected,
     this.transformer,
-  }) : super(key: key);
+    this.nullText,
+    this.nullValue,
+  })  : assert(
+          (nullText != null && nullValue != null) || (nullText == null && nullValue == null),
+          "Either provide both values or remove both values",
+        ),
+        super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +50,11 @@ class CustomSelector<T> extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        option == null.toString() ? "None" : option,
+                        option == null.toString()
+                            ? "None"
+                            : nullValue != null && nullValue == entry.value
+                                ? nullText!
+                                : option,
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                       if (entry.value == selectedItem)
