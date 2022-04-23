@@ -149,7 +149,13 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
       debugPrint("Checking if internet is reconnected");
 
       if (!internetReconnected) {
-        await reconnectInternet(status, initialSSID);
+        await reconnectInternet(
+          (String message) => setState(() {
+            loaderMessage = message;
+          }),
+          status,
+          initialSSID,
+        );
 
         setState(() {
           internetReconnected = true;

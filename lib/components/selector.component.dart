@@ -38,9 +38,6 @@ class CustomSelector<T> extends StatelessWidget {
             final int index = entry.key;
             final String option = transformer != null ? transformer!(entry.value) : entry.value.toString();
 
-            print(nullText);
-            print(nullValue);
-            print(entry.value);
             return Column(
               children: [
                 MaterialButton(

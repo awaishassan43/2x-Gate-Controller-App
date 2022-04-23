@@ -32,7 +32,7 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
   bool isLoading = false;
   String? deleteError;
 
-    Future<void> reboot(BuildContext context) async {
+  Future<void> reboot(BuildContext context) async {
     final DeviceController controller = Provider.of<DeviceController>(context, listen: false);
 
     final DeviceCommands deviceCommands = controller.devices[widget.deviceID]!.deviceCommands;
@@ -50,7 +50,7 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
 
       /// currently set to 60 seconds ahead of current time
 
-      mappedData['request']['payload']['online'] = 1;
+      mappedData['request']['payload']['reboot'] = 1;
       mappedData['timestamp'] = currentTime.millisecondsSinceEpoch;
       mappedData['request']['payload']['exp'] = expiryTime.millisecondsSinceEpoch;
 
@@ -60,7 +60,7 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
       showMessage(context, "Controller updated successfully!");
     } on FirebaseException catch (e) {
       showMessage(context, e.toString());
-    } catch(e) {
+    } catch (e) {
       showMessage(context, e.toString());
     }
 
@@ -70,6 +70,10 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
   }
 
   Future<void> updateRelay(BuildContext context, dynamic value, String relayID, String key) async {
+    setState(() {
+      isLoading = true;
+    });
+
     try {
       final DeviceController controller = Provider.of<DeviceController>(context, listen: false);
       final DeviceSettings settings = controller.devices[widget.deviceID]!.deviceSettings;
@@ -84,6 +88,10 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
     } catch (e) {
       showMessage(context, e.toString());
     }
+
+    setState(() {
+      isLoading = false;
+    });
   }
 
   Future<void> updateControllerData(BuildContext context, String key, dynamic value) async {
@@ -457,38 +465,42 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                               ? DateFormat("HH:mm").format(today)
                               : DateFormat("hh:mm a").format(today),
                         ),
-                        SectionItem(
-                          title: "Network",
-                          subtitle: Column(
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: const [
-                                  Text("Strength", style: netTextStyle),
-                                  // Text(device.networkStrength ?? '...', style: netTextStyle),
-                                  Text('...', style: netTextStyle),
+                        Selector<DeviceController, DeviceData>(
+                          selector: (context, controller) => controller.devices[widget.deviceID]!.deviceData,
+                          builder: (context, data, _) {
+                            final payload = data.state.payload;
+
+                            return SectionItem(
+                              title: "Network",
+                              subtitle: Column(
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      const Text("Strength", style: netTextStyle),
+                                      Text(payload.Strength.toString(), style: netTextStyle),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 3.5),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      const Text("Mac ID", style: netTextStyle),
+                                      Text(payload.Mac, style: netTextStyle),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 3.5),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      const Text("IP Address", style: netTextStyle),
+                                      Text(payload.Ip, style: netTextStyle),
+                                    ],
+                                  ),
                                 ],
                               ),
-                              const SizedBox(height: 3.5),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: const [
-                                  Text("Mac ID", style: netTextStyle),
-                                  // Text(device.macID ?? '...', style: netTextStyle),
-                                  Text('...', style: netTextStyle),
-                                ],
-                              ),
-                              const SizedBox(height: 3.5),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: const [
-                                  Text("IP Address", style: netTextStyle),
-                                  // Text(device.ipAddress ?? '...', style: netTextStyle),
-                                  Text('...', style: netTextStyle),
-                                ],
-                              ),
-                            ],
-                          ),
+                            );
+                          },
                         ),
                       ],
                     ),
@@ -508,18 +520,22 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                       ],
                     ),
                     const SizedBox(height: 40),
-                    CustomButton(
-                      text: "Reboot",
-                      onPressed: () => reboot(context),
-                      backgroundColor: Colors.white,
-                      disableElevation: true,
+                    Selector<DeviceController, bool>(
+                      selector: (context, controller) => controller.devices[widget.deviceID]!.deviceData.online,
+                      builder: (context, isOnline, _) {
+                        return CustomButton(
+                          text: "Reboot",
+                          isDisabled: !isOnline,
+                          onPressed: () => reboot(context),
+                          backgroundColor: Colors.white,
+                          disableElevation: true,
+                        );
+                      },
                     ),
                     const SizedBox(height: 5),
                     CustomButton(
                       text: "Change WiFi credentials",
-                      onPressed: () {
-                        Navigator.pushNamed(context, Screen.addDevice, arguments: true);
-                      },
+                      onPressed: () => Navigator.pushNamed(context, Screen.addDevice, arguments: true),
                       textColor: Colors.blue,
                       backgroundColor: Colors.white,
                       disableElevation: true,
@@ -546,6 +562,8 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                           });
 
                           Provider.of<UserController>(context, listen: false).removeDevice(context, widget.deviceID);
+
+                          showMessage(context, "Device deleted successfully!");
                           Navigator.popUntil(context, ModalRoute.withName(Screen.dashboard));
                         } catch (e) {
                           setState(() {

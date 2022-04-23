@@ -2,7 +2,7 @@ const linkToTermsOfUse = 'https://google.com';
 
 const Map<String, String> temperatureUnits = {"C": "Celcius", "F": "Fahrenheit"};
 
-// const String deviceSSID = 'PTCL_BC';
+// const String deviceSSID = 'quaidian15';
 // const String devicePassword = 'BlueMushroom12!@21';
 const String deviceSSID = 'myssid';
 const String devicePassword = 'mypassword';

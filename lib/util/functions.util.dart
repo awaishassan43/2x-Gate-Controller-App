@@ -162,17 +162,20 @@ Future<ConnectivityStatus> verifySetup() async {
 }
 
 Future<bool> connectToDevice() async {
-  if (await WiFiForIoTPlugin.isConnected() && await WiFiForIoTPlugin.getSSID() != deviceSSID) {
-    await WiFiForIoTPlugin.disconnect();
+  // final String? connectedSSID = await WiFiForIoTPlugin.getBSSID();
 
-    await Future.delayed(const Duration(seconds: 5));
+  // if (await WiFiForIoTPlugin.isConnected() && connectedSSID != null && connectedSSID != deviceSSID) {
+  //   final bool isDisconnected = await WiFiForIoTPlugin.removeWifiNetwork(connectedSSID);
+  //   debugPrint("Disconnection result: $isDisconnected");
 
-    final bool isConnected = await WiFiForIoTPlugin.isConnected();
+  //   await Future.delayed(const Duration(seconds: 5));
 
-    if (isConnected) {
-      throw "Failed to disconnect from the connected network - Please manually disconnect and try again!";
-    }
-  }
+  //   final bool isConnected = await WiFiForIoTPlugin.isConnected();
+
+  //   if (isConnected) {
+  //     throw "Failed to disconnect from the connected network - Please manually disconnect and try again!";
+  //   }
+  // }
 
   // Enable wifi if not
   if (!await WiFiForIoTPlugin.isEnabled()) {
@@ -245,6 +248,7 @@ Future<String> sendCredentialsToDevice(String ssid, String password) async {
     );
 
     await WiFiForIoTPlugin.forceWifiUsage(false);
+    await WiFiForIoTPlugin.removeWifiNetwork(deviceSSID);
 
     debugPrint("Response: " + response.body.toString());
 
@@ -254,36 +258,34 @@ Future<String> sendCredentialsToDevice(String ssid, String password) async {
   }
 }
 
-Future<void> reconnectInternet(ConnectivityStatus status, String? initialSSID) async {
+Future<void> reconnectInternet(void Function(String message) changeMessage, ConnectivityStatus status, String? initialSSID) async {
   try {
     if (initialSSID != null) {
       if (initialSSID == deviceSSID || initialSSID == "<unknown ssid>") {
         throw "Failed to automatically connect to internet - Please connect to wifi or cellular network manually and press the continue button";
       }
 
-      final bool isConnected = await WiFiForIoTPlugin.connect(initialSSID, withInternet: true);
+      changeMessage("Switching to initial WiFi connection: $initialSSID");
+      await WiFiForIoTPlugin.findAndConnect(initialSSID, password: '');
+
+      await Future.delayed(const Duration(seconds: 5));
+      final bool isConnected = await WiFiForIoTPlugin.getBSSID() == initialSSID;
 
       if (!isConnected) {
         throw "Failed to reconnect to " + initialSSID;
       }
     } else if (status == ConnectivityStatus.mobile) {
+      changeMessage("Switching to cellular network");
       await WiFiForIoTPlugin.setEnabled(false);
     }
 
     debugPrint("Checking internet connection");
 
-    final bool isInternetConnected = await Connectivity()
-        .isConnected
-        .firstWhere(
-          (isConnected) => isConnected == true,
-          orElse: () => false,
-        )
-        .timeout(
-      const Duration(seconds: 10),
-      onTimeout: () {
-        throw "Timed out while waiting for internet connection";
-      },
-    );
+    await Future.delayed(const Duration(seconds: 10));
+
+    changeMessage("Waiting for internet connection");
+
+    final bool isInternetConnected = await Connectivity().checkConnection();
 
     if (!isInternetConnected) {
       throw "Please make sure internet is connected";
