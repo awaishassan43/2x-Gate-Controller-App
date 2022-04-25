@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:iot/controllers/user.controller.dart';
+import 'package:iot/models/profile.model.dart';
 import '/components/error.component.dart';
 import '/components/loader.component.dart';
 import '/controllers/device.controller.dart';
@@ -48,7 +49,7 @@ class Dashboard extends StatelessWidget {
       ),
       body: Stack(
         children: [
-          Selector<UserController, List<String>?>(
+          Selector<UserController, List<ConnectedDevice>?>(
             selector: (context, controller) => controller.profile?.devices,
             builder: (context, _, __) {
               return SingleChildScrollView(

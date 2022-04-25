@@ -211,8 +211,8 @@ class UserController extends ChangeNotifier {
     try {
       final DatabaseReference devicesReference = users.child(auth.currentUser!.uid).child('devices').ref;
       final DataSnapshot data = await devicesReference.get();
-      final List<String> devices = data.value != null ? mapToList(data.value as Map) : [];
-      devices.add(id);
+      final List<ConnectedDevice> devices = data.value != null ? mapToList<ConnectedDevice>(data.value as Map) : [];
+      devices.add(ConnectedDevice(id: id));
 
       await devicesReference.set(listToMap(devices));
     } on FirebaseException catch (e) {

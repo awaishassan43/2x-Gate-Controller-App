@@ -37,7 +37,7 @@ class DeviceController extends ChangeNotifier {
 
   Future<void> loadDevices(BuildContext context) async {
     try {
-      final List<String>? deviceIDs = Provider.of<UserController>(context, listen: false).profile?.devices;
+      final List<String>? deviceIDs = Provider.of<UserController>(context, listen: false).profile?.devices.map((e) => e.id).toList();
 
       if (deviceIDs == null) {
         return;

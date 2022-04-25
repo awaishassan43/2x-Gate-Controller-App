@@ -1,4 +1,6 @@
-import '/util/functions.util.dart';
+import 'package:iot/util/functions.util.dart';
+
+import '../enum/access.enum.dart';
 
 class Profile {
   String email;
@@ -7,7 +9,7 @@ class Profile {
   String phone;
   String temperatureUnit;
   bool is24Hours;
-  List<String> devices;
+  List<ConnectedDevice> devices;
   String fcmToken;
 
   Profile({
@@ -29,7 +31,7 @@ class Profile {
       phone: data['phone'],
       temperatureUnit: data['temperatureUnit'],
       is24Hours: data['is24Hours'],
-      devices: castList<String>(data['devices']),
+      devices: mapToList(data['devices']).map((item) => ConnectedDevice.fromMap(item as Map<String, dynamic>)).toList(),
       fcmToken: data['fcmToken'],
     );
   }
@@ -42,7 +44,7 @@ class Profile {
       "phone": phone,
       "temperatureUnit": temperatureUnit,
       "is24Hours": is24Hours,
-      "devices": devices,
+      "devices": devices.map((e) => e.toJSON()).toList(),
       "fcmToken": fcmToken,
     };
   }
@@ -57,7 +59,35 @@ class Profile {
     phone = data['phone'];
     temperatureUnit = data['temperatureUnit'];
     is24Hours = data['is24Hours'];
-    devices = data['devices'];
+    devices = mapToList(data['devices']).map((item) => ConnectedDevice.fromMap(item as Map<String, dynamic>)).toList();
     fcmToken = data['fcmToken'];
+  }
+}
+
+class ConnectedDevice {
+  String id;
+  String? accessProvidedBy;
+  AccessType? accessType;
+
+  ConnectedDevice({
+    required this.id,
+    this.accessProvidedBy,
+    this.accessType,
+  });
+
+  factory ConnectedDevice.fromMap(Map<String, dynamic> data) {
+    return ConnectedDevice(
+      id: data['id'],
+      accessProvidedBy: data['accessProvidedBy'],
+      accessType: data['accessType'] ? AccessTypeExtension.getAccessType(data['accessType']) : null,
+    );
+  }
+
+  Map<String, dynamic> toJSON() {
+    return {
+      "id": id,
+      "accessProvidedBy": accessProvidedBy,
+      "accessType": accessType,
+    };
   }
 }
