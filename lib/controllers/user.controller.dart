@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import '../enum/access.enum.dart';
 import '../util/notification.util.dart';
 import '/models/profile.model.dart';
 import '/util/functions.util.dart';
@@ -171,7 +172,7 @@ class UserController extends ChangeNotifier {
       throw e.message ?? "Something went wrong while trying to get user profile";
     } catch (e) {
       debugPrint("Generic Exception: Failed to attach listeners to user profile: ${e.toString()}");
-      throw "Failed to attach listener to user profile: ${e.toString()}";
+      rethrow;
     }
   }
 
@@ -212,7 +213,7 @@ class UserController extends ChangeNotifier {
       final DatabaseReference devicesReference = users.child(auth.currentUser!.uid).child('devices').ref;
       final DataSnapshot data = await devicesReference.get();
       final List<ConnectedDevice> devices = data.value != null ? mapToList<ConnectedDevice>(data.value as Map) : [];
-      devices.add(ConnectedDevice(id: id));
+      devices.add(ConnectedDevice(id: id, accessType: AccessType.owner));
 
       await devicesReference.set(listToMap(devices));
     } on FirebaseException catch (e) {
@@ -275,5 +276,9 @@ class UserController extends ChangeNotifier {
       debugPrint("Generic Exception: Failed to send password reset email: ${e.toString()}");
       throw "Failed to send password reset email: ${e.toString()}";
     }
+  }
+
+  AccessType getAccessType(String id) {
+    return profile!.devices.firstWhere((element) => element.id == id).accessType;
   }
 }

@@ -1,6 +1,5 @@
-import 'package:iot/util/functions.util.dart';
-
 import '../enum/access.enum.dart';
+import '../util/functions.util.dart';
 
 class Profile {
   String email;
@@ -31,7 +30,7 @@ class Profile {
       phone: data['phone'],
       temperatureUnit: data['temperatureUnit'],
       is24Hours: data['is24Hours'],
-      devices: mapToList(data['devices']).map((item) => ConnectedDevice.fromMap(item as Map<String, dynamic>)).toList(),
+      devices: (data['devices'] as List).map((item) => ConnectedDevice.fromMap((item as Map).cast<String, dynamic>())).toList(),
       fcmToken: data['fcmToken'],
     );
   }
@@ -67,19 +66,19 @@ class Profile {
 class ConnectedDevice {
   String id;
   String? accessProvidedBy;
-  AccessType? accessType;
+  AccessType accessType;
 
   ConnectedDevice({
     required this.id,
+    required this.accessType,
     this.accessProvidedBy,
-    this.accessType,
   });
 
   factory ConnectedDevice.fromMap(Map<String, dynamic> data) {
     return ConnectedDevice(
       id: data['id'],
       accessProvidedBy: data['accessProvidedBy'],
-      accessType: data['accessType'] ? AccessTypeExtension.getAccessType(data['accessType']) : null,
+      accessType: AccessTypeExtension.getAccessType(data['accessType']),
     );
   }
 

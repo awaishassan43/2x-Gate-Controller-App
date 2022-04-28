@@ -26,9 +26,9 @@ void showMessage(BuildContext context, String message) {
   );
 }
 
-List<T> mapToList<T>(Map data) {
+List<T> mapToList<T>(Map? data) {
   try {
-    return data.values.toList().cast<T>();
+    return data != null ? data.values.toList().cast<T>() : [];
   } catch (e) {
     throw "Failed to convert map to list: ${e.toString()}";
   }

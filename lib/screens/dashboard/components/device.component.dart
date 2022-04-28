@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:iot/components/button.component.dart';
 import 'package:iot/components/loader.component.dart';
 import 'package:iot/controllers/device.controller.dart';
+import 'package:iot/enum/access.enum.dart';
 import '/controllers/user.controller.dart';
 import '/enum/route.enum.dart';
 import '/models/device.model.dart';
@@ -22,6 +23,13 @@ class DeviceComponent extends StatefulWidget {
 
 class _DeviceComponentState extends State<DeviceComponent> {
   bool isLoading = false;
+  late final AccessType _accessType;
+
+  @override
+  void initState() {
+    super.initState();
+    _accessType = Provider.of<UserController>(context, listen: false).getAccessType(widget.device.deviceSettings.deviceId);
+  }
 
   Future<void> updateRelayStatus(BuildContext context, int relayID) async {
     final DeviceController controller = Provider.of<DeviceController>(context, listen: false);
@@ -96,7 +104,7 @@ class _DeviceComponentState extends State<DeviceComponent> {
                   padding: 0,
                   textColor: Colors.white,
                   disableElevation: deviceData.online,
-                  isDisabled: !deviceData.online,
+                  isDisabled: !deviceData.online || _accessType == AccessType.guest,
                 ),
               ],
             ),
@@ -127,7 +135,7 @@ class _DeviceComponentState extends State<DeviceComponent> {
                   borderRadius: 7.5,
                   padding: 0,
                   textColor: Colors.white,
-                  isDisabled: !deviceData.online,
+                  isDisabled: !deviceData.online || _accessType == AccessType.guest,
                 ),
               ],
             ),
@@ -211,7 +219,7 @@ class _DeviceComponentState extends State<DeviceComponent> {
                                     style: const TextStyle(
                                       color: textColor,
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 15,
+                                      fontSize: 14,
                                     ),
                                     children: [
                                       TextSpan(text: getTemperatureValue(context, temperature, withUnit: false)),
@@ -255,7 +263,7 @@ class _DeviceComponentState extends State<DeviceComponent> {
                                 style: const TextStyle(
                                   color: textColor,
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 15,
+                                  fontSize: 14,
                                 ),
                                 children: [
                                   TextSpan(text: humidity),
@@ -269,16 +277,20 @@ class _DeviceComponentState extends State<DeviceComponent> {
                          * End of humidity
                          */
 
-                        IconButton(
-                          constraints: const BoxConstraints(
-                            maxHeight: 40,
-                            maxWidth: 40,
+                        /**
+                         * Settings button
+                         */
+                        if (_accessType != AccessType.guest)
+                          IconButton(
+                            constraints: const BoxConstraints(
+                              maxHeight: 40,
+                              maxWidth: 40,
+                            ),
+                            icon: const Icon(Icons.settings),
+                            onPressed: () {
+                              Navigator.pushNamed(context, Screen.deviceSettings, arguments: widget.device.deviceSettings.deviceId);
+                            },
                           ),
-                          icon: const Icon(Icons.settings),
-                          onPressed: () {
-                            Navigator.pushNamed(context, Screen.deviceSettings, arguments: widget.device.deviceSettings.deviceId);
-                          },
-                        ),
                       ],
                     ),
                   ],

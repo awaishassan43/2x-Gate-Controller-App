@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:iot/components/largeButton.component.dart';
 import 'package:iot/controllers/user.controller.dart';
+import 'package:iot/enum/access.enum.dart';
 import 'package:iot/models/device.model.dart';
 import 'package:iot/screens/device/components/sensor.component.dart';
 import 'package:iot/util/functions.util.dart';
@@ -26,6 +27,13 @@ class _DeviceScreenState extends State<DeviceScreen> {
   bool isLoading = false;
   bool isFirstRelayDisabled = false;
   bool isSecondRelayDisabled = false;
+  late final AccessType _accessType;
+
+  @override
+  void initState() {
+    super.initState();
+    _accessType = Provider.of<UserController>(context, listen: false).getAccessType(widget.deviceID);
+  }
 
   Future<void> updateRelayStatus(BuildContext context, int relayID) async {
     final DeviceController controller = Provider.of<DeviceController>(context, listen: false);
@@ -174,24 +182,25 @@ class _DeviceScreenState extends State<DeviceScreen> {
               /**
                * Bottom Section
                */
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.all(10),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    // BottomSectionItem(text: "History", onPressed: () {}, icon: Icons.history),
-                    // BottomSectionItem(text: "Schedule", icon: Icons.history, onPressed: () {}),
-                    BottomSectionItem(
-                      text: "Settings",
-                      icon: Icons.settings,
-                      onPressed: () {
-                        Navigator.pushNamed(context, Screen.deviceSettings, arguments: widget.deviceID);
-                      },
-                    ),
-                  ],
+              if (_accessType != AccessType.guest)
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.all(10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      // BottomSectionItem(text: "History", onPressed: () {}, icon: Icons.history),
+                      // BottomSectionItem(text: "Schedule", icon: Icons.history, onPressed: () {}),
+                      BottomSectionItem(
+                        text: "Settings",
+                        icon: Icons.settings,
+                        onPressed: () {
+                          Navigator.pushNamed(context, Screen.deviceSettings, arguments: widget.deviceID);
+                        },
+                      ),
+                    ],
+                  ),
                 ),
-              ),
               /**
                * End of bottom section
                */

@@ -10,6 +10,11 @@ class SectionItem extends StatelessWidget {
   final bool showSeparator;
   final bool showChevron;
   final bool showEditIcon;
+  final bool isDisabled;
+  final bool showSwitch;
+  final bool? switchValue;
+  final void Function(bool value)? onSwitchPressed;
+
   const SectionItem({
     Key? key,
     required this.title,
@@ -21,9 +26,23 @@ class SectionItem extends StatelessWidget {
     this.showSeparator = true,
     this.showChevron = false,
     this.showEditIcon = false,
-  })  : assert((trailing != null || trailingText != null) || (trailing == null && trailingText == null)),
+    this.showSwitch = false,
+    this.switchValue,
+    this.onSwitchPressed,
+    this.isDisabled = false,
+  })  :
+
+        /// Only show trailing widget or trailingText or show none
         assert((trailing != null || trailingText != null) || (trailing == null && trailingText == null)),
+
+        /// Only show chevron or edit icon or show none
         assert((showChevron != true || showEditIcon != true) || (showChevron == false && showEditIcon == false)),
+
+        /// Only show switch or trailing widget or show none
+        assert((trailing != null || showSwitch) || (trailing == null && !showSwitch)),
+
+        /// In case if switch is shown, then make sure to provide a non-null switch value and an onSwitchPressed function
+        assert((!showSwitch) || (showSwitch && switchValue != null && onSwitchPressed != null)),
         super(key: key);
 
   @override
@@ -37,13 +56,14 @@ class SectionItem extends StatelessWidget {
          * Section item wrapper
          */
         MaterialButton(
-          onPressed: onTap,
+          onPressed: isDisabled ? null : onTap,
           height: 50,
           elevation: 0,
           focusElevation: 0,
           disabledElevation: 0,
           highlightElevation: 0,
           hoverElevation: 0,
+          disabledColor: Colors.blueGrey.withOpacity(0.3),
           padding: const EdgeInsets.all(0),
           child: Padding(
             padding: EdgeInsets.only(top: 12.5, bottom: 12.5, left: 12.5, right: trailing != null ? 5 : 12.5),
@@ -105,6 +125,11 @@ class SectionItem extends StatelessWidget {
                         ),
                       ),
                     if (trailing != null) trailing!,
+                    if (showSwitch)
+                      Switch(
+                        onChanged: isDisabled ? null : onSwitchPressed,
+                        value: switchValue!,
+                      ),
                     if (showChevron || showEditIcon) ...[
                       if (showEditIcon) const SizedBox(width: 5),
                       Icon(

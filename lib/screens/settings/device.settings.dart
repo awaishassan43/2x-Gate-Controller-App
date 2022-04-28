@@ -1,9 +1,11 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:iot/enum/access.enum.dart';
 import 'package:iot/screens/settings/subscreens/editor.screen.dart';
 import 'package:iot/screens/settings/subscreens/selector.screen.dart';
 import 'package:iot/screens/settings/subscreens/temperature.screen.dart';
+import 'package:iot/util/themes.util.dart';
 import 'package:tuple/tuple.dart';
 import '/components/button.component.dart';
 import '/components/loader.component.dart';
@@ -31,6 +33,13 @@ class DeviceSettingsScreen extends StatefulWidget {
 class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
   bool isLoading = false;
   String? deleteError;
+  late final AccessType _accessType;
+
+  @override
+  void initState() {
+    super.initState();
+    _accessType = Provider.of<UserController>(context, listen: false).getAccessType(widget.deviceID);
+  }
 
   Future<void> reboot(BuildContext context) async {
     final DeviceController controller = Provider.of<DeviceController>(context, listen: false);
@@ -165,6 +174,24 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    if (_accessType != AccessType.owner)
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: Colors.red.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(7.5),
+                        ),
+                        child: const Text(
+                          "These settings can only be edited by the device owner",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.red,
+                          ),
+                        ),
+                      ),
+
                     /**
                        * Controller name
                        */
@@ -186,6 +213,7 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                             );
                           },
                           showSeparator: false,
+                          isDisabled: _accessType != AccessType.owner,
                           showEditIcon: true,
                         ),
                       ],
@@ -199,6 +227,7 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                       children: [
                         SectionItem(
                           title: "Name",
+                          isDisabled: _accessType != AccessType.owner,
                           subtitleText: "Change the name of the relay",
                           trailingText: relay1.name,
                           showEditIcon: true,
@@ -215,6 +244,7 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                           },
                         ),
                         SectionItem(
+                          isDisabled: _accessType != AccessType.owner,
                           title: "Output Time",
                           subtitleText: "Duration",
                           trailingText: getTimeString(relay1.outTime),
@@ -237,15 +267,15 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                           },
                         ),
                         SectionItem(
+                          isDisabled: _accessType != AccessType.owner,
                           title: "External Input",
                           subtitleText: "Enable/Disable relay output",
-                          trailing: Switch(
-                            onChanged: (value) => updateRelay(context, value, 'Relay1', 'ExtInput'),
-                            value: relay1.extInput,
-                          ),
+                          onSwitchPressed: (value) => updateRelay(context, value, 'Relay1', 'ExtInput'),
+                          switchValue: relay1.extInput,
                           onTap: () => updateRelay(context, !relay1.extInput, 'Relay1', 'ExtInput'),
                         ),
                         SectionItem(
+                          isDisabled: _accessType != AccessType.owner,
                           title: "Auto Close",
                           subtitleText: "Automatically close the door at a specified time",
                           trailingText: relay1.autoClose != 0 ? getTimeString(relay1.autoClose) : "Disabled",
@@ -269,6 +299,7 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                           },
                         ),
                         // SectionItem(
+                        // isDisabled: _accessType != AccessType.owner,
                         //   title: "Scheduled",
                         //   subtitleText: "Open and close the door at a specified time",
                         //   trailing: Switch(
@@ -294,6 +325,7 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                       header: relay2.name,
                       children: [
                         SectionItem(
+                          isDisabled: _accessType != AccessType.owner,
                           title: "Name",
                           subtitleText: "Change the name of the relay",
                           trailingText: relay2.name,
@@ -311,6 +343,7 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                           },
                         ),
                         SectionItem(
+                          isDisabled: _accessType != AccessType.owner,
                           title: "Output Time",
                           subtitleText: "Duration",
                           trailingText: getTimeString(relay2.outTime),
@@ -332,15 +365,16 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                           },
                         ),
                         SectionItem(
+                          isDisabled: _accessType != AccessType.owner,
                           title: "External Input",
                           subtitleText: "Enable/Disable relay output",
-                          trailing: Switch(
-                            onChanged: (value) => updateRelay(context, value, 'Relay2', 'ExtInput'),
-                            value: relay2.extInput,
-                          ),
+                          switchValue: relay2.extInput,
+                          showSwitch: true,
+                          onSwitchPressed: (value) => updateRelay(context, value, 'Relay2', 'ExtInput'),
                           onTap: () => updateRelay(context, !relay2.extInput, 'Relay2', 'ExtInput'),
                         ),
                         SectionItem(
+                          isDisabled: _accessType != AccessType.owner,
                           title: "Auto Close",
                           subtitleText: "Automatically close the door at a specified time",
                           trailingText: relay2.autoClose != 0 ? getTimeString(relay2.autoClose) : "Disabled",
@@ -364,6 +398,7 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                           },
                         ),
                         // SectionItem(
+                        // isDisabled: _accessType != AccessType.owner,
                         //   title: "Scheduled",
                         //   subtitleText: "Open and close the door at a specified time",
                         //   trailing: Switch(
@@ -390,22 +425,22 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                       subHeader: "[Premium Feature]",
                       children: [
                         SectionItem(
+                          isDisabled: _accessType != AccessType.owner,
                           title: "On Close",
-                          trailing: Switch(
-                            onChanged: (value) => updateControllerSettings(context, 'alertOnClose', value),
-                            value: deviceSettings.alertOnClose,
-                          ),
+                          showSwitch: true,
+                          onSwitchPressed: (value) => updateControllerSettings(context, 'alertOnClose', value),
+                          switchValue: deviceSettings.alertOnClose,
                           onTap: () => updateControllerSettings(context, 'alertOnClose', !deviceSettings.alertOnClose),
                         ),
                         SectionItem(
+                          isDisabled: _accessType != AccessType.owner,
                           title: "On Open",
-                          trailing: Switch(
-                            onChanged: (value) => updateControllerSettings(context, 'alertOnOpen', value),
-                            value: deviceSettings.alertOnOpen,
-                          ),
+                          onSwitchPressed: (value) => updateControllerSettings(context, 'alertOnOpen', value),
+                          switchValue: deviceSettings.alertOnOpen,
                           onTap: () => updateControllerSettings(context, 'alertOnOpen', !deviceSettings.alertOnOpen),
                         ),
                         // SectionItem(
+                        // isDisabled: _accessType != AccessType.owner,
                         //   title: "Open Alert",
                         //   subtitleText: "Alert if door is left open",
                         //   trailingText: deviceSettings.remainedOpenAlert == null ? "Don't alert" : getTimeString(device.remainedOpenAlert!),
@@ -425,15 +460,15 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                         //   },
                         // ),
                         SectionItem(
+                          isDisabled: _accessType != AccessType.owner,
                           title: "Night Alert",
                           subtitleText: "Alert if door is left open",
                           onTap: () => updateControllerSettings(context, 'nightAlert', !deviceSettings.nightAlert),
-                          trailing: Switch(
-                            onChanged: (value) => updateControllerSettings(context, 'nightAlert', value),
-                            value: deviceSettings.nightAlert,
-                          ),
+                          onSwitchPressed: (value) => updateControllerSettings(context, 'nightAlert', value),
+                          switchValue: deviceSettings.nightAlert,
                         ),
                         SectionItem(
+                          isDisabled: _accessType != AccessType.owner,
                           title: "Temperature Alert",
                           showEditIcon: true,
                           subtitleText: "Alert if temperature exceeds",
@@ -451,15 +486,17 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                       header: "Info",
                       children: [
                         SectionItem(
+                          isDisabled: _accessType != AccessType.owner,
                           title: "Firmware",
                           onTap: () {},
-                          // trailingText: device.firmware ?? '...',
                         ),
                         SectionItem(
+                          isDisabled: _accessType != AccessType.owner,
                           title: "Date",
                           trailingText: "${today.day} ${today.getMonth} ${today.year}",
                         ),
                         SectionItem(
+                          isDisabled: _accessType != AccessType.owner,
                           title: "Time",
                           trailingText: Provider.of<UserController>(context, listen: false).profile!.is24Hours
                               ? DateFormat("HH:mm").format(today)
@@ -471,6 +508,7 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                             final payload = data.state.payload;
 
                             return SectionItem(
+                              isDisabled: _accessType != AccessType.owner,
                               title: "Network",
                               subtitle: Column(
                                 children: [
@@ -508,11 +546,13 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                       header: "General",
                       children: [
                         SectionItem(
+                          isDisabled: _accessType != AccessType.owner,
                           title: "User Guide",
                           onTap: () {},
                           showChevron: true,
                         ),
                         SectionItem(
+                          isDisabled: _accessType != AccessType.owner,
                           title: "FAQ",
                           showChevron: true,
                           onTap: () {},
@@ -525,7 +565,7 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                       builder: (context, isOnline, _) {
                         return CustomButton(
                           text: "Reboot",
-                          isDisabled: !isOnline,
+                          isDisabled: !isOnline && _accessType != AccessType.owner,
                           onPressed: () => reboot(context),
                           backgroundColor: Colors.white,
                           disableElevation: true,
@@ -539,6 +579,7 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                       textColor: Colors.blue,
                       backgroundColor: Colors.white,
                       disableElevation: true,
+                      isDisabled: _accessType != AccessType.owner,
                     ),
                     const SizedBox(height: 5),
                     if (deleteError != null)
@@ -553,6 +594,7 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                         ),
                       ),
                     CustomButton(
+                      isDisabled: _accessType != AccessType.owner,
                       text: "Delete Device",
                       onPressed: () async {
                         try {
