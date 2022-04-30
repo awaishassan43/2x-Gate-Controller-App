@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -317,5 +318,21 @@ Future<void> getWiFiDevices() async {
     await WiFiScan.instance.startScan();
   } catch (e) {
     throw "Failed to load wifi devices";
+  }
+}
+
+Future<String> generateDynamicLink(String path) async {
+  try {
+    final DynamicLinkParameters _params = DynamicLinkParameters(
+      link: Uri.parse('$appLink/$path'),
+      uriPrefix: appLink,
+      androidParameters: const AndroidParameters(packageName: 'com.tesron.gatecontroller'),
+    );
+
+    final Uri dynamicLink = await FirebaseDynamicLinks.instance.buildLink(_params);
+
+    return dynamicLink.toString();
+  } catch (e) {
+    throw "Failed to generate the link";
   }
 }

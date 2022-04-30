@@ -13,4 +13,4 @@ const String feedbackURL = 'https://us-central1-luminous-shadow-330923.cloudfunc
 const int minCharacters = 8;
 
 // Dynamic link structure
-const String dynamicLink = 'https://gatecontroller.page.link';
+const String appLink = 'https://gatecontroller.page.link';

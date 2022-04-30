@@ -25,7 +25,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
     // Checking for the scanned value to confirm it contains the dynamic link
     final String code = barcode.rawValue!;
 
-    if (!code.startsWith(dynamicLink)) {
+    if (!code.startsWith(appLink)) {
       debugPrint("Code read - Dynamic link not found");
       return;
     }
