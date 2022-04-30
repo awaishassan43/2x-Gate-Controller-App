@@ -1,3 +1,4 @@
+import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:iot/screens/addUser/addUser.screen.dart';
 import 'package:iot/screens/error/error.screen.dart';
@@ -22,14 +23,59 @@ import 'package:provider/provider.dart';
 
 import 'screens/device/device.screen.dart';
 
-class App extends StatelessWidget {
+class App extends StatefulWidget {
   const App({Key? key}) : super(key: key);
 
   @override
+  State<App> createState() => _AppState();
+}
+
+class _AppState extends State<App> {
+  late final Future<String> initialPath;
+
+  @override
+  void initState() {
+    super.initState();
+    initialPath = loadInitialScreen(context);
+
+    FirebaseDynamicLinks.instance.onLink.listen((event) {
+      print("Received stream link: $event");
+      Navigator.pushNamed(context, Screen.addDevice);
+    }).onError((e) {
+      print("Something went wrong in stream: $e");
+    });
+  }
+
+  Future<String> loadInitialScreen(BuildContext context) async {
+    try {
+      /// getLoggedInUser returns either a boolean value or a null value
+      /// in case of null, user is logged in but not verified
+      /// in case of true, the user is logged in and we need to return dashboard screen
+      /// in case of false, the user is not logged in, so need to return login screen
+      final bool? isUserLoggedIn = await Provider.of<UserController>(context, listen: false).getLoggedInUser();
+
+      /// Also check if the app received a dynamic link
+      final PendingDynamicLinkData? initialLink = await FirebaseDynamicLinks.instance.getInitialLink();
+
+      print("Received initial link: $initialLink");
+
+      if (isUserLoggedIn == null) {
+        return Screen.success;
+      } else if (isUserLoggedIn == false) {
+        return Screen.login;
+      } else {
+        return Screen.dashboard;
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return FutureBuilder<bool?>(
-      future: Provider.of<UserController>(context, listen: false).getLoggedInUser(),
-      builder: (BuildContext context, AsyncSnapshot<bool?> snapshot) {
+    return FutureBuilder<String>(
+      future: initialPath,
+      builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
           return SizedBox.expand(
             child: Container(
@@ -84,13 +130,7 @@ class App extends StatelessWidget {
                 },
               );
             },
-            initialRoute: error != null
-                ? Screen.error
-                : snapshot.data == true
-                    ? Screen.addUser
-                    : snapshot.data == null
-                        ? Screen.success
-                        : Screen.login,
+            initialRoute: error != null ? Screen.error : snapshot.data,
           );
         }
       },

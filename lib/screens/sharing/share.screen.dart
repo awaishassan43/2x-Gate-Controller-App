@@ -1,11 +1,10 @@
-import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
-import 'package:iot/controllers/user.controller.dart';
-import 'package:iot/util/constants.util.dart';
-import 'package:iot/util/functions.util.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
+
+import '../../controllers/user.controller.dart';
+import '../../util/functions.util.dart';
 
 class SharingScreen extends StatelessWidget {
   final String deviceID;
