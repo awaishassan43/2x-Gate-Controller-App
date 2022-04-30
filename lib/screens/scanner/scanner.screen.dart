@@ -45,7 +45,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Add User"),
+        title: const Text("Scan QR"),
         centerTitle: true,
       ),
       body: Stack(

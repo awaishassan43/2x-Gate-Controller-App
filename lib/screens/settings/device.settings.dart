@@ -5,7 +5,6 @@ import 'package:iot/enum/access.enum.dart';
 import 'package:iot/screens/settings/subscreens/editor.screen.dart';
 import 'package:iot/screens/settings/subscreens/selector.screen.dart';
 import 'package:iot/screens/settings/subscreens/temperature.screen.dart';
-import 'package:iot/util/themes.util.dart';
 import 'package:tuple/tuple.dart';
 import '/components/button.component.dart';
 import '/components/loader.component.dart';

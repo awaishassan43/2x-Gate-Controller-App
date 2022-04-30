@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:iot/screens/addUser/addUser.screen.dart';
 import 'package:iot/screens/error/error.screen.dart';
 import 'package:iot/screens/forgotPassword/forgotPassword.screen.dart';
 import 'package:iot/screens/scanner/scanner.screen.dart';
@@ -57,7 +58,7 @@ class App extends StatelessWidget {
               Screen.forgotPassword: (context) => const CustomScreen(),
               Screen.success: (context) => const SuccessScreen(),
               Screen.scanner: (context) => const ScannerScreen(),
-              Screen.sharing: (context) => const SharingScreen(),
+              Screen.addUser: (context) => const AddUserScreen(),
             },
             onGenerateRoute: (settings) {
               return MaterialPageRoute(
@@ -74,6 +75,9 @@ class App extends StatelessWidget {
                   } else if (settings.name == Screen.addDevice) {
                     final bool changeOnly = settings.arguments != null ? settings.arguments as bool : false;
                     return AddDeviceScreen(changeCredentialsOnly: changeOnly);
+                  } else if (settings.name == Screen.sharing) {
+                    final Map args = settings.arguments! as Map;
+                    return SharingScreen(deviceID: args["id"], deviceName: args["name"]);
                   } else {
                     return Container();
                   }
@@ -83,7 +87,7 @@ class App extends StatelessWidget {
             initialRoute: error != null
                 ? Screen.error
                 : snapshot.data == true
-                    ? Screen.sharing
+                    ? Screen.addUser
                     : snapshot.data == null
                         ? Screen.success
                         : Screen.login,

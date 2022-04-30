@@ -13,6 +13,7 @@ class Screen {
   static String get error => '/error';
   static String get scanner => '/scanner';
   static String get sharing => '/sharing';
+  static String get addUser => '/addUser';
 
   // Settings Subscreens
   static String get resetPassword => '/resetPassword';
