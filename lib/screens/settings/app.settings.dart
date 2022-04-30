@@ -211,7 +211,7 @@ class AppSettings extends StatelessWidget {
                         SectionItem(
                           title: "Add User",
                           showChevron: true,
-                          onTap: () {},
+                          onTap: () => Navigator.pushNamed(context, Screen.sharing),
                           showSeparator: false,
                         ),
                       ],

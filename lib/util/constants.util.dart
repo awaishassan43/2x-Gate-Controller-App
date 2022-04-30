@@ -10,6 +10,7 @@ const String deviceIP = '192.168.4.1';
 const String feedbackURL = 'https://us-central1-luminous-shadow-330923.cloudfunctions.net/sendMailOverHTTP';
 
 // Password limit
-int minCharacters = 8;
+const int minCharacters = 8;
 
-// TODO: handle the conversion for temperature units in all stuff
+// Dynamic link structure
+const String dynamicLink = 'https://gatecontroller.page.link';

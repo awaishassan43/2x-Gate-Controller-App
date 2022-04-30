@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:iot/screens/error/error.screen.dart';
 import 'package:iot/screens/forgotPassword/forgotPassword.screen.dart';
+import 'package:iot/screens/scanner/scanner.screen.dart';
+import 'package:iot/screens/sharing/share.screen.dart';
 import '/components/loader.component.dart';
 import '/controllers/user.controller.dart';
 import '/enum/route.enum.dart';
@@ -54,6 +56,8 @@ class App extends StatelessWidget {
               Screen.editPhone: (context) => const PhoneEditingScreen(),
               Screen.forgotPassword: (context) => const CustomScreen(),
               Screen.success: (context) => const SuccessScreen(),
+              Screen.scanner: (context) => const ScannerScreen(),
+              Screen.sharing: (context) => const SharingScreen(),
             },
             onGenerateRoute: (settings) {
               return MaterialPageRoute(
@@ -79,7 +83,7 @@ class App extends StatelessWidget {
             initialRoute: error != null
                 ? Screen.error
                 : snapshot.data == true
-                    ? Screen.dashboard
+                    ? Screen.sharing
                     : snapshot.data == null
                         ? Screen.success
                         : Screen.login,
