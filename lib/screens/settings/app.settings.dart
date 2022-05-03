@@ -200,12 +200,12 @@ class AppSettings extends StatelessWidget {
                           title: "Family",
                           trailingText: "View",
                           showChevron: true,
-                          onTap: () {},
+                          onTap: () => Navigator.pushNamed(context, Screen.family),
                         ),
                         SectionItem(
                           title: "Guest",
                           trailingText: "View",
-                          onTap: () {},
+                          onTap: () => Navigator.pushNamed(context, Screen.guests),
                           showChevron: true,
                         ),
                         SectionItem(

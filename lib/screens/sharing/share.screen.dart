@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:iot/components/button.component.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
@@ -42,23 +43,73 @@ class SharingScreen extends StatelessWidget {
         title: const Text("Sharing"),
         centerTitle: true,
       ),
-      body: Column(
-        children: [
-          const Text("Share via QR code"),
-          QrImageView(
-            data: 'https://google.com/',
-            version: QrVersions.auto,
-            size: 200,
-          ),
+      body: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  children: [
+                    const Text(
+                      "Share via QR code",
+                      style: TextStyle(),
+                    ),
+                    const SizedBox(height: 10),
+                    QrImageView(
+                      data: 'https://google.com/',
+                      version: QrVersions.auto,
+                      size: 200,
+                    ),
+                  ],
+                ),
+              ),
+            ),
 
-          /**
-           * Buttons to share
-           */
-          MaterialButton(
-            onPressed: () => share(context),
-            child: const Text("Share via other methods"),
-          ),
-        ],
+            /**
+             * End of top section
+             */
+
+            /**
+             * OR SEPERATOR
+             */
+            const SizedBox(height: 30),
+            Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    height: 1,
+                    color: Colors.grey.withOpacity(0.5),
+                  ),
+                ),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 10),
+                  child: Text("OR"),
+                ),
+                Expanded(
+                  child: Container(
+                    height: 1,
+                    color: Colors.grey.withOpacity(0.5),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 30),
+            /**
+             * END OF OR SEPERATOR
+             */
+
+            /**
+             * Buttons to share
+             */
+            CustomButton(
+              text: "Share via other methods",
+              onPressed: () => share(context),
+            ),
+          ],
+        ),
       ),
     );
   }

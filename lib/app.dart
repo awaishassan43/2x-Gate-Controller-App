@@ -1,8 +1,12 @@
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
+import 'package:iot/screens/addSchedule/addSchedule.screen.dart';
 import 'package:iot/screens/addUser/addUser.screen.dart';
 import 'package:iot/screens/error/error.screen.dart';
+import 'package:iot/screens/scheduling/scheduling.screen.dart';
+import 'package:iot/screens/shared/family.screen.dart';
 import 'package:iot/screens/forgotPassword/forgotPassword.screen.dart';
+import 'package:iot/screens/shared/guest.screen.dart';
 import 'package:iot/screens/scanner/scanner.screen.dart';
 import 'package:iot/screens/sharing/share.screen.dart';
 import '/components/loader.component.dart';
@@ -37,13 +41,6 @@ class _AppState extends State<App> {
   void initState() {
     super.initState();
     initialPath = loadInitialScreen(context);
-
-    FirebaseDynamicLinks.instance.onLink.listen((event) {
-      print("Received stream link: $event");
-      Navigator.pushNamed(context, Screen.addDevice);
-    }).onError((e) {
-      print("Something went wrong in stream: $e");
-    });
   }
 
   Future<String> loadInitialScreen(BuildContext context) async {
@@ -54,8 +51,17 @@ class _AppState extends State<App> {
       /// in case of false, the user is not logged in, so need to return login screen
       final bool? isUserLoggedIn = await Provider.of<UserController>(context, listen: false).getLoggedInUser();
 
-      /// Also check if the app received a dynamic link
+      /// According to stackoverflow:
+      /// https://stackoverflow.com/questions/66439839/flutter-firebase-dynamic-link-is-not-caught-by-onlink-but-open-the-app-on-ios
+      /// the getInitialLink does not work unless a delay of 2 or 3 seconds is put before accessing the link
+      await Future.delayed(const Duration(seconds: 3));
+
+      /// Also check if the app received a dynamic link and attach the listener for dynmaic link
+      /// in case if the app receives it while it is in foreground
       final PendingDynamicLinkData? initialLink = await FirebaseDynamicLinks.instance.getInitialLink();
+      FirebaseDynamicLinks.instance.onLink.listen((link) {
+        Navigator.pushNamed(context, Screen.addUser);
+      });
 
       print("Received initial link: $initialLink");
 
@@ -105,6 +111,10 @@ class _AppState extends State<App> {
               Screen.success: (context) => const SuccessScreen(),
               Screen.scanner: (context) => const ScannerScreen(),
               Screen.addUser: (context) => const AddUserScreen(),
+              Screen.guests: (context) => const GuestsScreen(),
+              Screen.family: (context) => const FamilyScreen(),
+              Screen.scheduling: (context) => const SchedulingScreen(),
+              Screen.addSchedule: (context) => const AddScheduleScreen(),
             },
             onGenerateRoute: (settings) {
               return MaterialPageRoute(

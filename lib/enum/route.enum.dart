@@ -14,6 +14,10 @@ class Screen {
   static String get scanner => '/scanner';
   static String get sharing => '/sharing';
   static String get addUser => '/addUser';
+  static String get guests => '/guests';
+  static String get family => '/family';
+  static String get scheduling => '/scheduling';
+  static String get addSchedule => '/addSchedule';
 
   // Settings Subscreens
   static String get resetPassword => '/resetPassword';

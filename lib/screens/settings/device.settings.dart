@@ -297,23 +297,21 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                             ));
                           },
                         ),
-                        // SectionItem(
-                        // isDisabled: _accessType != AccessType.owner,
-                        //   title: "Scheduled",
-                        //   subtitleText: "Open and close the door at a specified time",
-                        //   trailing: Switch(
-                        //     value: relay.scheduled,
-                        //     onChanged: (value) {
-                        //       if (value != relay.scheduled) {
-                        //         onScheduledStatusUpdated(context, relay.id, value);
-                        //       }
-                        //     },
-                        //   ),
-                        //   onTap: () {
-                        //     onScheduledStatusUpdated(context, relay.id, !relay.scheduled);
-                        //   },
-                        //   showSeparator: false,
-                        // ),
+                        SectionItem(
+                          isDisabled: _accessType != AccessType.owner,
+                          title: "Scheduled",
+                          subtitleText: "Open and close the door at a specified time",
+                          // trailing: Switch(
+                          //   value: relay.scheduled,
+                          //   onChanged: (value) {
+                          //     if (value != relay.scheduled) {
+                          //       onScheduledStatusUpdated(context, relay.id, value);
+                          //     }
+                          //   },
+                          // ),
+                          onTap: () => Navigator.pushNamed(context, Screen.scheduling),
+                          showSeparator: false,
+                        ),
                       ],
                     ),
 
@@ -396,23 +394,21 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                             ));
                           },
                         ),
-                        // SectionItem(
-                        // isDisabled: _accessType != AccessType.owner,
-                        //   title: "Scheduled",
-                        //   subtitleText: "Open and close the door at a specified time",
-                        //   trailing: Switch(
-                        //     value: relay.scheduled,
-                        //     onChanged: (value) {
-                        //       if (value != relay.scheduled) {
-                        //         onScheduledStatusUpdated(context, relay.id, value);
-                        //       }
-                        //     },
-                        //   ),
-                        //   onTap: () {
-                        //     onScheduledStatusUpdated(context, relay.id, !relay.scheduled);
-                        //   },
-                        //   showSeparator: false,
-                        // ),
+                        SectionItem(
+                          isDisabled: _accessType != AccessType.owner,
+                          title: "Scheduled",
+                          subtitleText: "Open and close the door at a specified time",
+                          // trailing: Switch(
+                          //   value: relay.scheduled,
+                          //   onChanged: (value) {
+                          //     if (value != relay.scheduled) {
+                          //       onScheduledStatusUpdated(context, relay.id, value);
+                          //     }
+                          //   },
+                          // ),
+                          onTap: () => Navigator.pushNamed(context, Screen.scheduling),
+                          showSeparator: false,
+                        ),
                       ],
                     ),
 
