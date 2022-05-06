@@ -336,3 +336,21 @@ Future<String> generateDynamicLink(String path) async {
     throw "Failed to generate the link";
   }
 }
+
+Map<String, bool> createDayMap() {
+  return {
+    "monday": false,
+    "tuesday": false,
+    "wednesday": false,
+    "thursday": false,
+    "friday": false,
+    "saturday": false,
+    "sunday": false,
+  };
+}
+
+extension Capitalization on String {
+  String capitalize() {
+    return "${this[0].toUpperCase()}${substring(1)}";
+  }
+}

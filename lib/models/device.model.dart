@@ -1,5 +1,6 @@
 // ignore_for_file: non_constant_identifier_names
-// Just because bilal said
+// Just because bilal said he doesn't want to change the variable names in database to lowercase.. and flutter complains
+/// about non-constant identifiers to be starting with uppercase
 
 import 'package:iot/util/functions.util.dart';
 
@@ -191,30 +192,58 @@ class _RelaySettings {
     required this.extInput,
     required this.name,
     required this.outTime,
-    required this.scheduled,
     required this.autoClose,
+    required this.schedules,
   });
 
   bool extInput;
   String name;
   int outTime;
-  bool scheduled;
   int autoClose;
+  List<Schedule> schedules;
 
   factory _RelaySettings.fromJson(Map<String, dynamic> json) => _RelaySettings(
         extInput: json["ExtInput"],
         name: json["Name"],
         outTime: json["OutTime"],
-        scheduled: json["Scheduled"],
         autoClose: json["autoClose"],
+        schedules: mapToList(json['schedules']).map((e) => Schedule.fromJson(e as Map<String, dynamic>)).toList(),
       );
 
   Map<String, dynamic> toJson() => {
         "ExtInput": extInput,
         "Name": name,
         "OutTime": outTime,
-        "Scheduled": scheduled,
         "autoClose": autoClose,
+        "schedules": schedules.map((e) => e.toJson()).toList(),
+      };
+}
+
+class Schedule {
+  bool repeat;
+  DateTime executionTime;
+  Map<String, bool> days;
+  bool enabled;
+
+  Schedule({
+    required this.repeat,
+    required this.executionTime,
+    required this.days,
+    required this.enabled,
+  });
+
+  factory Schedule.fromJson(Map<String, dynamic> json) => Schedule(
+        repeat: json['repeat'],
+        days: json['days'],
+        executionTime: DateTime.parse(json['executionTime']),
+        enabled: json['enabled'],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "repeat": repeat,
+        "days": days,
+        "executionTime": executionTime,
+        "enabled": enabled,
       };
 }
 
@@ -355,8 +384,8 @@ Device getEmptyDeviceData(String deviceID, String ownerID) {
         nightAlert: false,
         region: "UK",
         temperatureAlert: null,
-        relay1: _RelaySettings(extInput: true, name: 'Front Gate', outTime: 10, scheduled: false, autoClose: 20),
-        relay2: _RelaySettings(extInput: true, name: 'Back Gate', outTime: 10, scheduled: false, autoClose: 20),
+        relay1: _RelaySettings(extInput: true, name: 'Front Gate', outTime: 10, autoClose: 20, schedules: []),
+        relay2: _RelaySettings(extInput: true, name: 'Back Gate', outTime: 10, autoClose: 20, schedules: []),
       ),
     ),
     deviceData: DeviceData(

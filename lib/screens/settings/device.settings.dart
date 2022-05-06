@@ -301,15 +301,11 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                           isDisabled: _accessType != AccessType.owner,
                           title: "Scheduled",
                           subtitleText: "Open and close the door at a specified time",
-                          // trailing: Switch(
-                          //   value: relay.scheduled,
-                          //   onChanged: (value) {
-                          //     if (value != relay.scheduled) {
-                          //       onScheduledStatusUpdated(context, relay.id, value);
-                          //     }
-                          //   },
-                          // ),
-                          onTap: () => Navigator.pushNamed(context, Screen.scheduling),
+                          onTap: () => Navigator.pushNamed(context, Screen.scheduling, arguments: {
+                            "relayID": "Relay1",
+                            "deviceID": widget.deviceID,
+                            "schedules": deviceSettings.relay1.schedules,
+                          }),
                           showSeparator: false,
                         ),
                       ],
@@ -398,15 +394,11 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                           isDisabled: _accessType != AccessType.owner,
                           title: "Scheduled",
                           subtitleText: "Open and close the door at a specified time",
-                          // trailing: Switch(
-                          //   value: relay.scheduled,
-                          //   onChanged: (value) {
-                          //     if (value != relay.scheduled) {
-                          //       onScheduledStatusUpdated(context, relay.id, value);
-                          //     }
-                          //   },
-                          // ),
-                          onTap: () => Navigator.pushNamed(context, Screen.scheduling),
+                          onTap: () => Navigator.pushNamed(context, Screen.scheduling, arguments: {
+                            "relayID": "Relay2",
+                            "deviceID": widget.deviceID,
+                            "schedules": deviceSettings.relay2.schedules,
+                          }),
                           showSeparator: false,
                         ),
                       ],

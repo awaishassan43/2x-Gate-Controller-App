@@ -113,8 +113,6 @@ class _AppState extends State<App> {
               Screen.addUser: (context) => const AddUserScreen(),
               Screen.guests: (context) => const GuestsScreen(),
               Screen.family: (context) => const FamilyScreen(),
-              Screen.scheduling: (context) => const SchedulingScreen(),
-              Screen.addSchedule: (context) => const AddScheduleScreen(),
             },
             onGenerateRoute: (settings) {
               return MaterialPageRoute(
@@ -134,6 +132,12 @@ class _AppState extends State<App> {
                   } else if (settings.name == Screen.sharing) {
                     final Map args = settings.arguments! as Map;
                     return SharingScreen(deviceID: args["id"], deviceName: args["name"]);
+                  } else if (settings.name == Screen.scheduling) {
+                    final Map args = settings.arguments as Map;
+                    return SchedulingScreen(relayID: args["relayID"], deviceID: args["deviceID"], schedules: args["schedules"]);
+                  } else if (settings.name == Screen.addSchedule) {
+                    final Map args = settings.arguments as Map;
+                    return AddScheduleScreen(relayID: args["relayID"], deviceID: args["deviceID"]);
                   } else {
                     return Container();
                   }
