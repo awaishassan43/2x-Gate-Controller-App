@@ -221,13 +221,15 @@ class _RelaySettings {
 
 class Schedule {
   bool repeat;
-  DateTime executionTime;
+  int hours;
+  int minutes;
   Map<String, bool> days;
   bool enabled;
 
   Schedule({
     required this.repeat,
-    required this.executionTime,
+    required this.hours,
+    required this.minutes,
     required this.days,
     required this.enabled,
   });
@@ -235,14 +237,16 @@ class Schedule {
   factory Schedule.fromJson(Map<String, dynamic> json) => Schedule(
         repeat: json['repeat'],
         days: json['days'],
-        executionTime: DateTime.parse(json['executionTime']),
+        hours: json['hours'],
+        minutes: json['minutes'],
         enabled: json['enabled'],
       );
 
   Map<String, dynamic> toJson() => {
         "repeat": repeat,
         "days": days,
-        "executionTime": executionTime,
+        "hours": hours,
+        "minutes": minutes,
         "enabled": enabled,
       };
 }

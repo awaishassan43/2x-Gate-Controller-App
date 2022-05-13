@@ -13,7 +13,7 @@ class GuestsScreen extends StatelessWidget {
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
-          children: [],
+          children: const [],
         ),
       ),
     );

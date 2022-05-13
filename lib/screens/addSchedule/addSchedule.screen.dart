@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:iot/components/seperator.component.dart';
-import 'package:iot/screens/addSchedule/components/day.component.dart';
-import 'package:iot/screens/addSchedule/components/heading.component.dart';
 
 import '../../models/device.model.dart';
 import '../../util/functions.util.dart';
+import 'components/day.component.dart';
+import 'components/heading.component.dart';
 
 class AddScheduleScreen extends StatefulWidget {
   final String relayID;
@@ -28,7 +27,8 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
   late bool isEnabled;
   late bool repeat;
   late Map<String, bool> days;
-  late DateTime time;
+  late int hours;
+  late int minutes;
 
   @override
   void initState() {
@@ -37,7 +37,8 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
     isEnabled = widget.schedule?.enabled != null ? widget.schedule!.enabled : false;
     repeat = widget.schedule?.repeat != null ? widget.schedule!.repeat : false;
     days = widget.schedule?.days != null ? widget.schedule!.days : createDayMap();
-    time = widget.schedule?.executionTime != null ? widget.schedule!.executionTime : DateTime.now();
+    hours = widget.schedule?.hours != null ? widget.schedule!.hours : DateTime.now().hour;
+    minutes = widget.schedule?.minutes != null ? widget.schedule!.minutes : DateTime.now().minute;
   }
 
   void onDayClicked(String day, bool isSelected) {
@@ -75,17 +76,41 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
               },
               title: const CustomHeading(heading: "Enabled"),
             ),
+            /**
+             * Seperator
+             */
             Container(
               margin: const EdgeInsets.all(20),
               height: 1.5,
               color: Colors.grey.withOpacity(0.4),
             ),
+            /**
+             * End of seperator
+             */
+
             Stack(
               children: [
                 Padding(
                   padding: const EdgeInsets.all(10.0),
                   child: Column(
                     children: [
+                      MaterialButton(
+                        onPressed: () async {
+                          final TimeOfDay? selectedTime =
+                              await showTimePicker(context: context, initialTime: TimeOfDay(hour: hours, minute: minutes));
+                          if (selectedTime == null) {
+                            return;
+                          }
+
+                          setState(() {
+                            hours = selectedTime.hour;
+                            minutes = selectedTime.minute;
+                          });
+                        },
+                        child: Text(
+                          "$hours:$minutes",
+                        ),
+                      ),
                       SwitchListTile(
                         value: repeat,
                         enableFeedback: isEnabled,
@@ -104,8 +129,13 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
                           ),
                           elevation: 5,
                           child: Column(
-                            children:
-                                days.entries.map((entry) => DaySelector(day: entry.key, isSelected: entry.value, onSelected: onDayClicked)).toList(),
+                            children: days.entries
+                                .map((entry) => DaySelector(
+                                      day: entry.key,
+                                      isSelected: entry.value,
+                                      onSelected: onDayClicked,
+                                    ))
+                                .toList(),
                           ),
                         ),
                         crossFadeState: repeat ? CrossFadeState.showSecond : CrossFadeState.showFirst,

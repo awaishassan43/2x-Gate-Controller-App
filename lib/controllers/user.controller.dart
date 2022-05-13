@@ -11,6 +11,8 @@ import '/util/functions.util.dart';
 class UserController extends ChangeNotifier {
   late final FirebaseAuth auth;
   late final DatabaseReference users;
+  late final DatabaseReference devices;
+
   Profile? profile;
   bool _isLoading = false;
   StreamSubscription? profileListener;
@@ -32,6 +34,7 @@ class UserController extends ChangeNotifier {
     if (!initialized) {
       auth = FirebaseAuth.instance;
       users = FirebaseDatabase.instance.ref('users');
+      devices = FirebaseDatabase.instance.ref('deviceAccess');
       FirebaseDatabase.instance.setPersistenceEnabled(true);
 
       initialized = true;
@@ -156,6 +159,9 @@ class UserController extends ChangeNotifier {
       final String userID = auth.currentUser!.uid;
 
       final DataSnapshot document = await users.child(userID).get();
+      final DataSnapshot devicesList = await devices.orderByChild('userID').equalTo(userID).get();
+
+      print(devicesList.value.toString());
 
       if (!document.exists) {
         throw Exception("User profile does not exist");

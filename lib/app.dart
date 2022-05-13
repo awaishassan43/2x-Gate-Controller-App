@@ -58,12 +58,13 @@ class _AppState extends State<App> {
 
       /// Also check if the app received a dynamic link and attach the listener for dynmaic link
       /// in case if the app receives it while it is in foreground
+      ///
+      /// TODO: Remove this ignore
+      // ignore: unused_local_variable
       final PendingDynamicLinkData? initialLink = await FirebaseDynamicLinks.instance.getInitialLink();
       FirebaseDynamicLinks.instance.onLink.listen((link) {
         Navigator.pushNamed(context, Screen.addUser);
       });
-
-      print("Received initial link: $initialLink");
 
       if (isUserLoggedIn == null) {
         return Screen.success;
