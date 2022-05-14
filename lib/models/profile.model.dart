@@ -67,26 +67,30 @@ class ConnectedDevice {
   String id;
   String? accessProvidedBy;
   AccessType accessType;
+  String userID;
 
   ConnectedDevice({
     required this.id,
     required this.accessType,
+    required this.userID,
     this.accessProvidedBy,
   });
 
   factory ConnectedDevice.fromMap(Map<String, dynamic> data) {
     return ConnectedDevice(
-      id: data['id'],
+      id: data['deviceID'],
       accessProvidedBy: data['accessProvidedBy'],
       accessType: AccessTypeExtension.getAccessType(data['accessType']),
+      userID: data['userID'],
     );
   }
 
   Map<String, dynamic> toJSON() {
     return {
-      "id": id,
+      "deviceID": id,
       "accessProvidedBy": accessProvidedBy,
       "accessType": accessType,
+      "userID": userID,
     };
   }
 }

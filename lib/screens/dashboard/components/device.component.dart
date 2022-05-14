@@ -280,17 +280,16 @@ class _DeviceComponentState extends State<DeviceComponent> {
                         /**
                          * Settings button
                          */
-                        if (_accessType != AccessType.guest)
-                          IconButton(
-                            constraints: const BoxConstraints(
-                              maxHeight: 40,
-                              maxWidth: 40,
-                            ),
-                            icon: const Icon(Icons.settings),
-                            onPressed: () {
-                              Navigator.pushNamed(context, Screen.deviceSettings, arguments: widget.device.deviceSettings.deviceId);
-                            },
+                        IconButton(
+                          constraints: const BoxConstraints(
+                            maxHeight: 40,
+                            maxWidth: 40,
                           ),
+                          icon: const Icon(Icons.settings),
+                          onPressed: () {
+                            Navigator.pushNamed(context, Screen.deviceSettings, arguments: widget.device.deviceSettings.deviceId);
+                          },
+                        ),
                       ],
                     ),
                   ],

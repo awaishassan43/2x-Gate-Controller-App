@@ -37,7 +37,7 @@ class CustomButton extends StatelessWidget {
           fontWeight: FontWeight.bold,
         ),
       ),
-      disabledColor: Colors.black.withOpacity(0.6),
+      disabledColor: Colors.grey.withOpacity(0.4),
       padding: EdgeInsets.all(padding),
       color: backgroundColor,
       elevation: disableElevation ? 0 : 2,

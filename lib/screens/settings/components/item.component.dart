@@ -63,7 +63,7 @@ class SectionItem extends StatelessWidget {
           disabledElevation: 0,
           highlightElevation: 0,
           hoverElevation: 0,
-          disabledColor: Colors.blueGrey.withOpacity(0.3),
+          disabledColor: Colors.blueGrey.withOpacity(0.1),
           padding: const EdgeInsets.all(0),
           child: Padding(
             padding: EdgeInsets.only(top: 12.5, bottom: 12.5, left: 12.5, right: trailing != null ? 5 : 12.5),

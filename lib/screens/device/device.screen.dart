@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:iot/components/largeButton.component.dart';
 import 'package:iot/controllers/user.controller.dart';
-import 'package:iot/enum/access.enum.dart';
 import 'package:iot/models/device.model.dart';
 import 'package:iot/screens/device/components/sensor.component.dart';
 import 'package:iot/util/functions.util.dart';
+import 'package:iot/util/themes.util.dart';
 import 'package:tuple/tuple.dart';
 import '/components/loader.component.dart';
 import '/controllers/device.controller.dart';
@@ -27,13 +27,6 @@ class _DeviceScreenState extends State<DeviceScreen> {
   bool isLoading = false;
   bool isFirstRelayDisabled = false;
   bool isSecondRelayDisabled = false;
-  late final AccessType _accessType;
-
-  @override
-  void initState() {
-    super.initState();
-    _accessType = Provider.of<UserController>(context, listen: false).getAccessType(widget.deviceID);
-  }
 
   Future<void> updateRelayStatus(BuildContext context, int relayID) async {
     final DeviceController controller = Provider.of<DeviceController>(context, listen: false);
@@ -182,10 +175,21 @@ class _DeviceScreenState extends State<DeviceScreen> {
               /**
                * Bottom Section
                */
-              if (_accessType != AccessType.guest)
-                SingleChildScrollView(
+              Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: backgroundColor,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.4),
+                      blurRadius: 5,
+                      spreadRadius: 2,
+                    ),
+                  ],
+                ),
+                child: SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.all(10),
+                  padding: const EdgeInsets.all(7.5),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
@@ -201,6 +205,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
                     ],
                   ),
                 ),
+              ),
               /**
                * End of bottom section
                */

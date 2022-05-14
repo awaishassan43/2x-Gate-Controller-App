@@ -161,12 +161,16 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
         children: [
           SingleChildScrollView(
             padding: const EdgeInsets.all(20),
-            child: Selector<DeviceController, Tuple2<DeviceSettings, String>>(
+            child: Selector<DeviceController, Tuple2<DeviceSettings?, String?>>(
               selector: (context, controller) =>
-                  Tuple2(controller.devices[widget.deviceID]!.deviceSettings, controller.devices[widget.deviceID]!.deviceData.name),
+                  Tuple2(controller.devices[widget.deviceID]?.deviceSettings, controller.devices[widget.deviceID]?.deviceData.name),
               builder: (context, data, _) {
-                final String name = data.item2;
-                final deviceSettings = data.item1.value;
+                if (data.item1 == null || data.item2 == null) {
+                  return Container();
+                }
+
+                final String name = data.item2!;
+                final deviceSettings = data.item1!.value;
                 final relay1 = deviceSettings.relay1;
                 final relay2 = deviceSettings.relay2;
 
@@ -581,19 +585,14 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                         ),
                       ),
                     CustomButton(
-                      isDisabled: _accessType != AccessType.owner,
                       text: "Delete Device",
-                      onPressed: () async {
+                      onPressed: () {
                         try {
                           setState(() {
                             if (deleteError != null) deleteError = null;
-                            isLoading = true;
                           });
 
                           Provider.of<UserController>(context, listen: false).removeDevice(context, widget.deviceID);
-
-                          showMessage(context, "Device deleted successfully!");
-                          Navigator.popUntil(context, ModalRoute.withName(Screen.dashboard));
                         } catch (e) {
                           setState(() {
                             isLoading = false;
