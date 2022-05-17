@@ -2,6 +2,8 @@
 // Just because bilal said he doesn't want to change the variable names in database to lowercase.. and flutter complains
 /// about non-constant identifiers to be starting with uppercase
 
+import 'dart:collection';
+
 import 'package:iot/util/functions.util.dart';
 
 class Device {
@@ -200,14 +202,18 @@ class _RelaySettings {
   String name;
   int outTime;
   int autoClose;
-  List<Schedule> schedules;
+  List<Schedule>? schedules;
 
   factory _RelaySettings.fromJson(Map<String, dynamic> json) => _RelaySettings(
         extInput: json["ExtInput"],
         name: json["Name"],
         outTime: json["OutTime"],
         autoClose: json["autoClose"],
-        schedules: mapToList(json['schedules']).map((e) => Schedule.fromJson(e as Map<String, dynamic>)).toList(),
+        schedules: json['schedules'] != null
+            ? (json['schedules'] as List<dynamic>)
+                .map((e) => Schedule.fromJson((e as LinkedHashMap<Object?, Object?>).cast<String, dynamic>()))
+                .toList()
+            : null,
       );
 
   Map<String, dynamic> toJson() => {
@@ -215,7 +221,7 @@ class _RelaySettings {
         "Name": name,
         "OutTime": outTime,
         "autoClose": autoClose,
-        "schedules": schedules.map((e) => e.toJson()).toList(),
+        "schedules": schedules?.map((e) => e.toJson()).toList(),
       };
 }
 
@@ -236,7 +242,7 @@ class Schedule {
 
   factory Schedule.fromJson(Map<String, dynamic> json) => Schedule(
         repeat: json['repeat'],
-        days: json['days'],
+        days: (json['days']).cast<String, bool>(),
         hours: json['hours'],
         minutes: json['minutes'],
         enabled: json['enabled'],

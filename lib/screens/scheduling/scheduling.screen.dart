@@ -33,7 +33,6 @@ class SchedulingScreen extends StatelessWidget {
              */
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
                 child: Column(
                   children: schedules
                       .map((e) => ScheduleComponent(

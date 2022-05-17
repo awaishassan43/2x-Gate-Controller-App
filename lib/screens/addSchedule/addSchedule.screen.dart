@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:iot/components/button.component.dart';
+import 'package:iot/controllers/device.controller.dart';
+import 'package:iot/util/themes.util.dart';
+import 'package:provider/provider.dart';
 
 import '../../models/device.model.dart';
 import '../../util/functions.util.dart';
@@ -8,14 +12,12 @@ import 'components/heading.component.dart';
 class AddScheduleScreen extends StatefulWidget {
   final String relayID;
   final String deviceID;
-  final Schedule? schedule;
   final int? scheduleIndex;
 
   const AddScheduleScreen({
     Key? key,
     required this.relayID,
     required this.deviceID,
-    this.schedule,
     this.scheduleIndex,
   }) : super(key: key);
 
@@ -34,11 +36,21 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
   void initState() {
     super.initState();
 
-    isEnabled = widget.schedule?.enabled != null ? widget.schedule!.enabled : false;
-    repeat = widget.schedule?.repeat != null ? widget.schedule!.repeat : false;
-    days = widget.schedule?.days != null ? widget.schedule!.days : createDayMap();
-    hours = widget.schedule?.hours != null ? widget.schedule!.hours : DateTime.now().hour;
-    minutes = widget.schedule?.minutes != null ? widget.schedule!.minutes : DateTime.now().minute;
+    final Map<String, dynamic> deviceSettings =
+        Provider.of<DeviceController>(context, listen: false).devices[widget.deviceID]!.deviceSettings.toJson();
+    final List<Map<String, dynamic>> mappedSchedules = deviceSettings['value'][widget.relayID]['schedules'];
+
+    Schedule? schedule;
+
+    if (widget.scheduleIndex != null) {
+      schedule = Schedule.fromJson(mappedSchedules[widget.scheduleIndex!]);
+    }
+
+    isEnabled = schedule?.enabled != null ? schedule!.enabled : false;
+    repeat = schedule?.repeat != null ? schedule!.repeat : false;
+    days = schedule?.days != null ? schedule!.days : createDayMap();
+    hours = schedule?.hours != null ? schedule!.hours : DateTime.now().hour;
+    minutes = schedule?.minutes != null ? schedule!.minutes : DateTime.now().minute;
   }
 
   void onDayClicked(String day, bool isSelected) {
@@ -53,6 +65,47 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
     setState(() {
       days = newDays;
     });
+  }
+
+  Future<void> addSchedule(BuildContext context) async {
+    try {
+      /**
+       * Getting the relevant device and the device settings.... and converting it to json
+       */
+      final DeviceController controller = Provider.of<DeviceController>(context, listen: false);
+      final Map<String, dynamic> deviceSettings = controller.devices[widget.deviceID]!.deviceSettings.toJson();
+
+      /**
+       * Creating the mapped data .... using mappedData because it simplifies the relayID usage... because in case of class manipulation,
+       * using the relayID is a bit difficult...
+       */
+      final Map<String, dynamic> mappedSchedule = {
+        "enabled": isEnabled,
+        "repeat": repeat,
+        "days": days,
+        "hours": hours,
+        "minutes": minutes,
+      };
+
+      /**
+       * If an index is provided, i.e. it is not null,
+       * then update the current schedule, otherwise create a new one
+       */
+      if (widget.scheduleIndex != null) {
+        deviceSettings['value'][widget.relayID]['schedules'][widget.scheduleIndex!] = mappedSchedule;
+      } else {
+        (deviceSettings['value'][widget.relayID]['schedules'] as List<Map<String, dynamic>>).add(mappedSchedule);
+      }
+
+      // Update the device
+      controller.devices[widget.deviceID]!.updateWithJSON(deviceSettings: deviceSettings);
+      await controller.updateDevice(widget.deviceID, "deviceSettings");
+
+      showMessage(context, widget.scheduleIndex != null ? "Schedule created successfully" : "Schedule updated successfully");
+    } catch (e) {
+      debugPrint("Error occured while adding/updating a schedule: ${e.toString()}");
+      showMessage(context, widget.scheduleIndex != null ? "Failed to update the schedule" : "Failed to add a schedule");
+    }
   }
 
   @override
@@ -94,21 +147,32 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
                   padding: const EdgeInsets.all(10.0),
                   child: Column(
                     children: [
-                      MaterialButton(
-                        onPressed: () async {
-                          final TimeOfDay? selectedTime =
-                              await showTimePicker(context: context, initialTime: TimeOfDay(hour: hours, minute: minutes));
-                          if (selectedTime == null) {
-                            return;
-                          }
+                      ListTile(
+                        title: const CustomHeading(heading: "Schedule Time"),
+                        trailing: MaterialButton(
+                          color: backgroundColor,
+                          onPressed: () async {
+                            final TimeOfDay? selectedTime = await showTimePicker(
+                              context: context,
+                              initialTime: TimeOfDay(hour: hours, minute: minutes),
+                            );
 
-                          setState(() {
-                            hours = selectedTime.hour;
-                            minutes = selectedTime.minute;
-                          });
-                        },
-                        child: Text(
-                          "$hours:$minutes",
+                            if (selectedTime == null) {
+                              return;
+                            }
+
+                            setState(() {
+                              hours = selectedTime.hour;
+                              minutes = selectedTime.minute;
+                            });
+                          },
+                          child: Text(
+                            "$hours:$minutes",
+                            style: const TextStyle(
+                              color: textColor,
+                              fontSize: 25,
+                            ),
+                          ),
                         ),
                       ),
                       SwitchListTile(
@@ -155,6 +219,11 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
                     ),
                   ),
               ],
+            ),
+            const SizedBox(height: 20),
+            CustomButton(
+              text: "Add Schedule",
+              onPressed: () => addSchedule(context),
             ),
           ],
         ),

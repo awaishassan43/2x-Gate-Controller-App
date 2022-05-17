@@ -303,7 +303,7 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                         ),
                         SectionItem(
                           isDisabled: _accessType != AccessType.owner,
-                          title: "Scheduled",
+                          title: "Schedules",
                           subtitleText: "Open and close the door at a specified time",
                           onTap: () => Navigator.pushNamed(context, Screen.scheduling, arguments: {
                             "relayID": "Relay1",
