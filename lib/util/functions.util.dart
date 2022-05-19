@@ -354,3 +354,32 @@ extension Capitalization on String {
     return "${this[0].toUpperCase()}${substring(1)}";
   }
 }
+
+extension Conversion on TimeOfDay {
+  String convertToMeridiem() {
+    int hours = hour;
+    String meridiem = "AM";
+
+    if (hours > 12) {
+      hours = hours - 12;
+      meridiem = "PM";
+    }
+
+    return '$hours:$minute $meridiem';
+  }
+}
+
+String formatTime(bool is24Hours, int hours, int minute) {
+  String meridiem = "";
+
+  if (!is24Hours) {
+    if (hours > 12) {
+      hours = hours - 12;
+      meridiem = "PM";
+    } else {
+      meridiem = "AM";
+    }
+  }
+
+  return '${hours.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}${is24Hours ? '' : ' $meridiem'}';
+}

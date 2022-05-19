@@ -8,6 +8,8 @@ import 'package:iot/enum/route.enum.dart';
 import 'package:iot/util/functions.util.dart';
 import 'package:provider/provider.dart';
 
+import '../../util/themes.util.dart';
+
 class CustomScreen extends StatefulWidget {
   const CustomScreen({Key? key}) : super(key: key);
 
@@ -19,6 +21,7 @@ class _CustomScreenState extends State<CustomScreen> {
   /// Value holders
   late TextEditingController email;
   bool isLoading = false;
+  bool isSent = false;
 
   /// Error holders
   String emailError = '';
@@ -60,6 +63,10 @@ class _CustomScreenState extends State<CustomScreen> {
   }
 
   Future<void> sendVerificationEmail(BuildContext context) async {
+    setState(() {
+      isLoading = true;
+    });
+
     try {
       final isEmailValid = validateEmail();
 
@@ -67,21 +74,21 @@ class _CustomScreenState extends State<CustomScreen> {
         return;
       }
 
-      setState(() {
-        isLoading = true;
-      });
-
       final UserController controller = Provider.of<UserController>(context, listen: false);
       await controller.forgotPassword(email.text);
 
-      showMessage(context, "Email sent successfully! Please check your email for further instructions");
-    } catch (e) {
-      setState(() {
-        isLoading = false;
-      });
+      showMessage(context, "Email sent successfully! \n Please check your email for further instructions");
 
+      setState(() {
+        isSent = true;
+      });
+    } catch (e) {
       showMessage(context, e.toString());
     }
+
+    setState(() {
+      isLoading = false;
+    });
   }
 
   /// Build function
@@ -148,6 +155,16 @@ class _CustomScreenState extends State<CustomScreen> {
                               ),
                             ),
                           ),
+                        if (isSent)
+                          const Text(
+                            "Haven't received the email? Please check your spam folder and click the \"Not Spam\" button to avoid the issue for the future",
+                            style: TextStyle(
+                              color: textColor,
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        const SizedBox(height: 10),
                         CustomInput(
                           icon: Icons.person,
                           error: emailError,

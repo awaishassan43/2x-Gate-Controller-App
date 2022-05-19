@@ -4,6 +4,7 @@ import 'package:iot/controllers/device.controller.dart';
 import 'package:iot/util/themes.util.dart';
 import 'package:provider/provider.dart';
 
+import '../../controllers/user.controller.dart';
 import '../../models/device.model.dart';
 import '../../util/functions.util.dart';
 import 'components/day.component.dart';
@@ -38,7 +39,7 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
 
     final Map<String, dynamic> deviceSettings =
         Provider.of<DeviceController>(context, listen: false).devices[widget.deviceID]!.deviceSettings.toJson();
-    final List<Map<String, dynamic>> mappedSchedules = deviceSettings['value'][widget.relayID]['schedules'];
+    final List<Map<String, dynamic>> mappedSchedules = deviceSettings['value'][widget.relayID]['schedules'] ?? [];
 
     Schedule? schedule;
 
@@ -94,7 +95,7 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
       if (widget.scheduleIndex != null) {
         deviceSettings['value'][widget.relayID]['schedules'][widget.scheduleIndex!] = mappedSchedule;
       } else {
-        (deviceSettings['value'][widget.relayID]['schedules'] as List<Map<String, dynamic>>).add(mappedSchedule);
+        deviceSettings['value'][widget.relayID]['schedules'] = [...(deviceSettings['value'][widget.relayID]['schedules'] ?? []), mappedSchedule];
       }
 
       // Update the device
@@ -102,6 +103,8 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
       await controller.updateDevice(widget.deviceID, "deviceSettings");
 
       showMessage(context, widget.scheduleIndex != null ? "Schedule created successfully" : "Schedule updated successfully");
+
+      Navigator.pop(context);
     } catch (e) {
       debugPrint("Error occured while adding/updating a schedule: ${e.toString()}");
       showMessage(context, widget.scheduleIndex != null ? "Failed to update the schedule" : "Failed to add a schedule");
@@ -110,6 +113,8 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bool is24Hours = Provider.of<UserController>(context, listen: false).profile!.is24Hours;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Create a new schedule"),
@@ -143,70 +148,67 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
 
             Stack(
               children: [
-                Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: Column(
-                    children: [
-                      ListTile(
-                        title: const CustomHeading(heading: "Schedule Time"),
-                        trailing: MaterialButton(
-                          color: backgroundColor,
-                          onPressed: () async {
-                            final TimeOfDay? selectedTime = await showTimePicker(
-                              context: context,
-                              initialTime: TimeOfDay(hour: hours, minute: minutes),
-                            );
+                Column(
+                  children: [
+                    ListTile(
+                      title: const CustomHeading(heading: "Schedule Time"),
+                      trailing: MaterialButton(
+                        color: backgroundColor,
+                        onPressed: () async {
+                          final TimeOfDay? selectedTime = await showTimePicker(
+                            context: context,
+                            initialTime: TimeOfDay(hour: hours, minute: minutes),
+                          );
 
-                            if (selectedTime == null) {
-                              return;
-                            }
+                          if (selectedTime == null) {
+                            return;
+                          }
 
-                            setState(() {
-                              hours = selectedTime.hour;
-                              minutes = selectedTime.minute;
-                            });
-                          },
-                          child: Text(
-                            "$hours:$minutes",
-                            style: const TextStyle(
-                              color: textColor,
-                              fontSize: 25,
-                            ),
-                          ),
-                        ),
-                      ),
-                      SwitchListTile(
-                        value: repeat,
-                        enableFeedback: isEnabled,
-                        onChanged: (value) {
                           setState(() {
-                            repeat = value;
+                            hours = selectedTime.hour;
+                            minutes = selectedTime.minute;
                           });
                         },
-                        title: const CustomHeading(heading: "Repeat"),
-                      ),
-                      AnimatedCrossFade(
-                        firstChild: Container(),
-                        secondChild: Card(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.0),
-                          ),
-                          elevation: 5,
-                          child: Column(
-                            children: days.entries
-                                .map((entry) => DaySelector(
-                                      day: entry.key,
-                                      isSelected: entry.value,
-                                      onSelected: onDayClicked,
-                                    ))
-                                .toList(),
+                        child: Text(
+                          formatTime(is24Hours, hours, minutes),
+                          style: const TextStyle(
+                            color: textColor,
+                            fontSize: 20,
                           ),
                         ),
-                        crossFadeState: repeat ? CrossFadeState.showSecond : CrossFadeState.showFirst,
-                        duration: const Duration(milliseconds: 250),
                       ),
-                    ],
-                  ),
+                    ),
+                    SwitchListTile(
+                      value: repeat,
+                      enableFeedback: isEnabled,
+                      onChanged: (value) {
+                        setState(() {
+                          repeat = value;
+                        });
+                      },
+                      title: const CustomHeading(heading: "Repeat"),
+                    ),
+                    AnimatedCrossFade(
+                      firstChild: Container(),
+                      secondChild: Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        elevation: 5,
+                        child: Column(
+                          children: days.entries
+                              .map((entry) => DaySelector(
+                                    day: entry.key,
+                                    isSelected: entry.value,
+                                    onSelected: onDayClicked,
+                                  ))
+                              .toList(),
+                        ),
+                      ),
+                      crossFadeState: repeat ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+                      duration: const Duration(milliseconds: 250),
+                    ),
+                  ],
                 ),
                 if (!isEnabled)
                   Positioned(
@@ -222,7 +224,7 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
             ),
             const SizedBox(height: 20),
             CustomButton(
-              text: "Add Schedule",
+              text: widget.scheduleIndex != null ? "Save Changes" : "Add Schedule",
               onPressed: () => addSchedule(context),
             ),
           ],

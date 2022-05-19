@@ -135,10 +135,10 @@ class _AppState extends State<App> {
                     return SharingScreen(deviceID: args["id"], deviceName: args["name"]);
                   } else if (settings.name == Screen.scheduling) {
                     final Map args = settings.arguments as Map;
-                    return SchedulingScreen(relayID: args["relayID"], deviceID: args["deviceID"], schedules: args["schedules"]);
+                    return SchedulingScreen(relayID: args["relayID"], deviceID: args["deviceID"]);
                   } else if (settings.name == Screen.addSchedule) {
                     final Map args = settings.arguments as Map;
-                    return AddScheduleScreen(relayID: args["relayID"], deviceID: args["deviceID"]);
+                    return AddScheduleScreen(relayID: args["relayID"], deviceID: args["deviceID"], scheduleIndex: args["scheduleIndex"]);
                   } else {
                     return Container();
                   }

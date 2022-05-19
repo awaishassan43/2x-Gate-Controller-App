@@ -43,7 +43,6 @@ class Profile {
       "phone": phone,
       "temperatureUnit": temperatureUnit,
       "is24Hours": is24Hours,
-      "devices": devices.map((e) => e.toJSON()).toList(),
       "fcmToken": fcmToken,
     };
   }
