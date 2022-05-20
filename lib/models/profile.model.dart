@@ -1,5 +1,4 @@
 import '../enum/access.enum.dart';
-import '../util/functions.util.dart';
 
 class Profile {
   String email;
@@ -9,6 +8,7 @@ class Profile {
   String temperatureUnit;
   bool is24Hours;
   List<ConnectedDevice> devices;
+  List<ConnectedDevice> accessesProvidedToUsers;
   String fcmToken;
 
   Profile({
@@ -19,6 +19,7 @@ class Profile {
     required this.temperatureUnit,
     required this.is24Hours,
     required this.devices,
+    required this.accessesProvidedToUsers,
     required this.fcmToken,
   });
 
@@ -31,6 +32,7 @@ class Profile {
       temperatureUnit: data['temperatureUnit'],
       is24Hours: data['is24Hours'],
       devices: (data['devices'] as List).map((item) => ConnectedDevice.fromMap((item as Map).cast<String, dynamic>())).toList(),
+      accessesProvidedToUsers: (data['access'] as List).map((item) => ConnectedDevice.fromMap((item as Map).cast<String, dynamic>())).toList(),
       fcmToken: data['fcmToken'],
     );
   }
@@ -57,7 +59,6 @@ class Profile {
     phone = data['phone'];
     temperatureUnit = data['temperatureUnit'];
     is24Hours = data['is24Hours'];
-    devices = mapToList(data['devices']).map((item) => ConnectedDevice.fromMap(item as Map<String, dynamic>)).toList();
     fcmToken = data['fcmToken'];
   }
 }

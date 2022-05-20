@@ -18,6 +18,7 @@ class ScheduleComponent extends StatelessWidget {
 
   String getDays() {
     final List<String> days = schedule.days.entries.where((e) => e.value == true).map((e) => e.key.substring(0, 3).capitalize()).toList();
+
     return days.join(', ');
   }
 

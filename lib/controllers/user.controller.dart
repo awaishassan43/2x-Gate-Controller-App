@@ -125,6 +125,7 @@ class UserController extends ChangeNotifier {
         is24Hours: true,
         temperatureUnit: "C",
         devices: [],
+        accessesProvidedToUsers: [],
         fcmToken: await getFCMToken(),
       );
 
@@ -243,6 +244,7 @@ class UserController extends ChangeNotifier {
        */
       final String userID = getUserID();
       newData['devices'] = newDevices.values.where((element) => element["userID"] == userID).toList();
+      newData['access'] = newDevices.values.where((element) => element["accessProvidedBy"] == userID).toList();
 
       profile = Profile.fromMap(newData);
     } catch (e) {
