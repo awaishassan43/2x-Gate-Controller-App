@@ -1,5 +1,6 @@
-import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
+import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
+import 'package:iot/screens/accepting/accepting.screen.dart';
 import 'package:iot/screens/addSchedule/addSchedule.screen.dart';
 import 'package:iot/screens/addUser/addUser.screen.dart';
 import 'package:iot/screens/error/error.screen.dart';
@@ -51,28 +52,30 @@ class _AppState extends State<App> {
       /// in case of false, the user is not logged in, so need to return login screen
       final bool? isUserLoggedIn = await Provider.of<UserController>(context, listen: false).getLoggedInUser();
 
-      /// According to stackoverflow:
-      /// https://stackoverflow.com/questions/66439839/flutter-firebase-dynamic-link-is-not-caught-by-onlink-but-open-the-app-on-ios
-      /// the getInitialLink does not work unless a delay of 2 or 3 seconds is put before accessing the link
-      await Future.delayed(const Duration(seconds: 3));
-
       /// Also check if the app received a dynamic link and attach the listener for dynmaic link
       /// in case if the app receives it while it is in foreground
-      ///
-      /// TODO: Remove this ignore
-      // ignore: unused_local_variable
-      final PendingDynamicLinkData? initialLink = await FirebaseDynamicLinks.instance.getInitialLink();
-      FirebaseDynamicLinks.instance.onLink.listen((link) {
-        Navigator.pushNamed(context, Screen.addUser);
+      final AppLinks _appLinks = AppLinks();
+      final Uri? uri = await _appLinks.getInitialAppLink();
+
+      _appLinks.uriLinkStream.listen((event) {
+        Navigator.pushNamed(context, Screen.accepting);
       });
 
+      String screen;
+
       if (isUserLoggedIn == null) {
-        return Screen.success;
+        screen = Screen.success;
       } else if (isUserLoggedIn == false) {
-        return Screen.login;
+        screen = Screen.login;
       } else {
-        return Screen.dashboard;
+        if (uri != null && uri.path == "/shareDevice") {
+          screen = Screen.addUser;
+        } else {
+          screen = Screen.dashboard;
+        }
       }
+
+      return screen;
     } catch (e) {
       rethrow;
     }
@@ -139,13 +142,15 @@ class _AppState extends State<App> {
                   } else if (settings.name == Screen.addSchedule) {
                     final Map args = settings.arguments as Map;
                     return AddScheduleScreen(relayID: args["relayID"], deviceID: args["deviceID"], scheduleIndex: args["scheduleIndex"]);
+                  } else if (settings.name == Screen.accepting) {
+                    return const DeviceAcceptingScreen();
                   } else {
                     return Container();
                   }
                 },
               );
             },
-            initialRoute: error != null ? Screen.error : snapshot.data,
+            initialRoute: error != null ? Screen.error : snapshot.data!,
           );
         }
       },

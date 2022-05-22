@@ -99,14 +99,7 @@ class UserController extends ChangeNotifier {
     }
   }
 
-  Future<void> register(
-    String email,
-    String password,
-    String firstName,
-    String lastName,
-    String callingCode,
-    String phone,
-  ) async {
+  Future<void> register(String email, String password, String firstName, String lastName, String callingCode, String phone) async {
     try {
       final UserCredential userCredential = await auth.createUserWithEmailAndPassword(
         email: email,
@@ -252,34 +245,31 @@ class UserController extends ChangeNotifier {
     }
   }
 
-  Future<void> addDevice(String deviceID, {String? accessProvidedBy, AccessType? accessType}) async {
+  Future<String?> addDevice(String deviceID, {bool forSelf = false, AccessType accessType = AccessType.owner, String? nickName}) async {
     try {
-      /**
-       * Assert that either both are provided or none is provided
-       */
-      assert((accessProvidedBy == null && accessType == null) || (accessProvidedBy != null && accessType != null));
+      final String userID = getUserID();
 
       /**
        * Generate a unique id using uuid package
        */
       const Uuid uuid = Uuid();
       final String id = uuid.v4();
+      String? key;
+
+      if (!forSelf) {
+        key = uuid.v4();
+      }
 
       devices.child(id).set({
         "deviceID": deviceID,
-        /**
-         * In case if there's someone who is providing access then set the accessType to the
-         * one as being provided... otherwise if there's no one providing access, i.e. user is
-         * adding device for himself... then set him as owner
-         */
-        "accessType": accessProvidedBy != null
-            ? accessType != null
-                ? accessType.value
-                : AccessType.guest.value
-            : "owner",
-        "accessProvidedBy": accessProvidedBy,
-        "userID": getUserID(),
+        "accessType": accessType.value,
+        "accessProvidedBy": forSelf ? null : userID,
+        "key": key,
+        "userID": forSelf ? userID : null,
+        "nickName": nickName,
       });
+
+      return key;
     } on FirebaseException catch (e) {
       debugPrint("Firebase Exception: Failed to add device: ${e.toString()}");
       throw e.message ?? "Something went wrong while trying to add a device";
@@ -444,6 +434,28 @@ class UserController extends ChangeNotifier {
     showMessage(context, "Device removed successfully!");
   }
 
+  Future<void> addRemoteDevice(String key) async {
+    try {
+      /**
+       * Getting the db reference to the device access where the
+       * user id is the one to whom the current user has provided access to
+       * 
+       */
+      final DatabaseReference ref = devices.orderByChild("key").equalTo(key).ref;
+      print((await ref.get()).value);
+
+      // final String userID = getUserID();
+
+      // ref.child("userID").set(userID);
+    } on FirebaseException catch (e) {
+      debugPrint("Firebase Exception: Failed to update device access: ${e.toString()}");
+      throw e.message ?? "Something went wrong while trying to update device access";
+    } catch (e) {
+      debugPrint("Generic Exception: Failed to update device access: ${e.toString()}");
+      throw "Failed to update device access: ${e.toString()}";
+    }
+  }
+
   Future<void> updateAccessType(String deviceID, AccessType newAccessType, String targetUserID) async {
     try {
       /**
@@ -502,6 +514,6 @@ class UserController extends ChangeNotifier {
   }
 
   AccessType getAccessType(String id) {
-    return profile!.devices.firstWhere((element) => element.id == id).accessType;
+    return profile!.devices.firstWhere((element) => element.deviceID == id).accessType;
   }
 }

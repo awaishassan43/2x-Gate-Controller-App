@@ -18,6 +18,7 @@ class Screen {
   static String get family => '/family';
   static String get scheduling => '/scheduling';
   static String get addSchedule => '/addSchedule';
+  static String get accepting => '/accepting';
 
   // Settings Subscreens
   static String get resetPassword => '/resetPassword';

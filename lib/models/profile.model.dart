@@ -64,33 +64,41 @@ class Profile {
 }
 
 class ConnectedDevice {
-  String id;
+  String deviceID;
   String? accessProvidedBy;
   AccessType accessType;
-  String userID;
+  String? userID;
+  String? key;
+  String? nickName;
 
   ConnectedDevice({
-    required this.id,
+    required this.deviceID,
     required this.accessType,
     required this.userID,
+    this.key,
     this.accessProvidedBy,
+    this.nickName,
   });
 
   factory ConnectedDevice.fromMap(Map<String, dynamic> data) {
     return ConnectedDevice(
-      id: data['deviceID'],
+      deviceID: data['deviceID'],
       accessProvidedBy: data['accessProvidedBy'],
       accessType: AccessTypeExtension.getAccessType(data['accessType']),
       userID: data['userID'],
+      key: data['key'],
+      nickName: data['nickName'],
     );
   }
 
   Map<String, dynamic> toJSON() {
     return {
-      "deviceID": id,
+      "deviceID": deviceID,
       "accessProvidedBy": accessProvidedBy,
       "accessType": accessType,
       "userID": userID,
+      "key": key,
+      "nickName": nickName,
     };
   }
 }
