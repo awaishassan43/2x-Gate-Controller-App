@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:iot/screens/accepting/accepting.screen.dart';
 import 'package:iot/screens/addSchedule/addSchedule.screen.dart';
 import 'package:iot/screens/addUser/addUser.screen.dart';
+import 'package:iot/screens/editSharedDevice/editSharedDevice.screen.dart';
 import 'package:iot/screens/error/error.screen.dart';
 import 'package:iot/screens/scheduling/scheduling.screen.dart';
 import 'package:iot/screens/shared/family.screen.dart';
@@ -144,6 +145,9 @@ class _AppState extends State<App> {
                     return AddScheduleScreen(relayID: args["relayID"], deviceID: args["deviceID"], scheduleIndex: args["scheduleIndex"]);
                   } else if (settings.name == Screen.accepting) {
                     return const DeviceAcceptingScreen();
+                  } else if (settings.name == Screen.editSharedDevice) {
+                    final String accessID = settings.arguments as String;
+                    return EditSharedDevice(accessID: accessID);
                   } else {
                     return Container();
                   }

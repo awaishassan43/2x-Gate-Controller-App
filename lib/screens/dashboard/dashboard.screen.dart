@@ -26,25 +26,18 @@ class Dashboard extends StatelessWidget {
           ),
         ),
         actions: [
-          Selector<DeviceController, int>(
-            selector: (context, controller) => controller.devices.keys.length,
-            builder: (context, devices, _) {
-              return devices > 0
-                  ? Container()
-                  : IconButton(
-                      onPressed: () {
-                        Navigator.pushNamed(context, Screen.addDevice);
-                      },
-                      icon: const Icon(Icons.add),
-                    );
+          IconButton(
+            onPressed: () {
+              Navigator.pushNamed(context, Screen.addDevice);
             },
+            icon: const Icon(Icons.add),
           ),
           IconButton(
             onPressed: () {
               Navigator.pushNamed(context, Screen.appSettings);
             },
             icon: const Icon(Icons.settings),
-          )
+          ),
         ],
       ),
       body: Stack(

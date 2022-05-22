@@ -236,12 +236,29 @@ class UserController extends ChangeNotifier {
        * Filter the devices of the current user and assign the list to the newData map
        */
       final String userID = getUserID();
-      newData['devices'] = newDevices.values.where((element) => element["userID"] == userID).toList();
-      newData['access'] = newDevices.values.where((element) => element["accessProvidedBy"] == userID).toList();
+      newData['devices'] =
+          newDevices.entries.where((entry) => entry.value["userID"] == userID).map((entry) => {...entry.value, "id": entry.key}).toList();
+
+      newData['access'] = newDevices.entries
+          .where((element) => element.value["accessProvidedBy"] == userID)
+          .map((entry) => {...entry.value, "id": entry.key})
+          .toList();
 
       profile = Profile.fromMap(newData);
     } catch (e) {
       throw "Generic Exception: Failed to transform profile data ${e.toString()}";
+    }
+  }
+
+  Future<void> revokeAccess(String accessID) async {
+    try {
+      await devices.child(accessID).remove();
+    } on FirebaseException catch (e) {
+      debugPrint("Firebase Exception: Failed to revoke access: ${e.toString()}");
+      throw e.message ?? "Something went wrong while trying to revoke access";
+    } catch (e) {
+      debugPrint("Generic Exeption: Failed to revoke access: ${e.toString()}");
+      throw "Failed to to revoke access: ${e.toString()}";
     }
   }
 
@@ -456,16 +473,10 @@ class UserController extends ChangeNotifier {
     }
   }
 
-  Future<void> updateAccessType(String deviceID, AccessType newAccessType, String targetUserID) async {
+  Future<void> updateDeviceAccess(ConnectedDevice updatedAccess) async {
     try {
-      /**
-       * Getting the db reference to the device access where the
-       * user id is the one to whom the current user has provided access to
-       * 
-       */
-      final DatabaseReference ref = devices.orderByChild("userID").equalTo(targetUserID).ref.orderByChild("deviceID").equalTo(deviceID).ref;
-
-      ref.child("accessType").set(newAccessType.value);
+      final Map<String, dynamic> mappedData = updatedAccess.toJSON();
+      devices.child(updatedAccess.id).set(mappedData);
     } on FirebaseException catch (e) {
       debugPrint("Firebase Exception: Failed to change user access type: ${e.toString()}");
       throw e.message ?? "Something went wrong while trying to change the user access type";

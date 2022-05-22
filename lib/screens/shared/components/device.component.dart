@@ -4,6 +4,8 @@ import 'package:iot/models/profile.model.dart';
 import 'package:iot/util/themes.util.dart';
 import 'package:provider/provider.dart';
 
+import '../../../enum/route.enum.dart';
+
 class SharedDevice extends StatelessWidget {
   final ConnectedDevice device;
   const SharedDevice({
@@ -14,7 +16,9 @@ class SharedDevice extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialButton(
-      onPressed: () {},
+      onPressed: () {
+        Navigator.pushNamed(context, Screen.editSharedDevice, arguments: device.id);
+      },
       padding: const EdgeInsets.symmetric(horizontal: 7.5, vertical: 12.5),
       child: Row(
         children: [

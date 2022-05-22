@@ -64,6 +64,7 @@ class Profile {
 }
 
 class ConnectedDevice {
+  String id;
   String deviceID;
   String? accessProvidedBy;
   AccessType accessType;
@@ -72,6 +73,7 @@ class ConnectedDevice {
   String? nickName;
 
   ConnectedDevice({
+    required this.id,
     required this.deviceID,
     required this.accessType,
     required this.userID,
@@ -82,6 +84,7 @@ class ConnectedDevice {
 
   factory ConnectedDevice.fromMap(Map<String, dynamic> data) {
     return ConnectedDevice(
+      id: data['id'],
       deviceID: data['deviceID'],
       accessProvidedBy: data['accessProvidedBy'],
       accessType: AccessTypeExtension.getAccessType(data['accessType']),
@@ -95,7 +98,7 @@ class ConnectedDevice {
     return {
       "deviceID": deviceID,
       "accessProvidedBy": accessProvidedBy,
-      "accessType": accessType,
+      "accessType": accessType.value,
       "userID": userID,
       "key": key,
       "nickName": nickName,
