@@ -41,8 +41,17 @@ class _EditSharedDeviceState extends State<EditSharedDevice> {
   Future<void> updateAccess(BuildContext context) async {
     try {
       final UserController controller = Provider.of<UserController>(context, listen: false);
+
       await controller.updateDeviceAccess(
-        ConnectedDevice(id: device.id, deviceID: device.id, accessType: type, userID: device.userID),
+        ConnectedDevice(
+          id: device.id,
+          deviceID: device.deviceID,
+          nickName: textEditingController.text,
+          accessType: type,
+          userID: device.userID,
+          key: device.key,
+          accessProvidedBy: device.accessProvidedBy,
+        ),
       );
 
       showMessage(context, "Updated successfully!");
@@ -82,7 +91,33 @@ class _EditSharedDeviceState extends State<EditSharedDevice> {
                   title: const CustomHeading(heading: "Device Name"),
                   trailing: Text(Provider.of<DeviceController>(context, listen: false).devices[device.deviceID]!.deviceData.name),
                 ),
-                CustomInput(label: "NickName", controller: textEditingController),
+                ListTile(
+                  title: const CustomHeading(heading: "Status"),
+                  trailing: device.key != null
+                      ? const Text(
+                          "Pending",
+                          style: TextStyle(
+                            color: Colors.green,
+                          ),
+                        )
+                      : const Text(
+                          "Active",
+                          style: TextStyle(
+                            color: Colors.green,
+                          ),
+                        ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const CustomHeading(heading: "Nickname"),
+                      const SizedBox(height: 5),
+                      CustomInput(label: "NickName", controller: textEditingController),
+                    ],
+                  ),
+                ),
                 ListTile(
                   title: const CustomHeading(heading: "Access Type"),
                   trailing: DropdownButton<AccessType>(

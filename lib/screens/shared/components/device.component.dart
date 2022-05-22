@@ -56,6 +56,24 @@ class SharedDevice extends StatelessWidget {
               ),
             ],
           ),
+          const Spacer(),
+          device.key != null
+              ? const Text(
+                  "Pending",
+                  style: TextStyle(
+                    color: Colors.green,
+                  ),
+                )
+              : const Text(
+                  "Active",
+                  style: TextStyle(
+                    color: Colors.green,
+                  ),
+                ),
+          const Icon(
+            Icons.chevron_right,
+            color: textColor,
+          ),
         ],
       ),
     );

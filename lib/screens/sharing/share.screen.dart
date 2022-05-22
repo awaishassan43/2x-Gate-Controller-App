@@ -84,113 +84,110 @@ class _SharingScreenState extends State<SharingScreen> {
       ),
       body: Stack(
         children: [
-          Padding(
+          SingleChildScrollView(
             padding: const EdgeInsets.all(20.0),
-            child: AnimatedCrossFade(
-              crossFadeState: link != null ? CrossFadeState.showSecond : CrossFadeState.showFirst,
-              duration: const Duration(milliseconds: 250),
-              firstChild: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  CustomInput(label: "Nickname", controller: textEditingController),
-                  ListTile(
-                    title: const CustomHeading(heading: "Access Type"),
-                    trailing: DropdownButton<AccessType>(
-                      value: type,
-                      items: AccessType.values
-                          .map(
-                            (accessType) => DropdownMenuItem(
-                              child: Text(accessType.value.capitalize()),
-                              value: accessType,
-                            ),
-                          )
-                          .toList(),
-                      onChanged: (accessType) {
-                        if (accessType == null) {
-                          return;
-                        }
+            child: link == null
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      CustomInput(label: "Nickname", controller: textEditingController),
+                      ListTile(
+                        title: const CustomHeading(heading: "Access Type"),
+                        trailing: DropdownButton<AccessType>(
+                          value: type,
+                          items: AccessType.values
+                              .map(
+                                (accessType) => DropdownMenuItem(
+                                  child: Text(accessType.value.capitalize()),
+                                  value: accessType,
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (accessType) {
+                            if (accessType == null) {
+                              return;
+                            }
 
-                        setState(() {
-                          type = accessType;
-                        });
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 50),
-                  CustomButton(
-                    text: "Create Shareable Link",
-                    onPressed: () => generateLink(context),
-                  ),
-                ],
-              ),
-              secondChild: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(20.0),
-                      child: Column(
-                        children: [
-                          const Text(
-                            "Share via QR code",
-                            style: TextStyle(),
-                          ),
-                          const SizedBox(height: 10),
-                          if (link != null)
-                            QrImageView(
-                              data: link!,
-                              version: QrVersions.auto,
-                              size: 200,
-                            ),
-                        ],
+                            setState(() {
+                              type = accessType;
+                            });
+                          },
+                        ),
                       ),
-                    ),
-                  ),
+                      const SizedBox(height: 50),
+                      CustomButton(
+                        text: "Create Shareable Link",
+                        onPressed: () => generateLink(context),
+                      ),
+                    ],
+                  )
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(20.0),
+                          child: Column(
+                            children: [
+                              const Text(
+                                "Share via QR code",
+                                style: TextStyle(),
+                              ),
+                              const SizedBox(height: 10),
+                              if (link != null)
+                                QrImageView(
+                                  data: link!,
+                                  version: QrVersions.auto,
+                                  size: 200,
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
 
-                  /**
+                      /**
                  * End of top section
                  */
 
-                  /**
+                      /**
                  * OR SEPERATOR
                  */
-                  const SizedBox(height: 30),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          height: 1,
-                          color: Colors.grey.withOpacity(0.5),
+                      const SizedBox(height: 30),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Container(
+                              height: 1,
+                              color: Colors.grey.withOpacity(0.5),
+                            ),
+                          ),
+                          const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 10),
+                            child: Text("OR"),
+                          ),
+                          Expanded(
+                            child: Container(
+                              height: 1,
+                              color: Colors.grey.withOpacity(0.5),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 30),
+                      /**
+                   * END OF OR SEPERATOR
+                   */
+
+                      /**
+                   * Buttons to share
+                   */
+                      if (link != null)
+                        CustomButton(
+                          text: "Share via other methods",
+                          onPressed: () => share(context, link!),
                         ),
-                      ),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 10),
-                        child: Text("OR"),
-                      ),
-                      Expanded(
-                        child: Container(
-                          height: 1,
-                          color: Colors.grey.withOpacity(0.5),
-                        ),
-                      ),
                     ],
                   ),
-                  const SizedBox(height: 30),
-                  /**
-                 * END OF OR SEPERATOR
-                 */
-
-                  /**
-                 * Buttons to share
-                 */
-                  if (link != null)
-                    CustomButton(
-                      text: "Share via other methods",
-                      onPressed: () => share(context, link!),
-                    ),
-                ],
-              ),
-            ),
           ),
           if (isLoading) const Loader(),
         ],
