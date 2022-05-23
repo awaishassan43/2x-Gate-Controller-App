@@ -134,7 +134,7 @@ class DeviceController extends ChangeNotifier {
       settingsCollection.child(id).set(device.deviceSettings.toJson());
 
       // /// Attach device to the user profile
-      await controller.addDevice(id);
+      await controller.addDevice(id, forSelf: true);
     } on FirebaseException catch (e) {
       debugPrint("Firebase Exception: Failed to add device: ${e.toString()}");
       throw e.message ?? "Something went wrong while trying to add a device";

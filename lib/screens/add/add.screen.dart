@@ -25,7 +25,12 @@ class AddDeviceScreen extends StatefulWidget {
 class _AddDeviceScreenState extends State<AddDeviceScreen> {
   /// Process state
   bool isLoading = true;
-  String? loaderMessage = "Waiting for the controller to be connected";
+  // TODO: Uncomment this line
+  // String? loaderMessage = "Waiting for the controller to be connected";
+
+  // TODO: Remove this line
+  String? loaderMessage = "Adding device";
+
   ConnectivityStatus status = ConnectivityStatus.none;
   String? initialSSID;
 
@@ -35,7 +40,8 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
   // true means credentials have been sent... so no need to run
   bool credentialsSent = false;
   bool internetReconnected = false;
-  String? deviceID;
+  // TODO: Remove the device id
+  String? deviceID = "hellothere";
   bool deviceRegistered = false;
 
   /// SSID and password state
@@ -49,7 +55,17 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
   void initState() {
     super.initState();
 
-    prepare(context);
+    // TODO: Uncomment this line
+    // prepare(context);
+
+    // TODO: Remove these lins
+    doIt(context);
+  }
+
+  Future<void> doIt(BuildContext context) async {
+    final DeviceController controller = Provider.of<DeviceController>(context, listen: false);
+    await controller.addDevice(deviceID!, context);
+    showMessage(context, "Device added successfully");
   }
 
   Future<void> prepare(BuildContext context) async {

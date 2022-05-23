@@ -38,11 +38,13 @@ class App extends StatefulWidget {
 
 class _AppState extends State<App> {
   late final Future<String> initialPath;
+  late final GlobalKey<NavigatorState> _navigatorKey;
 
   @override
   void initState() {
     super.initState();
     initialPath = loadInitialScreen(context);
+    _navigatorKey = GlobalKey<NavigatorState>();
   }
 
   Future<String> loadInitialScreen(BuildContext context) async {
@@ -59,7 +61,10 @@ class _AppState extends State<App> {
       final Uri? uri = await _appLinks.getInitialAppLink();
 
       _appLinks.uriLinkStream.listen((event) {
-        Navigator.pushNamed(context, Screen.accepting);
+        if (event.path == "/shareDevice") {
+          debugPrint("Received url - Navigating to accepting device screen");
+          _navigatorKey.currentState?.pushNamedAndRemoveUntil(Screen.accepting, (_) => false);
+        }
       });
 
       String screen;
@@ -70,7 +75,7 @@ class _AppState extends State<App> {
         screen = Screen.login;
       } else {
         if (uri != null && uri.path == "/shareDevice") {
-          screen = Screen.addUser;
+          screen = Screen.accepting;
         } else {
           screen = Screen.dashboard;
         }
@@ -104,6 +109,7 @@ class _AppState extends State<App> {
             debugShowCheckedModeBanner: false,
             theme: Themes.lightTheme,
             themeMode: ThemeMode.light,
+            navigatorKey: _navigatorKey,
             routes: {
               Screen.login: (context) => const LoginScreen(),
               Screen.signup: (context) => const SignupScreen(),

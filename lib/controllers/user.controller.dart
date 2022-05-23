@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:iot/util/functions.util.dart';
 import 'package:iot/util/themes.util.dart';
 import '../enum/access.enum.dart';
@@ -453,17 +454,52 @@ class UserController extends ChangeNotifier {
 
   Future<void> addRemoteDevice(String key) async {
     try {
+      final String userID = getUserID();
+
       /**
        * Getting the db reference to the device access where the
        * user id is the one to whom the current user has provided access to
-       * 
        */
-      final DatabaseReference ref = devices.orderByChild("key").equalTo(key).ref;
-      print((await ref.get()).value);
+      final DataSnapshot item = await devices.orderByChild("key").equalTo(key).get();
 
-      // final String userID = getUserID();
+      if (item.value == null) {
+        throw "Failed to find data - It seems like access has already been revoked";
+      }
 
-      // ref.child("userID").set(userID);
+      final Map<String, dynamic> data = (item.value as LinkedHashMap<Object?, Object?>).cast<String, dynamic>();
+
+      final String accessKey = data.keys.first;
+      final Map<String, dynamic> mappedData = (data.values.first as LinkedHashMap<Object?, Object?>).cast<String, dynamic>();
+
+      /**
+       * Check if the mappedData already has a userID assigned to it... if it means, a user is already assigned
+       */
+      if (mappedData['userID'] != null) {
+        if (mappedData['userID'] == userID) {
+          throw "User already has access to this device";
+        } else {
+          throw "A user has already been assigned to the device - Please create a new QR code to share with the user";
+        }
+      }
+
+      /**
+       * Check if the user itself is the one providing the QR code
+       */
+      if (mappedData['accessProvidedBy'] == userID) {
+        throw "Cannot add yourself as another user for the device";
+      }
+
+      /**
+       * Getting the user id and updating the map to assign the user's id
+       * and making the key null, so that the sharing status can be regarded
+       * as active - please note non-null value means that the shared access
+       * has not yet been accepted... null means that the shared access has been 
+       * accepted.. so the key is set to null
+       */
+      mappedData['userID'] = userID;
+      mappedData['key'] = null;
+
+      devices.child(accessKey).set(mappedData);
     } on FirebaseException catch (e) {
       debugPrint("Firebase Exception: Failed to update device access: ${e.toString()}");
       throw e.message ?? "Something went wrong while trying to update device access";

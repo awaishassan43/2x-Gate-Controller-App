@@ -7,7 +7,9 @@ import 'package:iot/models/profile.model.dart';
 import 'package:iot/util/functions.util.dart';
 import 'package:provider/provider.dart';
 
+import '../../components/button.component.dart';
 import '../../enum/route.enum.dart';
+import '../../util/themes.util.dart';
 
 class DeviceAcceptingScreen extends StatefulWidget {
   const DeviceAcceptingScreen({Key? key}) : super(key: key);
@@ -34,49 +36,73 @@ class _DeviceAcceptingScreenState extends State<DeviceAcceptingScreen> {
 
       if (sharingKey == null) {
         showMessage(context, "Failed to get the sharable link");
-        Navigator.pushNamed(context, Screen.dashboard);
+        Navigator.pushNamedAndRemoveUntil(context, Screen.dashboard, (route) => false);
 
         return;
       }
 
       final UserController controller = Provider.of<UserController>(context, listen: false);
-
-      final List<ConnectedDevice> accesses = controller.profile!.accessesProvidedToUsers;
-      final ConnectedDevice device = accesses.firstWhere((access) => access.key == sharingKey);
-
-      if (device.key == null) {
-        throw "Cannot add this device - Please ask the owner to share the link again";
-      }
-
-      controller.addRemoteDevice(device.key!);
+      await controller.addRemoteDevice(sharingKey);
+      showMessage(context, "Added device successfully!");
     } catch (e) {
-      showMessage(context, "Failed to add the device");
+      showMessage(context, e.toString());
+      rethrow;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        FutureBuilder(
-          future: attachDevice,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState != ConnectionState.done) {
-              return const Loader(message: "Adding new device");
-            }
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Adding New Device"),
+        centerTitle: true,
+      ),
+      body: Stack(
+        children: [
+          FutureBuilder(
+            future: attachDevice,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState != ConnectionState.done) {
+                return const Loader(message: "Adding new device");
+              }
 
-            if (snapshot.hasError) {
-              return ErrorMessage(message: snapshot.error!.toString());
-            }
-
-            return Column(
-              children: const [
-                Text("Device added successfully!"),
-              ],
-            );
-          },
-        ),
-      ],
+              return Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    snapshot.hasError || snapshot.error != null
+                        ? ErrorMessage(message: snapshot.error!.toString())
+                        : Column(
+                            children: const [
+                              Icon(
+                                Icons.done,
+                                color: Colors.green,
+                                size: 30,
+                              ),
+                              Text(
+                                "Device added successfully!",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: textColor,
+                                ),
+                              ),
+                            ],
+                          ),
+                    const Spacer(),
+                    CustomButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, Screen.dashboard);
+                      },
+                      text: "Go to dashboard",
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 }
