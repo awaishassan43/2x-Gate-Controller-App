@@ -305,6 +305,10 @@ class UserController extends ChangeNotifier {
       final String userID = getUserID();
       final DataSnapshot mapData = await devices.orderByChild("deviceID").equalTo(deviceID).get();
 
+      if (mapData.value == null) {
+        throw "No such device data found";
+      }
+
       /**
        * Variables to hold the values
        */
@@ -316,7 +320,10 @@ class UserController extends ChangeNotifier {
 
       for (MapEntry<Object?, Object?> entry in (mapData.value as LinkedHashMap<Object?, Object?>).entries) {
         final String key = entry.key as String;
-        final ConnectedDevice value = ConnectedDevice.fromMap((entry.value as LinkedHashMap<Object?, Object?>).cast<String, dynamic>());
+        final Map<String, dynamic> mappedDevice = (entry.value as LinkedHashMap<Object?, Object?>).cast<String, dynamic>();
+        mappedDevice['id'] = entry.key;
+
+        final ConnectedDevice value = ConnectedDevice.fromMap(mappedDevice);
 
         mapOfUsersWithDeviceAccess[key] = value;
 
