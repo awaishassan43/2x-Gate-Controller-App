@@ -324,12 +324,12 @@ class _SignupScreenState extends State<SignupScreen> {
       FocusScope.of(context).unfocus();
 
       await Provider.of<UserController>(context, listen: false).register(
-        email.text,
+        email.text.trim(),
         password.text,
-        firstName.text,
-        lastName.text,
+        firstName.text.trim(),
+        lastName.text.trim(),
         pickedCountry!.phoneCode,
-        phone.text,
+        phone.text.trim(),
       );
 
       showMessage(context, "Account created successfully!");

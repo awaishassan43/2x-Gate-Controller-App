@@ -225,6 +225,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           error: emailError,
                           label: "Email Address",
                           controller: email,
+                          textInputType: TextInputType.emailAddress,
                         ),
                         const SizedBox(height: 12.5),
                         CustomInput(

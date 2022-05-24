@@ -75,7 +75,7 @@ class _CustomScreenState extends State<CustomScreen> {
       }
 
       final UserController controller = Provider.of<UserController>(context, listen: false);
-      await controller.forgotPassword(email.text);
+      await controller.forgotPassword(email.text.trim());
 
       showMessage(context, "Email sent successfully! \n Please check your email for further instructions");
 
@@ -170,6 +170,7 @@ class _CustomScreenState extends State<CustomScreen> {
                           error: emailError,
                           label: "Email Address",
                           controller: email,
+                          textInputType: TextInputType.emailAddress,
                         ),
                         const SizedBox(height: 30),
                         CustomButton(
