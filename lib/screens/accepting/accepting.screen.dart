@@ -28,9 +28,15 @@ class _DeviceAcceptingScreenState extends State<DeviceAcceptingScreen> {
 
   Future<void> attachingDevice(BuildContext context) async {
     try {
+      /**
+       * Get the dynamic link that started the app or the user scanned through QR scanner
+       */
       final AppLinks _appLinks = AppLinks();
       final Uri? uri = await _appLinks.getInitialAppLink();
 
+      /**
+       * Get the sharing key and add the device based on the key provided
+       */
       final String? sharingKey = uri?.queryParameters["key"];
 
       if (sharingKey == null) {

@@ -9,56 +9,89 @@ import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 
 class DeviceController extends ChangeNotifier {
+  /// Reference to the deviceSettings database collection
+  /// This reference helps in retreiving and updating the respective device settings
   final DatabaseReference settingsCollection = FirebaseDatabase.instance.ref('/deviceSettings');
+
+  /// Reference to the deviceComands collection
+  /// This reference helps in sending commands to the device, i.e. to open and close the door and stuff
   final DatabaseReference commandsCollection = FirebaseDatabase.instance.ref('/deviceCommands');
+
+  /// Reference to the devices collection
+  /// This reference helps in retreiving and update the device data, i.e. name, door status, online
+  /// status, and a couple other things
   final DatabaseReference deviceCollection = FirebaseDatabase.instance.ref('/devices');
+
+  /// Reference to the deviceStateLogs collection
+  /// This reference isn't being used yet
   final DatabaseReference logsCollection = FirebaseDatabase.instance.ref('/deviceStateLogs');
 
+  /// 1. A map of device id to the respective device objects
+  /// 2. A map of device id with the respective listener from each of the references mentioned above
+  /// The deviceListeners map helps in keeping the record of the listeners and then cancelling the
+  /// subscription when the user logs out
   Map<String, Device> devices = {};
-  bool _isLoading = false;
-  String _outputTimeError = '';
-
-  /// A local variable to keep and control the listeners
   Map<String, List<StreamSubscription>> deviceListeners = {};
 
-  /// Loader setter and getter
+  /// _isLoading property with getter and setter to control the loading indicator
+  bool _isLoading = false;
+
   bool get isLoading => _isLoading;
   set isLoading(bool value) {
     _isLoading = value;
     notifyListeners();
   }
 
-  /// error setter and getter
-  String get outputTimeError => _outputTimeError;
-  set outputTimeError(String value) {
-    _outputTimeError = value;
-    notifyListeners();
-  }
-
+  /// loadDevices Method
+  /// This method is responsible for retreiving the list of devices from the database based
+  /// on the devices in the profile object provided by the UserController
+  /// It also attaches the listeners and adds them to the deviceListeners map, as mentioned above
   Future<void> loadDevices(BuildContext context) async {
     try {
+      /**
+       * Get the list of devices ids from the user profile
+       */
       final List<String>? deviceIDs = Provider.of<UserController>(context, listen: false).profile?.devices.map((e) => e.deviceID).toList();
 
       if (deviceIDs == null) {
         return;
       }
 
+      /**
+       * Since the loadDevices method is called whenever a device is added or removed in the database, this line checks
+       * which of the devices already present in the devices map, doesn't exist in the database anymore, so it adds the
+       * ids to the devicesToBeRemoved list which gets handled below
+       */
       final List<String> devicesToBeRemoved = devices.keys.where((element) => !deviceIDs.contains(element)).toList();
 
       /// Adding new devices
       for (String id in deviceIDs) {
+        /**
+         * If the device id is already present and the listeners are already attached to a particular device id, then leave it as
+         * it is... otherwise proceed to the if block
+         */
         if (!devices.containsKey(id) && deviceListeners[id] == null) {
+          /**
+           * Get the data from the respective collection
+           */
           final DataSnapshot deviceData = await deviceCollection.child(id).get();
           final DataSnapshot deviceSettings = await settingsCollection.child(id).get();
           final DataSnapshot deviceLogs = await logsCollection.child(id).get();
           final DataSnapshot deviceCommands = await commandsCollection.child(id).get();
 
+          /**
+           * Convert each of the object retreived to a map, and add to a local variable
+           */
           final Map<String, dynamic> map = {};
           map['deviceData'] = objectToMap(deviceData.value);
           map['deviceSettings'] = objectToMap(deviceSettings.value);
           map['deviceCommands'] = objectToMap(deviceCommands.value);
           map['deviceStateLogs'] = objectToMap(deviceLogs.value);
 
+          /**
+           * Generate device class using the mapped data and add that to the devices map based on the device id
+           * Map.from helps in preventing the direct mutation of the devices map
+           */
           final Device device = Device.fromJson(map);
           final Map<String, Device> deviceList = Map.from(devices);
           deviceList[id] = device;
@@ -67,6 +100,8 @@ class DeviceController extends ChangeNotifier {
 
           /**
            * Attaching data listener
+           * Since we don't need to listen to deviceCommands reference, so leaving it
+           * Same goes for deviceLogs reference....
            */
           final Map<String, List<StreamSubscription<dynamic>>> listenersList = Map.from(deviceListeners);
           listenersList[id] = [
@@ -91,16 +126,27 @@ class DeviceController extends ChangeNotifier {
 
       /// Removing previous devices and cancelling subscriptions
       for (String id in devicesToBeRemoved) {
+        /**
+         * Copy the devices map to a new variable to prevent direct mutation of the state
+         * and remove the device from the devices map
+         */
         final Map<String, Device> deviceList = Map.from(devices);
         deviceList.remove(id);
 
         devices = deviceList;
 
+        /**
+         * Check if the deviceListeners map contains the device id
+         * and if it exists, then loop over the list of streamsubscriptions to cancel them
+         */
         if (deviceListeners.containsKey(id)) {
           for (StreamSubscription listener in deviceListeners[id]!) {
             await listener.cancel();
           }
 
+          /**
+           * Update the deviceListeners property
+           */
           final Map<String, List<StreamSubscription<dynamic>>> listenersList = Map.from(deviceListeners);
           listenersList.remove(id);
           deviceListeners = listenersList;
@@ -144,10 +190,22 @@ class DeviceController extends ChangeNotifier {
     }
   }
 
+  /// updateDevices method
+  /// This method takes in the device id, and a collection key to update the respective device data
+  /// in the respective collection
   Future<void> updateDevice(String id, String collectionKey) async {
     try {
+      /**
+       * Get the existing device data from the devices map
+       */
       final Device device = devices[id]!;
 
+      /**
+       * Update the respective reference based on the collection key...
+       * 1. deviceData will update the "devices" collection
+       * 2. deviceCommands will update the "deviceCommands" collection
+       * 3. deviceSettings will update the "deviceSettings" collection
+       */
       if (collectionKey == "deviceData") {
         await deviceCollection.child(id).set(device.deviceData.toJson());
       } else if (collectionKey == "deviceCommands") {
@@ -164,7 +222,27 @@ class DeviceController extends ChangeNotifier {
     }
   }
 
+  /// removeDevices method
+  /// This method is responsible for clearing the devices map
   removeDevices() {
-    devices.clear();
+    /**
+     * Map through the list of devices and remove all subscriptions
+     */
+    for (String deviceID in deviceListeners.keys) {
+      /**
+       * Map through listeners and remove each listener individually
+       */
+      for (StreamSubscription listener in deviceListeners[deviceID]!) {
+        listener.cancel();
+      }
+    }
+
+    /**
+     * Once all subscriptions are cancelled, clear both the devices and the listeners maps
+     */
+    deviceListeners = {};
+    devices = {};
+
+    notifyListeners();
   }
 }

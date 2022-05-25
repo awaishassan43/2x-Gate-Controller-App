@@ -16,39 +16,71 @@ class UserController extends ChangeNotifier {
   late final DatabaseReference users;
   late final DatabaseReference devices;
 
+  /// profile property
+  /// This property holds the user's profile object based on Profile class
+  /// initially and as soon as user logs out, it is set to null
   Profile? profile;
+
+  /// Loading property and getter and setter to be used somewhere in the UI
   bool _isLoading = false;
-  bool initialized = false;
 
-  /// Stream subscription and the values on change
-  StreamSubscription? profileListener;
-  StreamSubscription? devicesListener;
-  Object? profileData;
-  Object? deviceAccessData;
-
-  /// Loader getter and setter
   bool get isLoading => _isLoading;
   set isLoading(bool value) {
     _isLoading = value;
     notifyListeners();
   }
 
-  /// Methods
+  /// This property controls the initialization of firebase api
+  bool initialized = false;
+
+  /// Stream subscription and the respective valuse
+  /// 1. profileListener - used to maintain the reference to the user's profile data and is used to cancel the subscription on lougout
+  /// 2. devicesListener - used to listen to "deviceAccess" database collection and remove subscription on logout
+  /// 3. profileData - contains the data for user's profile
+  /// 4. deviceAccessData - contains the list of the devices and the access levels provided to the user
+  StreamSubscription? profileListener;
+  StreamSubscription? devicesListener;
+  Object? profileData;
+  Object? deviceAccessData;
+
+  /// getUserID
+  /// this method is responsible for getting the user id
   String getUserID() {
     return auth.currentUser!.uid;
   }
 
+  /// initialize
+  /// This method is responsible for initializing the auth, devices and the firebase auth instances
+  /// as well as setting the offline behavior for the realtime database
   void initialize() {
     if (!initialized) {
       auth = FirebaseAuth.instance;
+
+      /// Reference to the user's collection
+      /// this reference is used to retreive and update the user's profile data
       users = FirebaseDatabase.instance.ref('users');
+
+      /// Reference to the deviceAccess collection
+      /// this reference is used to retreive the list of the devices that the user has access to
+      /// or has provided access to other users
       devices = FirebaseDatabase.instance.ref('deviceAccess');
+
+      /// Setting offline behavior for the database
       FirebaseDatabase.instance.setPersistenceEnabled(true);
 
       initialized = true;
     }
   }
 
+  /// getLoggedInUser
+  /// this method is responsible for getting the logged in user from firebase auth
+  /// instance and attaching listener to the profile
+  /// This method returns a nullable bool value based on whether the user is logged in or not
+  /// and whether the profile is verified or not
+  /// 1. if user is logged out, then return false
+  /// 2. if logged in, then check whether the profile is verified or not
+  ///   if the user is verified, then return true,
+  ///   otherwise return null
   Future<bool?> getLoggedInUser() async {
     try {
       initialize();
@@ -75,6 +107,8 @@ class UserController extends ChangeNotifier {
     }
   }
 
+  /// login Method
+  /// this method takes in the email and password and logs the user in with firebase auth the credentails
   Future<bool?> login(String email, String password) async {
     try {
       final UserCredential userCredential = await auth.signInWithEmailAndPassword(email: email.trim(), password: password);
@@ -99,8 +133,12 @@ class UserController extends ChangeNotifier {
     }
   }
 
+  // register method
   Future<void> register(String email, String password, String firstName, String lastName, String callingCode, String phone) async {
     try {
+      /**
+       * Register the user
+       */
       final UserCredential userCredential = await auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
@@ -110,6 +148,9 @@ class UserController extends ChangeNotifier {
         throw Exception("Error occured while trying to register user");
       }
 
+      /**
+       * Create the user profile data
+       */
       final Profile tempProfile = Profile(
         email: email,
         phone: phone,
@@ -122,12 +163,22 @@ class UserController extends ChangeNotifier {
         fcmToken: await getFCMToken(),
       );
 
+      /**
+       * Convert the profile data to json and remove the email because the email doesn't need to be 
+       * saved in the realtime database
+       */
       final Map<String, dynamic> profileData = tempProfile.toJSON();
       profileData.remove('email');
 
+      /**
+       * Store the map to the database
+       */
       final String userID = auth.currentUser!.uid;
       await users.child(userID).set(profileData);
 
+      /**
+       * Send the verification email to the uesr
+       */
       await userCredential.user?.sendEmailVerification();
     } on FirebaseException catch (e) {
       debugPrint("Firebase Exception: Registration Failed: ${e.toString()}");
@@ -138,6 +189,9 @@ class UserController extends ChangeNotifier {
     }
   }
 
+  /// updatePassword
+  /// this method is responsible for authenticating the user, and updating the password in case if no
+  /// error is caught
   Future<void> updatePassword(String oldPass, String newPass) async {
     try {
       if (auth.currentUser == null) {
@@ -156,23 +210,39 @@ class UserController extends ChangeNotifier {
     }
   }
 
+  /// this method is responsible for attaching the listener to the database collections
   Future<void> attachProfileListener() async {
     try {
+      /**
+       * Get the user id
+       */
       final String userID = auth.currentUser!.uid;
 
+      /**
+       * Get the reference to the user's profile
+       */
       final DatabaseReference documentRef = users.child(userID).ref;
       final DatabaseReference devicesAccessRef = devices.ref;
 
       /**
-       * Getting initial data from database and transforming that to profile data
+       * Getting initial data from database so that it can be transformed to the Profile object
+       * for the rest of the app to be used
        */
       final DataSnapshot document = await documentRef.get();
+
+      /**
+       * Get the list of all "deviceAccess" documents, so that it can be filtered based on the 
+       * devices that user has access to, and the devices that user has provided access to others
+       */
       final DataSnapshot devicesList = await devicesAccessRef.get();
 
       if (!document.exists) {
         throw Exception("User profile does not exist");
       }
 
+      /**
+       * Transforming the retreived data to the profile object
+       */
       profileData = document.value;
       deviceAccessData = devicesList.value;
 
@@ -200,6 +270,7 @@ class UserController extends ChangeNotifier {
     }
   }
 
+  /// This method is responsible for updating the user's profile data
   Future<void> updateProfile() async {
     try {
       notifyListeners();
@@ -208,6 +279,10 @@ class UserController extends ChangeNotifier {
         throw "Failed to get the profile data";
       }
 
+      /**
+       * Convert the profile to json object and remove email
+       * email doesn't need to be saved to the database
+       */
       final Map<String, dynamic> data = profile!.toJSON();
       data.remove('email');
 
@@ -250,6 +325,7 @@ class UserController extends ChangeNotifier {
     }
   }
 
+  /// This method helps the user revoke access to the devices that the current user has provided to others
   Future<void> revokeAccess(String accessID) async {
     try {
       await devices.child(accessID).remove();
@@ -262,6 +338,15 @@ class UserController extends ChangeNotifier {
     }
   }
 
+  /// addDevice
+  /// this method is responsible for adding a deviceAccess record to the database
+  /// params (and what they are needed for):
+  /// 1. deviceID - the id of the device to be added
+  /// 2. forSelf - a boolean value, true means that the user is adding the device for himself
+  ///       if false, then it means user intends to share the device with others... in the case of which a sharing key
+  ///       is generated as well, and the userID for the device is set as null, as the device has no current user
+  /// 3. accessType - an enum value, refering to the type of access that the user is providing
+  /// 4. nickName - a string value to help the user identify the accesses he has provided to others
   Future<String?> addDevice(String deviceID, {bool forSelf = false, AccessType accessType = AccessType.owner, String? nickName}) async {
     try {
       final String userID = getUserID();
@@ -273,6 +358,9 @@ class UserController extends ChangeNotifier {
       final String id = uuid.v4();
       String? key;
 
+      /**
+       * If not creating a deviceAccess document for self, then create a sharing key as well
+       */
       if (!forSelf) {
         key = uuid.v4();
       }
@@ -317,6 +405,10 @@ class UserController extends ChangeNotifier {
       late final String accessID;
       late final ConnectedDevice device;
 
+      /**
+       * Check if the device has multiple users, then show a dialog to help the user make choice between
+       * deleting the device for himself only or for all users, including the ones he shared access with
+       */
       for (MapEntry<Object?, Object?> entry in (mapData.value as LinkedHashMap<Object?, Object?>).entries) {
         final String key = entry.key as String;
         final Map<String, dynamic> mappedDevice = (entry.value as LinkedHashMap<Object?, Object?>).cast<String, dynamic>();
@@ -515,6 +607,7 @@ class UserController extends ChangeNotifier {
     }
   }
 
+  /// this method updates the device access he's provided the other user, like accessType or nickName
   Future<void> updateDeviceAccess(ConnectedDevice updatedAccess) async {
     try {
       final Map<String, dynamic> mappedData = updatedAccess.toJSON();
@@ -528,6 +621,7 @@ class UserController extends ChangeNotifier {
     }
   }
 
+  /// This method logs the user out as well as removes all the listeners associated
   Future<void> logout() async {
     try {
       await auth.signOut();
@@ -540,6 +634,7 @@ class UserController extends ChangeNotifier {
 
       /// Setting profile to null
       profile = null;
+
       notifyListeners();
     } on FirebaseException catch (e) {
       debugPrint("Firebase Exception: Failed to logout: ${e.toString()}");

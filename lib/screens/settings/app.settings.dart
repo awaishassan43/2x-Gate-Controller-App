@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:iot/controllers/device.controller.dart';
 import 'package:iot/screens/settings/subscreens/editor.screen.dart';
 import '/components/button.component.dart';
 import '/components/loader.component.dart';
@@ -263,14 +264,29 @@ class AppSettings extends StatelessWidget {
                     CustomButton(
                       text: "Sign Out",
                       onPressed: () async {
+                        /**
+                         * Get references to both controllers
+                         */
                         final UserController controller = Provider.of<UserController>(context, listen: false);
+                        final DeviceController deviceController = Provider.of<DeviceController>(context, listen: false);
 
                         try {
+                          /**
+                           * Show the loading indicator
+                           */
                           controller.isLoading = true;
 
+                          /**
+                           * Log the user out and remove all the devices from memory
+                           */
                           await controller.logout();
+                          await deviceController.removeDevices();
+
                           showMessage(context, "Logged out successfully!");
 
+                          /**
+                           * Hide the loading indicator and navigate to login screen
+                           */
                           controller.isLoading = false;
                           await Navigator.pushNamedAndRemoveUntil(context, Screen.login, (route) => false);
                         } catch (e) {
