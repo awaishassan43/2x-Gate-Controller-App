@@ -19,7 +19,11 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  /// Value holders
+  /// TextEditingControllers and Form state
+  /// Each of the controller is used to control the input fields on the
+  /// page - isAgreed boolean is used to control the state of whether the user
+  /// has accepted the terms of service or not
+  /// isLoading - controls whether to show or hide the loading indicator
   late TextEditingController email;
   late TextEditingController password;
   bool isAgreed = true;
@@ -41,6 +45,10 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
+
+    /**
+     * Initializing the editing controllers and focus nodes
+     */
     email = TextEditingController();
     password = TextEditingController();
 
@@ -50,6 +58,10 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void dispose() {
     super.dispose();
+
+    /**
+     * Disposing the controllers and focus nodes
+     */
     email.dispose();
     password.dispose();
 
@@ -67,6 +79,8 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  /// *************************************************************************** ///
+  /// Validation methods
   bool validateEmail() {
     if (email.text == "") {
       setState(() {
@@ -119,8 +133,14 @@ class _LoginScreenState extends State<LoginScreen> {
     return true;
   }
 
+  /// ***********************************************************************************///
+  /// End of validation methods
+
   Future<void> login(BuildContext context) async {
     try {
+      /**
+       * Validate each item and if either is invalid then return
+       */
       final bool isEmailValid = validateEmail();
       final bool isPasswordValid = validatePassword();
       final bool isTOSAgreed = validateTOS();

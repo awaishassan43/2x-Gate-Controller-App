@@ -19,23 +19,41 @@ class SuccessScreen extends StatefulWidget {
 }
 
 class _SuccessScreenState extends State<SuccessScreen> {
+  /// isLoading - boolean - controls the loading indicator shown the user
   bool isLoading = false;
+
+  /// message - nullable string - controls the message that's shown to the user when the loading indicator is shown
   String? message;
+
+  /// isEmailVerified - boolean - whether the email is verified or not, this state is updated in checkVerificationStatus
+  /// and is used to enable / disable the "Continue" button
   bool isEmailVerified = false;
+
+  /// timer - Timer - maintains the reference to a periodic timer object which runs the checkVerificationStatus
+  /// every 5 seconds. This reference is then used to cancel the timer in dispose function
   late Timer timer;
 
   @override
   void initState() {
     super.initState();
+    /**
+     * Check the verification status after every 5 seconds
+     */
     timer = Timer.periodic(const Duration(seconds: 5), (_) => checkVerificationStatus(context));
   }
 
   @override
   void dispose() {
     super.dispose();
+
+    /**
+     * Cancel the timer
+     */
     timer.cancel();
   }
 
+  /// This method is responsible for sending the verification email to the user if the user
+  /// clicks the resend email button
   Future<void> sendVerificationEmail(BuildContext context) async {
     setState(() {
       isLoading = true;
@@ -57,10 +75,15 @@ class _SuccessScreenState extends State<SuccessScreen> {
     });
   }
 
+  /// This method is responsible for checking the verification status of the user
   Future<void> checkVerificationStatus(BuildContext context) async {
     try {
       final UserController controller = Provider.of<UserController>(context, listen: false);
 
+      /**
+       * Reload the latest data of the userand check whether the email is verified or not
+       * if it is verified then update the state to enable the continue button
+       */
       await controller.auth.currentUser!.reload();
 
       if (controller.auth.currentUser!.emailVerified) {

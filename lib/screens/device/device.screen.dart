@@ -28,6 +28,11 @@ class _DeviceScreenState extends State<DeviceScreen> {
   bool isFirstRelayDisabled = false;
   bool isSecondRelayDisabled = false;
 
+  /// updateRelayStatus
+  /// Here's how sending a opening/closing command to a particular relay works
+  /// the "deviceCommands" collection handles the commands that the app sends to the device
+  /// this function takes in the relay id.... and sends the opposite of the current state of the
+  /// respective relay
   Future<void> updateRelayStatus(BuildContext context, int relayID) async {
     final DeviceController controller = Provider.of<DeviceController>(context, listen: false);
 
@@ -42,8 +47,10 @@ class _DeviceScreenState extends State<DeviceScreen> {
     });
 
     try {
-      /// Taking a shortcut due to time constraint
+      /// Mapping the deviceCommands object to JSON
       final Map<String, dynamic> mappedData = deviceCommands.toJson();
+
+      /// Setting the current time, as well as expiry time of the command sent to the database
       final DateTime currentTime = DateTime.now();
       final DateTime expiryTime = currentTime.add(const Duration(minutes: 1));
 
@@ -54,6 +61,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
       mappedData['timestamp'] = currentTime.millisecondsSinceEpoch;
       mappedData['request']['payload']['exp'] = expiryTime.millisecondsSinceEpoch;
 
+      /// updating the device data
       controller.devices[deviceID]!.updateWithJSON(deviceCommands: mappedData);
 
       await controller.updateDevice(deviceID, "deviceCommands");

@@ -46,6 +46,12 @@ class _DeviceAcceptingScreenState extends State<DeviceAcceptingScreen> {
         return;
       }
 
+      /**
+       * Add the shared device using the key shared through the link...
+       * what this does is, searches the database for the "deviceAccess" collection record
+       * where the key matches the selected key and updates the record by attaching the id 
+       * of the logged in user
+       */
       final UserController controller = Provider.of<UserController>(context, listen: false);
       await controller.addRemoteDevice(sharingKey);
       showMessage(context, "Added device successfully!");

@@ -18,7 +18,11 @@ class CustomScreen extends StatefulWidget {
 }
 
 class _CustomScreenState extends State<CustomScreen> {
-  /// Value holders
+  /// TextEditingControllers and Form state
+  /// Each of the controller is used to control the input fields on the
+  /// isLoading - boolean - whether to show or hide the loading indicator
+  /// isSent - whether the email was sent or not.... this flag is used to
+  /// enable or disable the resend button....
   late TextEditingController email;
   bool isLoading = false;
   bool isSent = false;
@@ -43,7 +47,8 @@ class _CustomScreenState extends State<CustomScreen> {
     email.dispose();
   }
 
-  /// Functions
+  /// ***************************************************************************** ///
+  /// Validation functions
   bool validateEmail() {
     if (email.text == "") {
       setState(() {
@@ -62,18 +67,28 @@ class _CustomScreenState extends State<CustomScreen> {
     return true;
   }
 
+  /// ***************************************************************************** ///
+  /// End of validation functions
+
+  /// This function sends the verification email when the user presses the resend button
   Future<void> sendVerificationEmail(BuildContext context) async {
     setState(() {
       isLoading = true;
     });
 
     try {
+      /**
+       * Check if entered email is valid, if it isn't then do nothing
+       */
       final isEmailValid = validateEmail();
 
       if (!isEmailValid) {
         return;
       }
 
+      /**
+       * Send the verification email
+       */
       final UserController controller = Provider.of<UserController>(context, listen: false);
       await controller.forgotPassword(email.text.trim());
 

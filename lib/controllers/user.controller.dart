@@ -651,6 +651,9 @@ class UserController extends ChangeNotifier {
 
   Future<void> forgotPassword(String email) async {
     try {
+      /**
+       * Send the password reset email to the user... the password reset is handled by google itself
+       */
       await auth.sendPasswordResetEmail(email: email);
     } on FirebaseException catch (e) {
       debugPrint("Firebase Exception: Failed to send password reset emali: ${e.toString()}");
@@ -661,7 +664,11 @@ class UserController extends ChangeNotifier {
     }
   }
 
-  AccessType getAccessType(String id) {
-    return profile!.devices.firstWhere((element) => element.deviceID == id).accessType;
+  /// getAccessType
+  /// This method is responsible for the getting the accessType of a particular device
+  /// that belongs to the current user....
+  AccessType getAccessType(String deviceID) {
+    final String userID = getUserID();
+    return profile!.devices.firstWhere((element) => element.deviceID == deviceID && element.userID != null && element.userID == userID).accessType;
   }
 }

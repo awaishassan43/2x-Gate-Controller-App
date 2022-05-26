@@ -21,7 +21,11 @@ class SignupScreen extends StatefulWidget {
 }
 
 class _SignupScreenState extends State<SignupScreen> {
-  /// Value holders
+  /// TextEditingControllers and Form state
+  /// Each of the controller is used to control the input fields on the
+  /// page - isAgreed boolean is used to control the state of whether the user
+  /// has accepted the terms of service or not
+  /// pickedCountry controls the country selected by the user
   late TextEditingController email;
   late TextEditingController password;
   late TextEditingController confirmPassword;
@@ -31,7 +35,8 @@ class _SignupScreenState extends State<SignupScreen> {
   bool isAgreed = false;
   Country? pickedCountry;
 
-  /// Error holders
+  /// Each of the following strings contains the error message
+  /// in case if such an error arises during the validation process
   String emailError = '';
   String passwordError = '';
   String confirmPasswordError = '';
@@ -43,6 +48,7 @@ class _SignupScreenState extends State<SignupScreen> {
   String formError = '';
 
   /// Focus nodes
+  /// the focus nodes help in focusing the next input field when the next button is pressed on keyboard
   late final FocusNode emailFocusNode;
   late final FocusNode passwordFocusNode;
   late final FocusNode confirmPasswordFocusNode;
@@ -58,6 +64,10 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   void initState() {
     super.initState();
+
+    /**
+     * Initializing the text controllers and focus nodes
+     */
     email = TextEditingController();
     password = TextEditingController();
     confirmPassword = TextEditingController();
@@ -77,6 +87,9 @@ class _SignupScreenState extends State<SignupScreen> {
   void dispose() {
     super.dispose();
 
+    /**
+     * Disposing the text editing cotnrollers and focus nodes
+     */
     email.dispose();
     password.dispose();
     confirmPassword.dispose();
@@ -103,6 +116,8 @@ class _SignupScreenState extends State<SignupScreen> {
     }
   }
 
+  /// ******************************************************************************///
+  /// Verfication methods
   bool validateEmail() {
     if (email.text == "") {
       setState(() {
@@ -276,6 +291,9 @@ class _SignupScreenState extends State<SignupScreen> {
     return true;
   }
 
+  /// *****************************************************************************  ///
+  /// END of verification methods
+
   void showCountryPickerDialog(BuildContext context) {
     showCountryPicker(
       context: context,
@@ -297,6 +315,9 @@ class _SignupScreenState extends State<SignupScreen> {
         return;
       }
 
+      /**
+       * Verify the inputs
+       */
       final bool isEmailValid = validateEmail();
       final bool isPasswordValid = validatePassword();
       final bool isConfirmPasswordValid = validateConfirmPassword();
@@ -306,6 +327,9 @@ class _SignupScreenState extends State<SignupScreen> {
       final bool isCountryValid = validateCountry();
       final bool isTOSAgreed = validateTOS();
 
+      /**
+       * If any of the inputs is invalid then don't proceed
+       */
       if (!isEmailValid ||
           !isFirstNameValid ||
           !isLastNameValid ||
@@ -321,8 +345,16 @@ class _SignupScreenState extends State<SignupScreen> {
         isLoading = true;
       });
 
+      /**
+       * this line hides the keyboard and unfocuses and focused input field
+       */
       FocusScope.of(context).unfocus();
 
+      /**
+       * Register the user with the provided information
+       * trim() method is being used to remove any extranous spaces around the things like
+       * email, name, as well as phone number
+       */
       await Provider.of<UserController>(context, listen: false).register(
         email.text.trim(),
         password.text,
@@ -333,6 +365,10 @@ class _SignupScreenState extends State<SignupScreen> {
       );
 
       showMessage(context, "Account created successfully!");
+
+      /**
+       * Remove all other routes from stack, and navigate to success screen
+       */
       Navigator.pushNamedAndRemoveUntil(context, Screen.success, (route) => false);
     } catch (e) {
       showMessage(context, "Failed to create the account");

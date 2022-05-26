@@ -12,6 +12,7 @@ class AddUserScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    /// Getting the list of devices that the current user can share with other users
     final Map<String, Device> devices = Provider.of<DeviceController>(context).devices;
 
     return Scaffold(

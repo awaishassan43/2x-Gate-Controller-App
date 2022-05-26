@@ -24,6 +24,7 @@ class SchedulingScreen extends StatefulWidget {
 }
 
 class _SchedulingScreenState extends State<SchedulingScreen> {
+  /// isLoading - boolean - whether to hide or show the loading indicator
   bool isLoading = false;
 
   Future<void> deleteSchedule(int scheduleIndex) async {
@@ -32,12 +33,27 @@ class _SchedulingScreenState extends State<SchedulingScreen> {
     });
 
     try {
+      /**
+       * Getting the device controller instance
+       */
       final DeviceController controller = Provider.of<DeviceController>(context, listen: false);
+
+      /**
+       * Getting the device settings json data
+       * it is important to note that we're getting the JSON data because it makes it easy to handle variables like
+       * relay id.... as well as any other specific keys that we need to update...
+       */
       final Map<String, dynamic> deviceSettings = controller.devices[widget.deviceID]!.deviceSettings.toJson();
 
+      /**
+       * Removing the schedule and updating the device using JSON data
+       */
       (deviceSettings['value'][widget.relayID]['schedules'] as List<Map<String, dynamic>>).removeAt(scheduleIndex);
       controller.devices[widget.deviceID]!.updateWithJSON(deviceSettings: deviceSettings);
 
+      /**
+       * Update the device data
+       */
       controller.updateDevice(widget.deviceID, "deviceSettings");
 
       showMessage(context, "Schedule deleted successfully!");

@@ -22,22 +22,36 @@ class EditSharedDevice extends StatefulWidget {
 }
 
 class _EditSharedDeviceState extends State<EditSharedDevice> {
+  /// isLoading - boolean - controls whether to show or hide the loading indicator
   bool isLoading = false;
+
+  /// device - ConnectedDevice object - maintains the deviceAccess data
   late ConnectedDevice device;
+
+  /// textEditingController - TextEditingController - controls the nickName editing field
   late final TextEditingController textEditingController;
+
+  /// type - AccessType enumerator - controls editing the access type that the user has shared to other device
   late AccessType type;
 
   @override
   void initState() {
     super.initState();
 
+    /**
+     * Get the UserController reference
+     */
     final UserController controller = Provider.of<UserController>(context, listen: false);
+
+    // Get the respective deviceAccess object based on the accessID provided to the screen as accessID argument
     device = controller.profile!.accessesProvidedToUsers.firstWhere((element) => element.id == widget.accessID);
 
+    // Fill in the data in the nickname field and the access type dropdown field
     textEditingController = TextEditingController(text: device.nickName);
     type = device.accessType;
   }
 
+  /// Update the device access object
   Future<void> updateAccess(BuildContext context) async {
     try {
       final UserController controller = Provider.of<UserController>(context, listen: false);
@@ -61,6 +75,7 @@ class _EditSharedDeviceState extends State<EditSharedDevice> {
     }
   }
 
+  /// This method revokes the access to a device that the current user has provided to other users
   Future<void> revokeAccess(BuildContext context) async {
     try {
       final UserController controller = Provider.of<UserController>(context, listen: false);

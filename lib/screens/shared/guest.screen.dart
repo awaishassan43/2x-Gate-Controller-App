@@ -17,7 +17,11 @@ class GuestsScreen extends StatelessWidget {
       ),
       body: Selector<UserController, List<ConnectedDevice>>(
         selector: (context, controller) =>
-            controller.profile!.accessesProvidedToUsers.where((element) => element.accessType == AccessType.guest).toList(),
+
+            /// Only show the devivces that have accessType of family and the access is being provided by the current user
+            controller.profile!.accessesProvidedToUsers
+                .where((element) => element.accessType == AccessType.guest && element.accessProvidedBy == controller.getUserID())
+                .toList(),
         builder: (context, guests, _) {
           return ListView.builder(
             itemCount: guests.length,

@@ -26,10 +26,17 @@ class SharingScreen extends StatefulWidget {
 }
 
 class _SharingScreenState extends State<SharingScreen> {
+  /// textEditingController to control the nickname field
   late final TextEditingController textEditingController;
 
+  /// isLoading - boolean - controls whether to show or hide the loading indicator
   bool isLoading = false;
+
+  /// accessType - AccessType enumerator - controls the access type that the user is providing to the other user
   AccessType type = AccessType.guest;
+
+  /// link - nullable string - shows the QR code based on whether the link was generated successfully or not
+  /// if it is non-null, then show the QR code
   String? link;
 
   @override
@@ -38,12 +45,25 @@ class _SharingScreenState extends State<SharingScreen> {
     textEditingController = TextEditingController();
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+    textEditingController.dispose();
+  }
+
   Future<void> generateLink(BuildContext ctonext) async {
     try {
+      /**
+       * If no nickname has been provided, then show an error to the user
+       */
       if (textEditingController.text.isEmpty) {
         throw "Please enter a nickname";
       }
 
+      /**
+       * Add a new record to the "deviceAccess" collection, with the respective access type and a nickname
+       * for easier identification for the accesses that the current user has provided to the other users
+       */
       final UserController controller = Provider.of<UserController>(context, listen: false);
       final String? tempKey = await controller.addDevice(widget.deviceID, forSelf: false, accessType: type, nickName: textEditingController.text);
 
@@ -51,6 +71,7 @@ class _SharingScreenState extends State<SharingScreen> {
         throw "Failed to create a shareable link for the device";
       }
 
+      /// Generate the dynamic link to share or create the QR code
       final String _link = await generateDynamicLink('shareDevice?key=$tempKey');
 
       setState(() {
