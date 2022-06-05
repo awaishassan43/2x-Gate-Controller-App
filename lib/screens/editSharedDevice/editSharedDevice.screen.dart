@@ -75,6 +75,18 @@ class _EditSharedDeviceState extends State<EditSharedDevice> {
     }
   }
 
+  List<AccessType> getShareableAccesses() {
+    final AccessType hasAccessType = device.accessType;
+
+    if (hasAccessType == AccessType.owner) {
+      return [AccessType.guest, AccessType.family];
+    } else if (hasAccessType == AccessType.family) {
+      return [AccessType.guest, AccessType.family];
+    } else {
+      return [AccessType.guest];
+    }
+  }
+
   /// This method revokes the access to a device that the current user has provided to other users
   Future<void> revokeAccess(BuildContext context) async {
     try {
@@ -137,7 +149,7 @@ class _EditSharedDeviceState extends State<EditSharedDevice> {
                   title: const CustomHeading(heading: "Access Type"),
                   trailing: DropdownButton<AccessType>(
                     value: type,
-                    items: AccessType.values
+                    items: getShareableAccesses()
                         .map(
                           (accessType) => DropdownMenuItem(
                             child: Text(accessType.value.capitalize()),

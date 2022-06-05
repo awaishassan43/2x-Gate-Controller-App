@@ -9,6 +9,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../controllers/user.controller.dart';
+import '../../models/profile.model.dart';
 import '../../util/functions.util.dart';
 
 class SharingScreen extends StatefulWidget {
@@ -84,6 +85,23 @@ class _SharingScreenState extends State<SharingScreen> {
     }
   }
 
+  List<AccessType> getShareableAccesses(BuildContext context) {
+    final UserController controller = Provider.of<UserController>(context, listen: false);
+    final String userID = controller.getUserID();
+
+    final ConnectedDevice device =
+        controller.profile!.devices.firstWhere((element) => element.userID == userID && element.deviceID == widget.deviceID);
+    final AccessType hasAccessType = device.accessType;
+
+    if (hasAccessType == AccessType.owner) {
+      return [AccessType.guest, AccessType.family];
+    } else if (hasAccessType == AccessType.family) {
+      return [AccessType.guest, AccessType.family];
+    } else {
+      return [AccessType.guest];
+    }
+  }
+
   Future<void> share(BuildContext context, String link) async {
     try {
       final UserController controller = Provider.of<UserController>(context, listen: false);
@@ -116,7 +134,7 @@ class _SharingScreenState extends State<SharingScreen> {
                         title: const CustomHeading(heading: "Access Type"),
                         trailing: DropdownButton<AccessType>(
                           value: type,
-                          items: AccessType.values
+                          items: getShareableAccesses(context)
                               .map(
                                 (accessType) => DropdownMenuItem(
                                   child: Text(accessType.value.capitalize()),
