@@ -383,3 +383,31 @@ String formatTime(bool is24Hours, int hours, int minute) {
 
   return '${hours.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}${is24Hours ? '' : ' $meridiem'}';
 }
+
+Uri decodeURI(Uri uri) {
+  final String splitPath = uri.query.split('&link=')[1];
+  final String decodedURL = Uri.decodeFull(splitPath);
+
+  final Uri newURI = Uri.parse(decodedURL);
+  return newURI;
+}
+
+String? getContextFromDynamicLink(Uri uri) {
+  if (uri.query.contains('&link=https')) {
+    final Uri newURI = decodeURI(uri);
+    return newURI.path;
+  }
+
+  return '';
+}
+
+String? getKeyFromDynamicLink(Uri uri) {
+  if (uri.query.contains('&link=https')) {
+    final Uri newURI = decodeURI(uri);
+    final String key = newURI.query.split("=")[1];
+
+    return key;
+  }
+
+  return null;
+}

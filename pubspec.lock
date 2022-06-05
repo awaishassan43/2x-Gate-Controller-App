@@ -793,6 +793,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.8.0"
+  touchable_opacity:
+    dependency: "direct main"
+    description:
+      name: touchable_opacity
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.2.0"
   tuple:
     dependency: "direct main"
     description:

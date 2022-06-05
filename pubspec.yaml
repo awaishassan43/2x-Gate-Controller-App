@@ -60,6 +60,7 @@ dependencies:
   date_time_picker_widget: ^1.0.1+4
   uuid: ^3.0.6
   app_links: ^3.2.0
+  touchable_opacity: ^1.2.0
 
 dev_dependencies:
   flutter_test:

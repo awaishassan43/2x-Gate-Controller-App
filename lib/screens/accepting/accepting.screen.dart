@@ -37,7 +37,11 @@ class _DeviceAcceptingScreenState extends State<DeviceAcceptingScreen> {
       /**
        * Get the sharing key and add the device based on the key provided
        */
-      final String? sharingKey = uri?.queryParameters["key"];
+      if (uri == null) {
+        throw "Failed to parse url";
+      }
+
+      final String? sharingKey = getKeyFromDynamicLink(uri);
 
       if (sharingKey == null) {
         showMessage(context, "Failed to get the sharable link");
@@ -63,56 +67,62 @@ class _DeviceAcceptingScreenState extends State<DeviceAcceptingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Adding New Device"),
-        centerTitle: true,
-      ),
-      body: Stack(
-        children: [
-          FutureBuilder(
-            future: attachDevice,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState != ConnectionState.done) {
-                return const Loader(message: "Adding new device");
-              }
+    return WillPopScope(
+      onWillPop: () async {
+        showMessage(context, "Cannot go back while device is being added");
+        return false;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text("Adding New Device"),
+          centerTitle: true,
+        ),
+        body: Stack(
+          children: [
+            FutureBuilder(
+              future: attachDevice,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState != ConnectionState.done) {
+                  return const Loader(message: "Adding new device");
+                }
 
-              return Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    snapshot.hasError || snapshot.error != null
-                        ? ErrorMessage(message: snapshot.error!.toString())
-                        : Column(
-                            children: const [
-                              Icon(
-                                Icons.done,
-                                color: Colors.green,
-                                size: 30,
-                              ),
-                              Text(
-                                "Device added successfully!",
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: textColor,
+                return Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      snapshot.hasError || snapshot.error != null
+                          ? ErrorMessage(message: snapshot.error!.toString())
+                          : Column(
+                              children: const [
+                                Icon(
+                                  Icons.done,
+                                  color: Colors.green,
+                                  size: 30,
                                 ),
-                              ),
-                            ],
-                          ),
-                    const Spacer(),
-                    CustomButton(
-                      onPressed: () {
-                        Navigator.pushNamed(context, Screen.dashboard);
-                      },
-                      text: "Go to dashboard",
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-        ],
+                                Text(
+                                  "Device added successfully!",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: textColor,
+                                  ),
+                                ),
+                              ],
+                            ),
+                      const Spacer(),
+                      CustomButton(
+                        onPressed: () {
+                          Navigator.pushNamedAndRemoveUntil(context, Screen.dashboard, (route) => false);
+                        },
+                        text: "Go to dashboard",
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

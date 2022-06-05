@@ -27,6 +27,7 @@ class AppSettings extends StatelessWidget {
       controller.profile = Profile.fromMap(mappedData);
       await controller.updateProfile();
     } catch (e) {
+      debugPrint("Failed to update user profile: ${e.toString()}");
       showMessage(context, e.toString());
     }
   }

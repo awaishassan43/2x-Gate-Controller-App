@@ -214,85 +214,95 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: widget.changeCredentialsOnly ? const Text("Change device credentials") : const Text("Add Device"),
-        centerTitle: true,
-      ),
-      body: Stack(
-        children: [
-          SizedBox.expand(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                mainAxisSize: MainAxisSize.max,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Text(
-                    "Select a wifi for your controller to use",
-                  ),
-                  if (addError != null)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 20, left: 20, right: 20),
-                      child: Text(
-                        addError!,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.red,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
+    return WillPopScope(
+      onWillPop: () async {
+        if (isLoading) {
+          showMessage(context, "Cannot go back before the process complete");
+          return false;
+        }
+
+        return true;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: widget.changeCredentialsOnly ? const Text("Change device credentials") : const Text("Add Device"),
+          centerTitle: true,
+        ),
+        body: Stack(
+          children: [
+            SizedBox.expand(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.max,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const Text(
+                      "Select a wifi for your controller to use",
                     ),
-                  const SizedBox(height: 20),
-                  ...!deviceRegistered
-                      ? [
-                          if (initialSetupDone && !credentialsSent && selectedSSID == null)
-                            StreamBuilder<List<WiFiAccessPoint>>(
-                              stream: WiFiScan.instance.onScannedResultsAvailable,
-                              builder: (context, snapshot) => Column(
-                                children: snapshot.data != null
-                                    ? snapshot.data!
-                                        .where((element) => element.ssid != deviceSSID)
-                                        .map((ap) => AccessPointComponent(ssid: ap.ssid, onPressed: onSSIDPressed))
-                                        .toList()
-                                    : [],
+                    if (addError != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 20, left: 20, right: 20),
+                        child: Text(
+                          addError!,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.red,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    const SizedBox(height: 20),
+                    ...!deviceRegistered
+                        ? [
+                            if (initialSetupDone && !credentialsSent && selectedSSID == null)
+                              StreamBuilder<List<WiFiAccessPoint>>(
+                                stream: WiFiScan.instance.onScannedResultsAvailable,
+                                builder: (context, snapshot) => Column(
+                                  children: snapshot.data != null
+                                      ? snapshot.data!
+                                          .where((element) => element.ssid != deviceSSID)
+                                          .map((ap) => AccessPointComponent(ssid: ap.ssid, onPressed: onSSIDPressed))
+                                          .toList()
+                                      : [],
+                                ),
                               ),
+                            if (addError != null)
+                              Column(
+                                children: [
+                                  IconButton(
+                                    onPressed: () => initialSetupDone ? onSSIDPressed(selectedSSID!, selectedPassword!) : prepare(context),
+                                    icon: const Icon(Icons.restart_alt),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  Text(getButtonText()),
+                                ],
+                              ),
+                          ]
+                        : [
+                            const Text(
+                              "Device registered successfully",
+                              style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
                             ),
-                          if (addError != null)
-                            Column(
+                            const SizedBox(height: 20),
+                            Row(
                               children: [
                                 IconButton(
-                                  onPressed: () => initialSetupDone ? onSSIDPressed(selectedSSID!, selectedPassword!) : prepare(context),
-                                  icon: const Icon(Icons.restart_alt),
+                                  icon: const Icon(Icons.arrow_back),
+                                  onPressed: () => Navigator.pop(context),
                                 ),
-                                const SizedBox(height: 10),
-                                Text(getButtonText()),
+                                const Text("Go back"),
                               ],
                             ),
-                        ]
-                      : [
-                          const Text(
-                            "Device registered successfully",
-                            style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(height: 20),
-                          Row(
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.arrow_back),
-                                onPressed: () => Navigator.pop(context),
-                              ),
-                              const Text("Go back"),
-                            ],
-                          ),
-                        ],
-                ],
+                          ],
+                  ],
+                ),
               ),
             ),
-          ),
-          if (isLoading) Loader(message: loaderMessage),
-        ],
+            if (isLoading) Loader(message: loaderMessage),
+          ],
+        ),
       ),
     );
   }

@@ -46,6 +46,8 @@ class Profile {
       "temperatureUnit": temperatureUnit,
       "is24Hours": is24Hours,
       "fcmToken": fcmToken,
+      "devices": devices.map((e) => e.toJSON()).toList(),
+      "access": accessesProvidedToUsers.map((e) => e.toJSON()).toList(),
     };
   }
 
@@ -96,6 +98,7 @@ class ConnectedDevice {
 
   Map<String, dynamic> toJSON() {
     return {
+      "id": id,
       "deviceID": deviceID,
       "accessProvidedBy": accessProvidedBy,
       "accessType": accessType.value,

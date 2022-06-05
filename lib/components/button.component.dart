@@ -1,7 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import '/util/themes.util.dart';
 
-class CustomButton extends StatelessWidget {
+class CustomButton extends StatefulWidget {
   final String text;
   final void Function() onPressed;
   final Color backgroundColor;
@@ -24,24 +26,45 @@ class CustomButton extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  State<CustomButton> createState() => _CustomButtonState();
+}
+
+class _CustomButtonState extends State<CustomButton> {
+  bool isPressed = false;
+
+  @override
   Widget build(BuildContext context) {
     return MaterialButton(
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(borderRadius),
+        borderRadius: BorderRadius.circular(widget.borderRadius),
       ),
-      onPressed: isDisabled ? null : onPressed,
+      onPressed: widget.isDisabled
+          ? null
+          : () {
+              widget.onPressed();
+              setState(() {
+                isPressed = true;
+              });
+
+              Future.delayed(const Duration(milliseconds: 500), () {
+                setState(() {
+                  isPressed = false;
+                });
+              });
+            },
       child: Text(
-        text,
+        widget.text,
         style: TextStyle(
-          color: isDisabled ? Colors.white60 : textColor,
+          color: widget.isDisabled ? Colors.white60 : widget.textColor,
           fontWeight: FontWeight.bold,
         ),
       ),
       disabledColor: Colors.grey.withOpacity(0.4),
-      padding: EdgeInsets.all(padding),
-      color: backgroundColor,
-      elevation: disableElevation ? 0 : 2,
-      highlightElevation: disableElevation ? 0 : 8,
+      padding: EdgeInsets.all(widget.padding),
+      splashColor: null,
+      color: isPressed ? widget.backgroundColor.withOpacity(0.5) : widget.backgroundColor,
+      elevation: widget.disableElevation ? 0 : 2,
+      highlightElevation: widget.disableElevation ? 0 : 8,
     );
   }
 }

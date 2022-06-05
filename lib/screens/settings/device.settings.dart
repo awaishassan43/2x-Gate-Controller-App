@@ -275,6 +275,7 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                           subtitleText: "Enable/Disable relay output",
                           onSwitchPressed: (value) => updateRelay(context, value, 'Relay1', 'ExtInput'),
                           switchValue: relay1.extInput,
+                          showSwitch: true,
                           onTap: () => updateRelay(context, !relay1.extInput, 'Relay1', 'ExtInput'),
                         ),
                         SectionItem(
@@ -428,6 +429,7 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                           title: "On Open",
                           onSwitchPressed: (value) => updateControllerSettings(context, 'alertOnOpen', value),
                           switchValue: deviceSettings.alertOnOpen,
+                          showSwitch: true,
                           onTap: () => updateControllerSettings(context, 'alertOnOpen', !deviceSettings.alertOnOpen),
                         ),
                         // SectionItem(
@@ -457,6 +459,7 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                           onTap: () => updateControllerSettings(context, 'nightAlert', !deviceSettings.nightAlert),
                           onSwitchPressed: (value) => updateControllerSettings(context, 'nightAlert', value),
                           switchValue: deviceSettings.nightAlert,
+                          showSwitch: true,
                         ),
                         SectionItem(
                           isDisabled: _accessType != AccessType.owner,

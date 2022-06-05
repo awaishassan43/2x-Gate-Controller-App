@@ -334,8 +334,8 @@ class _StatePayload {
   String pass;
   int state1;
   int state2;
-  int Temp;
-  int humidity;
+  double Temp;
+  double humidity;
   String Ip;
   String Mac;
   int Strength;
@@ -345,8 +345,8 @@ class _StatePayload {
         pass: json["pass"],
         state1: json["state1"],
         state2: json["state2"],
-        Temp: json["Temp"],
-        humidity: json["humidity"],
+        Temp: dynamicToDouble(json["Temp"]),
+        humidity: dynamicToDouble(json["humidity"]),
         Ip: json["Ip"],
         Mac: json["Mac"],
         Strength: json["Strength"],

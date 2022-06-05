@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
 
+import 'button.component.dart';
+
 class ErrorMessage extends StatelessWidget {
   final String? message;
-  const ErrorMessage({Key? key, this.message}) : super(key: key);
+  final void Function()? onRetry;
+  const ErrorMessage({
+    Key? key,
+    this.message,
+    this.onRetry,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -18,13 +25,18 @@ class ErrorMessage extends StatelessWidget {
             color: Colors.orange,
             size: 50,
           ),
-          const SizedBox(
-            height: 20,
-          ),
+          const SizedBox(height: 20),
           Text(
             message != null ? message! : 'Something went wrong while loading the list of tables',
             textAlign: TextAlign.center,
           ),
+          if (onRetry != null) ...[
+            const SizedBox(height: 40),
+            CustomButton(
+              onPressed: onRetry!,
+              text: "Retry",
+            ),
+          ],
         ],
       ),
     );

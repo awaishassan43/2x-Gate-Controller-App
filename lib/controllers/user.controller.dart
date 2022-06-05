@@ -285,6 +285,8 @@ class UserController extends ChangeNotifier {
        */
       final Map<String, dynamic> data = profile!.toJSON();
       data.remove('email');
+      data.remove("devices");
+      data.remove("accessesProvidedToUsers");
 
       await users.child(auth.currentUser!.uid).set(data);
     } on FirebaseException catch (e) {
@@ -350,6 +352,15 @@ class UserController extends ChangeNotifier {
   Future<String?> addDevice(String deviceID, {bool forSelf = false, AccessType accessType = AccessType.owner, String? nickName}) async {
     try {
       final String userID = getUserID();
+
+      if (forSelf) {
+        final List<ConnectedDevice> alreadyHasADeviceAdded =
+            profile!.devices.where((element) => element.deviceID == deviceID && userID == userID).toList();
+
+        if (alreadyHasADeviceAdded.isNotEmpty) {
+          throw "User already has the same device added";
+        }
+      }
 
       /**
        * Generate a unique id using uuid package

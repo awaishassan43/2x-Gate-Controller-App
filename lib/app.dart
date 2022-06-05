@@ -11,6 +11,7 @@ import 'package:iot/screens/forgotPassword/forgotPassword.screen.dart';
 import 'package:iot/screens/shared/guest.screen.dart';
 import 'package:iot/screens/scanner/scanner.screen.dart';
 import 'package:iot/screens/sharing/share.screen.dart';
+import 'package:iot/util/functions.util.dart';
 import '/components/loader.component.dart';
 import '/controllers/user.controller.dart';
 import '/enum/route.enum.dart';
@@ -61,8 +62,9 @@ class _AppState extends State<App> {
       final Uri? uri = await _appLinks.getInitialAppLink();
 
       _appLinks.uriLinkStream.listen((event) {
-        if (event.path == "/shareDevice") {
-          debugPrint("Received url - Navigating to accepting device screen");
+        final String? context = getContextFromDynamicLink(event);
+
+        if (context != null && context == "/shareDevice") {
           _navigatorKey.currentState?.pushNamedAndRemoveUntil(Screen.accepting, (_) => false);
         }
       });
@@ -74,8 +76,14 @@ class _AppState extends State<App> {
       } else if (isUserLoggedIn == false) {
         screen = Screen.login;
       } else {
-        if (uri != null && uri.path == "/shareDevice") {
-          screen = Screen.accepting;
+        if (uri != null) {
+          final String? context = getContextFromDynamicLink(uri);
+
+          if (context != null && context == "/shareDevice") {
+            screen = Screen.accepting;
+          } else {
+            screen = Screen.dashboard;
+          }
         } else {
           screen = Screen.dashboard;
         }
@@ -124,6 +132,7 @@ class _AppState extends State<App> {
               Screen.addUser: (context) => const AddUserScreen(),
               Screen.guests: (context) => const GuestsScreen(),
               Screen.family: (context) => const FamilyScreen(),
+              Screen.accepting: (context) => const DeviceAcceptingScreen(),
             },
             onGenerateRoute: (settings) {
               return MaterialPageRoute(
@@ -149,8 +158,6 @@ class _AppState extends State<App> {
                   } else if (settings.name == Screen.addSchedule) {
                     final Map args = settings.arguments as Map;
                     return AddScheduleScreen(relayID: args["relayID"], deviceID: args["deviceID"], scheduleIndex: args["scheduleIndex"]);
-                  } else if (settings.name == Screen.accepting) {
-                    return const DeviceAcceptingScreen();
                   } else if (settings.name == Screen.editSharedDevice) {
                     final String accessID = settings.arguments as String;
                     return EditSharedDevice(accessID: accessID);
