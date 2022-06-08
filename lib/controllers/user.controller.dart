@@ -108,7 +108,7 @@ class UserController extends ChangeNotifier {
   /// this method takes in the email and password and logs the user in with firebase auth the credentails
   Future<bool?> login(String email, String password) async {
     try {
-      final UserCredential userCredential = await auth.signInWithEmailAndPassword(email: email.trim(), password: password);
+      final UserCredential userCredential = await auth.signInWithEmailAndPassword(email: email.trim().toLowerCase(), password: password);
 
       if (userCredential.user == null) {
         throw "Error occured while trying to login";
@@ -137,7 +137,7 @@ class UserController extends ChangeNotifier {
        * Register the user
        */
       final UserCredential userCredential = await auth.createUserWithEmailAndPassword(
-        email: email,
+        email: email.toLowerCase(),
         password: password,
       );
 
@@ -149,7 +149,7 @@ class UserController extends ChangeNotifier {
        * Create the user profile data
        */
       final Profile tempProfile = Profile(
-        email: email,
+        email: email.toLowerCase(),
         phone: phone,
         code: callingCode,
         name: '$firstName $lastName',
@@ -382,7 +382,7 @@ class UserController extends ChangeNotifier {
        * Get user id if email is provided
        */
       if (email != null) {
-        final DataSnapshot targetUserData = await users.orderByChild('email').equalTo(email).get();
+        final DataSnapshot targetUserData = await users.orderByChild('email').equalTo(email.toLowerCase()).get();
         if (targetUserData.value == null) {
           throw "No registered account was found for the email: " + email;
         }
