@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
 import 'package:iot/components/link.component.dart';
 import 'package:iot/components/loader.component.dart';
@@ -162,8 +163,20 @@ class _SuccessScreenState extends State<SuccessScreen> {
                       CustomButton(
                         text: "Continue",
                         isDisabled: !isEmailVerified,
-                        onPressed: () {
-                          Navigator.pushNamedAndRemoveUntil(context, Screen.dashboard, (route) => false);
+                        onPressed: () async {
+                          try {
+                            final AppLinks _appLinks = AppLinks();
+                            final Uri? uri = await _appLinks.getInitialAppLink();
+
+                            if (uri != null && getContextFromDynamicLink(uri) == "/shareDevice") {
+                              Navigator.pushNamedAndRemoveUntil(context, Screen.accepting, (route) => false);
+                            } else {
+                              Navigator.pushNamedAndRemoveUntil(context, Screen.dashboard, (route) => false);
+                            }
+                          } catch (e) {
+                            debugPrint("Failed to get dynamic links: ${e.toString()}");
+                            Navigator.pushNamedAndRemoveUntil(context, Screen.dashboard, (route) => false);
+                          }
                         },
                       ),
                       const SizedBox(height: 20),

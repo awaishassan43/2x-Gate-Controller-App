@@ -1,3 +1,4 @@
+import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
 import '/components/button.component.dart';
 import '/components/input.component.dart';
@@ -161,12 +162,20 @@ class _LoginScreenState extends State<LoginScreen> {
       /// 3. null means the user was logged in but email needs verification
       final bool? success = await Provider.of<UserController>(context, listen: false).login(email.text.trim(), password.text);
 
+      showMessage(context, "Logged in successfully!");
+
       if (success == null) {
         Navigator.pushNamedAndRemoveUntil(context, Screen.success, (route) => false, arguments: true);
-      }
+      } else {
+        final AppLinks _appLinks = AppLinks();
+        final Uri? uri = await _appLinks.getInitialAppLink();
 
-      showMessage(context, "Logged in successfully!");
-      Navigator.pushNamedAndRemoveUntil(context, Screen.dashboard, (route) => false);
+        if (uri != null && getContextFromDynamicLink(uri) == "/shareDevice") {
+          Navigator.pushNamedAndRemoveUntil(context, Screen.accepting, (route) => false);
+        } else {
+          Navigator.pushNamedAndRemoveUntil(context, Screen.dashboard, (route) => false);
+        }
+      }
     } catch (e) {
       setState(() {
         isLoading = false;
