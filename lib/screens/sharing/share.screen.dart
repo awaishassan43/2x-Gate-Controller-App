@@ -1,3 +1,4 @@
+import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:iot/components/button.component.dart';
 import 'package:iot/components/input.component.dart';
@@ -30,6 +31,9 @@ class _SharingScreenState extends State<SharingScreen> {
   /// textEditingController to control the nickname field
   late final TextEditingController textEditingController;
 
+  /// textEditingController to control the email field
+  late final TextEditingController emailController;
+
   /// isLoading - boolean - controls whether to show or hide the loading indicator
   bool isLoading = false;
 
@@ -40,10 +44,17 @@ class _SharingScreenState extends State<SharingScreen> {
   /// if it is non-null, then show the QR code
   String? link;
 
+  /// isEmailShared - boolean - if true, then don't create a link, but rather add the user directly
+  bool isEmailShared = false;
+
+  /// error - nullable string - used to control the error message that appears on the screen
+  String? error;
+
   @override
   void initState() {
     super.initState();
     textEditingController = TextEditingController();
+    emailController = TextEditingController();
   }
 
   @override
@@ -54,6 +65,11 @@ class _SharingScreenState extends State<SharingScreen> {
 
   Future<void> generateLink(BuildContext ctonext) async {
     try {
+      setState(() {
+        error = null;
+        isLoading = true;
+      });
+
       /**
        * If no nickname has been provided, then show an error to the user
        */
@@ -77,10 +93,54 @@ class _SharingScreenState extends State<SharingScreen> {
 
       setState(() {
         link = _link;
+        error = null;
+        isLoading = false;
       });
 
       showMessage(context, "Link generated successfully!");
     } catch (e) {
+      setState(() {
+        error = e.toString();
+        isLoading = false;
+      });
+
+      showMessage(context, e.toString());
+    }
+  }
+
+  Future<void> addUser(BuildContext context) async {
+    try {
+      setState(() {
+        isLoading = false;
+        error = null;
+      });
+
+      /**
+       * If no nickname has been provided, then show an error to the user
+       */
+      if (textEditingController.text.isEmpty) {
+        throw "Please enter a nickname";
+      } else if (emailController.text.isEmpty) {
+        throw "Email cannot be empty!";
+      } else if (!EmailValidator.validate(emailController.text)) {
+        throw "Entered email is invalid";
+      }
+
+      /**
+       * Add a new record to the "deviceAccess" collection, with the respective access type and a nickname
+       * for easier identification for the accesses that the current user has provided to the other users
+       */
+      final UserController controller = Provider.of<UserController>(context, listen: false);
+      await controller.addDevice(widget.deviceID, email: emailController.text, accessType: type, nickName: textEditingController.text);
+
+      showMessage(context, "Device shared successfully!");
+      Navigator.pop(context);
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+        error = e.toString();
+      });
+
       showMessage(context, e.toString());
     }
   }
@@ -123,12 +183,24 @@ class _SharingScreenState extends State<SharingScreen> {
       ),
       body: Stack(
         children: [
-          SingleChildScrollView(
+          Padding(
             padding: const EdgeInsets.all(20.0),
             child: link == null
                 ? Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
+                      if (error != null)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 5, right: 20.0, left: 20, bottom: 20),
+                          child: Text(
+                            error!,
+                            style: const TextStyle(
+                              color: Colors.red,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
                       CustomInput(label: "Nickname", controller: textEditingController),
                       ListTile(
                         title: const CustomHeading(heading: "Access Type"),
@@ -153,79 +225,96 @@ class _SharingScreenState extends State<SharingScreen> {
                           },
                         ),
                       ),
-                      const SizedBox(height: 50),
+                      CustomInput(
+                        label: "Email (Optional - To directly add the user)",
+                        controller: emailController,
+                        textInputType: TextInputType.emailAddress,
+                        onUpdate: (value) {
+                          if (value == '' && isEmailShared) {
+                            setState(() {
+                              isEmailShared = false;
+                            });
+                          } else if (value != '' && !isEmailShared) {
+                            setState(() {
+                              isEmailShared = true;
+                            });
+                          }
+                        },
+                      ),
+                      const Spacer(),
                       CustomButton(
-                        text: "Create Shareable Link",
-                        onPressed: () => generateLink(context),
+                        text: !isEmailShared ? "Create Shareable Link" : "Add the user",
+                        onPressed: () => !isEmailShared ? generateLink(context) : addUser(context),
                       ),
                     ],
                   )
-                : Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(20.0),
-                          child: Column(
-                            children: [
-                              const Text(
-                                "Share via QR code",
-                                style: TextStyle(),
-                              ),
-                              const SizedBox(height: 10),
-                              if (link != null)
-                                QrImageView(
-                                  data: link!,
-                                  version: QrVersions.auto,
-                                  size: 200,
+                : SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Card(
+                          child: Padding(
+                            padding: const EdgeInsets.all(20.0),
+                            child: Column(
+                              children: [
+                                const Text(
+                                  "Share via QR code",
+                                  style: TextStyle(),
                                 ),
-                            ],
-                          ),
-                        ),
-                      ),
-
-                      /**
-                 * End of top section
-                 */
-
-                      /**
-                 * OR SEPERATOR
-                 */
-                      const SizedBox(height: 30),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Container(
-                              height: 1,
-                              color: Colors.grey.withOpacity(0.5),
+                                const SizedBox(height: 10),
+                                if (link != null)
+                                  QrImageView(
+                                    data: link!,
+                                    version: QrVersions.auto,
+                                    size: 200,
+                                  ),
+                              ],
                             ),
                           ),
-                          const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 10),
-                            child: Text("OR"),
-                          ),
-                          Expanded(
-                            child: Container(
-                              height: 1,
-                              color: Colors.grey.withOpacity(0.5),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 30),
-                      /**
-                   * END OF OR SEPERATOR
-                   */
-
-                      /**
-                   * Buttons to share
-                   */
-                      if (link != null)
-                        CustomButton(
-                          text: "Share via other methods",
-                          onPressed: () => share(context, link!),
                         ),
-                    ],
+                        /**
+                         * End of top section
+                         */
+
+                        /**
+                         * OR SEPERATOR
+                         */
+                        const SizedBox(height: 30),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Container(
+                                height: 1,
+                                color: Colors.grey.withOpacity(0.5),
+                              ),
+                            ),
+                            const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 10),
+                              child: Text("OR"),
+                            ),
+                            Expanded(
+                              child: Container(
+                                height: 1,
+                                color: Colors.grey.withOpacity(0.5),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 30),
+                        /**
+                     * END OF OR SEPERATOR
+                     */
+
+                        /**
+                     * Buttons to share
+                     */
+                        if (link != null)
+                          CustomButton(
+                            text: "Share via other methods",
+                            onPressed: () => share(context, link!),
+                          ),
+                      ],
+                    ),
                   ),
           ),
           if (isLoading) const Loader(),

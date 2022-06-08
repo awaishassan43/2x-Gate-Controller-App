@@ -65,9 +65,6 @@ class UserController extends ChangeNotifier {
       /// or has provided access to other users
       devices = FirebaseDatabase.instance.ref('deviceAccess');
 
-      /// Setting offline behavior for the database
-      FirebaseDatabase.instance.setPersistenceEnabled(true);
-
       initialized = true;
     }
   }
@@ -114,7 +111,7 @@ class UserController extends ChangeNotifier {
       final UserCredential userCredential = await auth.signInWithEmailAndPassword(email: email.trim(), password: password);
 
       if (userCredential.user == null) {
-        throw Exception("Error occured while trying to login");
+        throw "Error occured while trying to login";
       }
 
       /// FCM token is generated every time a user reinstalls the application or clears the cache
@@ -145,7 +142,7 @@ class UserController extends ChangeNotifier {
       );
 
       if (userCredential.user == null) {
-        throw Exception("Error occured while trying to register user");
+        throw "Error occured while trying to register user";
       }
 
       /**
@@ -168,7 +165,6 @@ class UserController extends ChangeNotifier {
        * saved in the realtime database
        */
       final Map<String, dynamic> profileData = tempProfile.toJSON();
-      profileData.remove('email');
 
       /**
        * Store the map to the database
@@ -229,16 +225,15 @@ class UserController extends ChangeNotifier {
        * for the rest of the app to be used
        */
       final DataSnapshot document = await documentRef.get();
+      if (!document.exists) {
+        throw ("User profile does not exist");
+      }
 
       /**
        * Get the list of all "deviceAccess" documents, so that it can be filtered based on the 
        * devices that user has access to, and the devices that user has provided access to others
        */
       final DataSnapshot devicesList = await devicesAccessRef.get();
-
-      if (!document.exists) {
-        throw Exception("User profile does not exist");
-      }
 
       /**
        * Transforming the retreived data to the profile object
@@ -249,6 +244,10 @@ class UserController extends ChangeNotifier {
       transformMapToProfile(profileData, deviceAccessData);
 
       profileListener = documentRef.onValue.listen((event) {
+        if (event.snapshot.value == null) {
+          return;
+        }
+
         profileData = event.snapshot.value;
 
         transformMapToProfile(profileData, deviceAccessData);
@@ -266,7 +265,7 @@ class UserController extends ChangeNotifier {
       throw e.message ?? "Something went wrong while trying to get user profile";
     } catch (e) {
       debugPrint("Generic Exception: Failed to attach listeners to user profile: ${e.toString()}");
-      throw "Generic Exception: Failed to get user profile data";
+      throw "Failed to get user profile data: ${e.toString()}";
     }
   }
 
@@ -284,7 +283,6 @@ class UserController extends ChangeNotifier {
        * email doesn't need to be saved to the database
        */
       final Map<String, dynamic> data = profile!.toJSON();
-      data.remove('email');
       data.remove("devices");
       data.remove("accessesProvidedToUsers");
 
@@ -323,7 +321,7 @@ class UserController extends ChangeNotifier {
 
       profile = Profile.fromMap(newData);
     } catch (e) {
-      throw "Generic Exception: Failed to transform profile data ${e.toString()}";
+      throw "Failed to transform profile data: ${e.toString()}";
     }
   }
 
@@ -349,11 +347,14 @@ class UserController extends ChangeNotifier {
   ///       is generated as well, and the userID for the device is set as null, as the device has no current user
   /// 3. accessType - an enum value, refering to the type of access that the user is providing
   /// 4. nickName - a string value to help the user identify the accesses he has provided to others
-  Future<String?> addDevice(String deviceID, {bool forSelf = false, AccessType accessType = AccessType.owner, String? nickName}) async {
+  /// 5. email - a string that can be used to identify the user if the device is to attached directly, i.e. without sharing a link
+  Future<String?> addDevice(String deviceID,
+      {bool forSelf = false, AccessType accessType = AccessType.owner, String? nickName, String? email}) async {
     try {
       final String userID = getUserID();
+      final String currentEmail = getUserEmail();
 
-      if (forSelf) {
+      if (forSelf || (email != null && email == currentEmail)) {
         final List<ConnectedDevice> alreadyHasADeviceAdded =
             profile!.devices.where((element) => element.deviceID == deviceID && userID == userID).toList();
 
@@ -368,12 +369,33 @@ class UserController extends ChangeNotifier {
       const Uuid uuid = Uuid();
       final String id = uuid.v4();
       String? key;
+      String? targetUserID;
 
       /**
        * If not creating a deviceAccess document for self, then create a sharing key as well
        */
-      if (!forSelf) {
+      if (!forSelf && email == null) {
         key = uuid.v4();
+      }
+
+      /**
+       * Get user id if email is provided
+       */
+      if (email != null) {
+        final DataSnapshot targetUserData = await users.orderByChild('email').equalTo(email).get();
+        if (targetUserData.value == null) {
+          throw "No registered account was found for the email: " + email;
+        }
+
+        final LinkedHashMap<Object?, Object?> targetUser = targetUserData.value! as LinkedHashMap;
+        targetUserID = targetUser.keys.first as String;
+
+        // Verify if the user doesn't already have the same device attached
+        for (ConnectedDevice connectedDevice in profile!.accessesProvidedToUsers) {
+          if (connectedDevice.userID == targetUserID && connectedDevice.deviceID == deviceID) {
+            throw "User already has access to the device";
+          }
+        }
       }
 
       devices.child(id).set({
@@ -381,7 +403,7 @@ class UserController extends ChangeNotifier {
         "accessType": accessType.value,
         "accessProvidedBy": forSelf ? null : userID,
         "key": key,
-        "userID": forSelf ? userID : null,
+        "userID": forSelf ? userID : targetUserID,
         "nickName": nickName,
       });
 
@@ -582,6 +604,7 @@ class UserController extends ChangeNotifier {
 
       /**
        * Check if the mappedData already has a userID assigned to it... if it means, a user is already assigned
+       * i.e. if the userid is not null, which means user is assigned to it... then check if it is the same user
        */
       if (mappedData['userID'] != null) {
         if (mappedData['userID'] == userID) {
@@ -596,6 +619,15 @@ class UserController extends ChangeNotifier {
        */
       if (mappedData['accessProvidedBy'] == userID) {
         throw "Cannot add yourself as another user for the device";
+      }
+
+      /**
+       * Checking if the user alredy has access to the device through a different access id
+       */
+      final Iterable<ConnectedDevice> devicesList =
+          profile!.accessesProvidedToUsers.where((element) => element.deviceID == mappedData['deviceID'] && element.userID == mappedData['userID']);
+      if (devicesList.isNotEmpty) {
+        throw "User already has access to the device";
       }
 
       /**

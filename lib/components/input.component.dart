@@ -15,6 +15,7 @@ class CustomInput extends StatefulWidget {
   final FocusNode? focusNode;
   final String? Function(String? value)? validator;
   final TextInputType textInputType;
+  final void Function(String)? onUpdate;
 
   const CustomInput({
     Key? key,
@@ -30,6 +31,7 @@ class CustomInput extends StatefulWidget {
     this.onDone,
     this.focusNode,
     this.nextFocusNode,
+    this.onUpdate,
     this.validator,
     this.textInputType = TextInputType.text,
   })  : assert((action == null && isPassword) || (action != null && !isPassword) || (action == null && !isPassword)),
@@ -55,6 +57,7 @@ class _CustomInputState extends State<CustomInput> {
         TextFormField(
           controller: widget.controller,
           autofocus: widget.autoFocus,
+          onChanged: widget.onUpdate,
           validator: widget.validator,
           focusNode: widget.focusNode,
           obscureText: isHidden,

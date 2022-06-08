@@ -12,6 +12,7 @@ class CustomButton extends StatefulWidget {
   final double borderRadius;
   final double padding;
   final bool isDisabled;
+  final bool withOpacityAnimation;
 
   const CustomButton({
     Key? key,
@@ -23,6 +24,7 @@ class CustomButton extends StatefulWidget {
     this.borderRadius = 5,
     this.padding = 15.0,
     this.isDisabled = false,
+    this.withOpacityAnimation = false,
   }) : super(key: key);
 
   @override
@@ -42,15 +44,18 @@ class _CustomButtonState extends State<CustomButton> {
           ? null
           : () {
               widget.onPressed();
-              setState(() {
-                isPressed = true;
-              });
 
-              Future.delayed(const Duration(milliseconds: 500), () {
+              if (widget.withOpacityAnimation) {
                 setState(() {
-                  isPressed = false;
+                  isPressed = true;
                 });
-              });
+
+                Future.delayed(const Duration(milliseconds: 500), () {
+                  setState(() {
+                    isPressed = false;
+                  });
+                });
+              }
             },
       child: Text(
         widget.text,

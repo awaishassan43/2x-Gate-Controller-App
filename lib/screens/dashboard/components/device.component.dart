@@ -99,6 +99,7 @@ class _DeviceComponentState extends State<DeviceComponent> {
                   onPressed: () {
                     updateRelayStatus(context, 1);
                   },
+                  withOpacityAnimation: true,
                   backgroundColor: deviceState.state1 == 1 ? const Color(0xFFfc4646) : const Color(0xFF00e6c3),
                   borderRadius: 7.5,
                   padding: 0,
@@ -134,6 +135,7 @@ class _DeviceComponentState extends State<DeviceComponent> {
                   backgroundColor: deviceState.state2 == 1 ? const Color(0xFFfc4646) : const Color(0xFF00e6c3),
                   borderRadius: 7.5,
                   padding: 0,
+                  withOpacityAnimation: true,
                   textColor: Colors.white,
                   isDisabled: !deviceData.online || _accessType == AccessType.guest,
                 ),
