@@ -3,8 +3,10 @@ import 'dart:collection';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:iot/controllers/device.controller.dart';
 import 'package:iot/util/functions.util.dart';
 import 'package:iot/util/themes.util.dart';
+import 'package:provider/provider.dart';
 import '../enum/access.enum.dart';
 import '../enum/route.enum.dart';
 import '../util/notification.util.dart';
@@ -544,6 +546,8 @@ class UserController extends ChangeNotifier {
                             for (String id in mapOfUsersWithDeviceAccess.keys) {
                               await devices.child(id).remove();
                             }
+
+                            await Provider.of<DeviceController>(context, listen: false).deleteDeviceData(deviceID);
                             postDelete(context);
                           } catch (e) {
                             rethrow;

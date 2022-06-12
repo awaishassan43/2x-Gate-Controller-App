@@ -24,7 +24,7 @@ class AddDeviceScreen extends StatefulWidget {
 
 class _AddDeviceScreenState extends State<AddDeviceScreen> {
   /// Process state
-  bool isLoading = true;
+  bool isLoading = false;
   String? loaderMessage = "Waiting for the controller to be connected";
   ConnectivityStatus status = ConnectivityStatus.none;
   String? initialSSID;
@@ -35,6 +35,7 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
   // true means credentials have been sent... so no need to run
   bool credentialsSent = false;
   bool internetReconnected = false;
+
   String? deviceID;
   bool deviceRegistered = false;
 
@@ -103,8 +104,14 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
     }
   }
 
-  Future<void> onSSIDPressed(String ssid, String password) async {
+  Future<void> onSSIDPressed(String? ssid, String? password) async {
     try {
+      if (ssid == null) {
+        throw "Provided SSID is null";
+      } else if (password == null) {
+        throw "Provided password is null";
+      }
+
       debugPrint("Provided SSID: " + ssid + " and password: " + password);
       // Get rid of the keyboard
       if (FocusScope.of(context).hasFocus) {
@@ -272,7 +279,7 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
                               Column(
                                 children: [
                                   IconButton(
-                                    onPressed: () => initialSetupDone ? onSSIDPressed(selectedSSID!, selectedPassword!) : prepare(context),
+                                    onPressed: () => initialSetupDone ? onSSIDPressed(selectedSSID, selectedPassword) : prepare(context),
                                     icon: const Icon(Icons.restart_alt),
                                   ),
                                   const SizedBox(height: 10),

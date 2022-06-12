@@ -245,4 +245,19 @@ class DeviceController extends ChangeNotifier {
 
     notifyListeners();
   }
+
+  deleteDeviceData(String id) async {
+    try {
+      await deviceCollection.child(id).remove();
+      await settingsCollection.child(id).remove();
+      await logsCollection.child(id).remove();
+      await commandsCollection.child(id).remove();
+    } on FirebaseException catch (e) {
+      debugPrint("Firebase Exception: Failed to delete device data: ${e.toString()}");
+      throw e.message ?? "Something went wrong while remove device data";
+    } catch (e) {
+      debugPrint("Generic Exception: Failed to delete device data: ${e.toString()}");
+      throw "Failed to delete device data: ${e.toString()}";
+    }
+  }
 }
