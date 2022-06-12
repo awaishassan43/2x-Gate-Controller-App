@@ -192,6 +192,7 @@ class _Value {
 class _RelaySettings {
   _RelaySettings({
     required this.extInput,
+    required this.reedSwitch,
     required this.name,
     required this.outTime,
     required this.autoClose,
@@ -199,6 +200,7 @@ class _RelaySettings {
   });
 
   bool extInput;
+  bool reedSwitch;
   String name;
   int outTime;
   int autoClose;
@@ -206,6 +208,7 @@ class _RelaySettings {
 
   factory _RelaySettings.fromJson(Map<String, dynamic> json) => _RelaySettings(
         extInput: json["ExtInput"],
+        reedSwitch: json['reedSwitch'],
         name: json["Name"],
         outTime: json["OutTime"],
         autoClose: json["autoClose"],
@@ -218,6 +221,7 @@ class _RelaySettings {
 
   Map<String, dynamic> toJson() => {
         "ExtInput": extInput,
+        "reedSwitch": reedSwitch,
         "Name": name,
         "OutTime": outTime,
         "autoClose": autoClose,
@@ -229,6 +233,8 @@ class Schedule {
   bool repeat;
   int hours;
   int minutes;
+  int date;
+  int month;
   Map<String, bool> days;
   bool enabled;
 
@@ -238,6 +244,8 @@ class Schedule {
     required this.minutes,
     required this.days,
     required this.enabled,
+    required this.date,
+    required this.month,
   });
 
   factory Schedule.fromJson(Map<String, dynamic> json) => Schedule(
@@ -246,6 +254,8 @@ class Schedule {
         hours: json['hours'],
         minutes: json['minutes'],
         enabled: json['enabled'],
+        date: int.parse(json['date']),
+        month: int.parse(json['month']),
       );
 
   Map<String, dynamic> toJson() => {
@@ -254,6 +264,8 @@ class Schedule {
         "hours": hours,
         "minutes": minutes,
         "enabled": enabled,
+        "date": date.toString(),
+        "month": month.toString(),
       };
 }
 
@@ -328,6 +340,8 @@ class _StatePayload {
     required this.Ip,
     required this.Mac,
     required this.Strength,
+    required this.date,
+    required this.time,
   });
 
   int exp;
@@ -339,6 +353,8 @@ class _StatePayload {
   String Ip;
   String Mac;
   int Strength;
+  String date;
+  String time;
 
   factory _StatePayload.fromJson(Map<String, dynamic> json) => _StatePayload(
         exp: json["exp"],
@@ -350,6 +366,8 @@ class _StatePayload {
         Ip: json["Ip"],
         Mac: json["Mac"],
         Strength: json["Strength"],
+        date: json['date'],
+        time: json['time'],
       );
 
   Map<String, dynamic> toJson() => {
@@ -362,6 +380,8 @@ class _StatePayload {
         "Ip": Ip,
         "Mac": Mac,
         "Strength": Strength,
+        "date": date,
+        "time": time,
       };
 }
 
@@ -394,8 +414,22 @@ Device getEmptyDeviceData(String deviceID, String ownerID) {
         nightAlert: false,
         region: "UK",
         temperatureAlert: null,
-        relay1: _RelaySettings(extInput: true, name: 'Front Gate', outTime: 10, autoClose: 20, schedules: []),
-        relay2: _RelaySettings(extInput: true, name: 'Back Gate', outTime: 10, autoClose: 20, schedules: []),
+        relay1: _RelaySettings(
+          extInput: true,
+          name: 'Front Gate',
+          outTime: 10,
+          autoClose: 20,
+          schedules: [],
+          reedSwitch: false,
+        ),
+        relay2: _RelaySettings(
+          extInput: true,
+          name: 'Back Gate',
+          outTime: 10,
+          autoClose: 20,
+          schedules: [],
+          reedSwitch: false,
+        ),
       ),
     ),
     deviceData: DeviceData(
@@ -414,6 +448,8 @@ Device getEmptyDeviceData(String deviceID, String ownerID) {
           state2: 1,
           Temp: 20,
           humidity: 20,
+          date: '',
+          time: '',
         ),
         reqId: "123412412123124",
       ),

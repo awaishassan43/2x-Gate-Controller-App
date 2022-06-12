@@ -384,6 +384,10 @@ String formatTime(bool is24Hours, int hours, int minute) {
   return '${hours.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}${is24Hours ? '' : ' $meridiem'}';
 }
 
+String leftPad(int value, {int length = 2, String padContent = '0'}) {
+  return value.toString().padLeft(length, padContent);
+}
+
 Uri decodeURI(Uri uri) {
   final String splitPath = uri.query.split('&link=')[1];
   final String decodedURL = Uri.decodeFull(splitPath);

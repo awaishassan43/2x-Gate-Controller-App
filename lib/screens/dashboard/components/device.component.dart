@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:iot/components/button.component.dart';
 import 'package:iot/components/loader.component.dart';
 import 'package:iot/controllers/device.controller.dart';
-import 'package:iot/enum/access.enum.dart';
 import '/controllers/user.controller.dart';
 import '/enum/route.enum.dart';
 import '/models/device.model.dart';
@@ -23,13 +22,6 @@ class DeviceComponent extends StatefulWidget {
 
 class _DeviceComponentState extends State<DeviceComponent> {
   bool isLoading = false;
-  late final AccessType _accessType;
-
-  @override
-  void initState() {
-    super.initState();
-    _accessType = Provider.of<UserController>(context, listen: false).getAccessType(widget.device.deviceSettings.deviceId);
-  }
 
   Future<void> updateRelayStatus(BuildContext context, int relayID) async {
     final DeviceController controller = Provider.of<DeviceController>(context, listen: false);

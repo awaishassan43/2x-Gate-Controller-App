@@ -150,8 +150,6 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
       color: Colors.black26,
     );
 
-    final DateTime today = DateTime.now();
-
     return Scaffold(
       appBar: AppBar(
         title: const Text("Device Settings"),
@@ -280,6 +278,15 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                         ),
                         SectionItem(
                           isDisabled: _accessType != AccessType.owner,
+                          title: "Door Sensor",
+                          subtitleText: "Enable if door sensor is present",
+                          onSwitchPressed: (value) => updateRelay(context, value, 'Relay1', 'reedSwitch'),
+                          switchValue: relay1.reedSwitch,
+                          showSwitch: true,
+                          onTap: () => updateRelay(context, !relay1.reedSwitch, 'Relay1', 'reedSwitch'),
+                        ),
+                        SectionItem(
+                          isDisabled: _accessType != AccessType.owner,
                           title: "Auto Close",
                           subtitleText: "Automatically close the door at a specified time",
                           trailingText: relay1.autoClose != 0 ? getTimeString(relay1.autoClose) : "Disabled",
@@ -370,6 +377,15 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                           showSwitch: true,
                           onSwitchPressed: (value) => updateRelay(context, value, 'Relay2', 'ExtInput'),
                           onTap: () => updateRelay(context, !relay2.extInput, 'Relay2', 'ExtInput'),
+                        ),
+                        SectionItem(
+                          isDisabled: _accessType != AccessType.owner,
+                          title: "Door sensor",
+                          subtitleText: "Enable if door sensor is present",
+                          onSwitchPressed: (value) => updateRelay(context, value, 'Relay2', 'reedSwitch'),
+                          switchValue: relay2.reedSwitch,
+                          showSwitch: true,
+                          onTap: () => updateRelay(context, !relay2.reedSwitch, 'Relay2', 'reedSwitch'),
                         ),
                         SectionItem(
                           isDisabled: _accessType != AccessType.owner,
@@ -479,23 +495,28 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                     Section(
                       header: "Info",
                       children: [
-                        SectionItem(
-                          isDisabled: _accessType != AccessType.owner,
-                          title: "Firmware",
-                          onTap: () {},
-                        ),
-                        SectionItem(
-                          isDisabled: _accessType != AccessType.owner,
-                          title: "Date",
-                          trailingText: "${today.day} ${today.getMonth} ${today.year}",
-                        ),
-                        SectionItem(
-                          isDisabled: _accessType != AccessType.owner,
-                          title: "Time",
-                          trailingText: Provider.of<UserController>(context, listen: false).profile!.is24Hours
-                              ? DateFormat("HH:mm").format(today)
-                              : DateFormat("hh:mm a").format(today),
-                        ),
+                        // SectionItem(
+                        //   isDisabled: _accessType != AccessType.owner,
+                        //   title: "Firmware",
+                        // ),
+                        Selector<DeviceController, String>(
+                            selector: (context, controller) => controller.devices[widget.deviceID]!.deviceData.state.payload.date,
+                            builder: (context, date, _) {
+                              return SectionItem(
+                                isDisabled: _accessType != AccessType.owner,
+                                title: "Date",
+                                trailingText: date,
+                              );
+                            }),
+                        Selector<DeviceController, String>(
+                            selector: (context, controller) => controller.devices[widget.deviceID]!.deviceData.state.payload.time,
+                            builder: (context, time, _) {
+                              return SectionItem(
+                                isDisabled: _accessType != AccessType.owner,
+                                title: "Time",
+                                trailingText: time,
+                              );
+                            }),
                         Selector<DeviceController, DeviceData>(
                           selector: (context, controller) => controller.devices[widget.deviceID]!.deviceData,
                           builder: (context, data, _) {
