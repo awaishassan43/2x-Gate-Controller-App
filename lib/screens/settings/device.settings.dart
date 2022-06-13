@@ -490,10 +490,17 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
 
                               final TimeOfDay? time = await showTimePicker(
                                 context: context,
+                                confirmText: "Set Night Alert",
+                                cancelText: "Disable Night Alert",
                                 initialTime: TimeOfDay(hour: splitTime[0], minute: splitTime[1]),
                               );
 
                               if (time == null) {
+                                await updateControllerSettings(context, 'nightAlert', null);
+                                setState(() {
+                                  isLoading = false;
+                                });
+
                                 return;
                               }
 
