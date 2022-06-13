@@ -57,7 +57,7 @@ Map<String, dynamic> objectToMap(Object? value) {
 }
 
 String getDeviceURL(String ssid, String password) {
-  return 'http://$deviceIP/ssid?ssid=$ssid&password=$password';
+  return 'http://$deviceIP/ssid?ssid=$ssid&password=$password&offset=${DateTime.now().timeZoneOffset}';
 }
 
 Uri getCloudURL(String id) {

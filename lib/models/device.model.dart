@@ -162,7 +162,7 @@ class _Value {
 
   bool alertOnClose;
   bool alertOnOpen;
-  bool nightAlert;
+  String? nightAlert;
   String region;
   double? temperatureAlert;
   _RelaySettings relay1;
@@ -411,7 +411,7 @@ Device getEmptyDeviceData(String deviceID, String ownerID) {
       value: _Value(
         alertOnClose: false,
         alertOnOpen: false,
-        nightAlert: false,
+        nightAlert: null,
         region: "UK",
         temperatureAlert: null,
         relay1: _RelaySettings(

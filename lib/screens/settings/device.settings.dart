@@ -1,6 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:iot/enum/access.enum.dart';
 import 'package:iot/screens/settings/subscreens/editor.screen.dart';
 import 'package:iot/screens/settings/subscreens/selector.screen.dart';
@@ -14,7 +13,6 @@ import '/enum/route.enum.dart';
 import '/models/device.model.dart';
 import '/util/functions.util.dart';
 import 'package:provider/provider.dart';
-import '/util/extensions.util.dart';
 import 'components/item.component.dart';
 import 'components/section.component.dart';
 
@@ -471,11 +469,43 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                         SectionItem(
                           isDisabled: _accessType != AccessType.owner,
                           title: "Night Alert",
-                          subtitleText: "Alert if door is left open",
-                          onTap: () => updateControllerSettings(context, 'nightAlert', !deviceSettings.nightAlert),
-                          onSwitchPressed: (value) => updateControllerSettings(context, 'nightAlert', value),
-                          switchValue: deviceSettings.nightAlert,
-                          showSwitch: true,
+                          subtitleText: "Alert if door is left open after",
+                          trailingText: deviceSettings.nightAlert == null
+                              ? "Disabled"
+                              : formatTime(
+                                  Provider.of<UserController>(context, listen: false).profile!.is24Hours,
+                                  int.parse(deviceSettings.nightAlert!.split(':')[0]),
+                                  int.parse(
+                                    deviceSettings.nightAlert!.split(':')[1],
+                                  ),
+                                ),
+                          onTap: () async {
+                            setState(() {
+                              isLoading = true;
+                            });
+
+                            try {
+                              final String nightAlertValue = deviceSettings.nightAlert == null ? "20:00" : deviceSettings.nightAlert!;
+                              final List<int> splitTime = nightAlertValue.split(':').map((value) => int.parse(value)).toList();
+
+                              final TimeOfDay? time = await showTimePicker(
+                                context: context,
+                                initialTime: TimeOfDay(hour: splitTime[0], minute: splitTime[1]),
+                              );
+
+                              if (time == null) {
+                                return;
+                              }
+
+                              await updateControllerSettings(context, 'nightAlert', '${time.hour}:${time.minute}');
+                            } catch (e) {
+                              showMessage(context, "Failed to set night alert: $e");
+                            }
+
+                            setState(() {
+                              isLoading = false;
+                            });
+                          },
                         ),
                         SectionItem(
                           isDisabled: _accessType != AccessType.owner,
