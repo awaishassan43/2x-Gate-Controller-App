@@ -233,8 +233,6 @@ class Schedule {
   bool repeat;
   int hours;
   int minutes;
-  int date;
-  int month;
   Map<String, bool> days;
   bool enabled;
 
@@ -244,8 +242,6 @@ class Schedule {
     required this.minutes,
     required this.days,
     required this.enabled,
-    required this.date,
-    required this.month,
   });
 
   factory Schedule.fromJson(Map<String, dynamic> json) => Schedule(
@@ -254,8 +250,6 @@ class Schedule {
         hours: json['hours'],
         minutes: json['minutes'],
         enabled: json['enabled'],
-        date: int.parse(json['date']),
-        month: int.parse(json['month']),
       );
 
   Map<String, dynamic> toJson() => {
@@ -264,8 +258,6 @@ class Schedule {
         "hours": hours,
         "minutes": minutes,
         "enabled": enabled,
-        "date": date.toString(),
-        "month": month.toString(),
       };
 }
 

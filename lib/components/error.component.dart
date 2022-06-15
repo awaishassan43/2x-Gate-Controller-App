@@ -11,6 +11,18 @@ class ErrorMessage extends StatelessWidget {
     this.onRetry,
   }) : super(key: key);
 
+  String getMessageText() {
+    if (message != null) {
+      if (message == "java.lang.Exception: Client is offline") {
+        return "Device is offline. Please check your internet connection and restart the app";
+      } else {
+        return message!;
+      }
+    } else {
+      return "Something went wrong";
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -27,7 +39,7 @@ class ErrorMessage extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           Text(
-            message != null ? message! : 'Something went wrong while loading the list of tables',
+            getMessageText(),
             textAlign: TextAlign.center,
           ),
           if (onRetry != null) ...[

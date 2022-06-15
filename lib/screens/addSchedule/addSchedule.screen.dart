@@ -32,8 +32,6 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
   late Map<String, bool> days;
   late int hours;
   late int minutes;
-  late int date;
-  late int month;
 
   @override
   void initState() {
@@ -54,8 +52,6 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
     days = schedule?.days != null ? schedule!.days : createDayMap();
     hours = schedule?.hours != null ? schedule!.hours : DateTime.now().hour;
     minutes = schedule?.minutes != null ? schedule!.minutes : DateTime.now().minute;
-    date = schedule?.date != null ? schedule!.date : DateTime.now().day;
-    month = schedule?.month != null ? schedule!.month : DateTime.now().month;
   }
 
   void onDayClicked(String day, bool isSelected) {
@@ -84,7 +80,7 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
        * Creating the mapped data .... using mappedData because it simplifies the relayID usage... because in case of class manipulation,
        * using the relayID is a bit difficult...
        */
-      final Schedule newSchedule = Schedule(enabled: isEnabled, repeat: repeat, days: days, hours: hours, minutes: minutes, date: date, month: month);
+      final Schedule newSchedule = Schedule(enabled: isEnabled, repeat: repeat, days: days, hours: hours, minutes: minutes);
       final Map<String, dynamic> mappedSchedule = newSchedule.toJson();
 
       /**
@@ -113,7 +109,6 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
   @override
   Widget build(BuildContext context) {
     final bool is24Hours = Provider.of<UserController>(context, listen: false).profile!.is24Hours;
-    final DateTime currentDate = DateTime.now();
 
     return Scaffold(
       appBar: AppBar(
@@ -171,36 +166,6 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
                         },
                         child: Text(
                           formatTime(is24Hours, hours, minutes),
-                          style: const TextStyle(
-                            color: textColor,
-                            fontSize: 20,
-                          ),
-                        ),
-                      ),
-                    ),
-                    ListTile(
-                      title: const CustomHeading(heading: "Begin scheduling from"),
-                      trailing: MaterialButton(
-                        color: backgroundColor,
-                        onPressed: () async {
-                          final DateTime? selectedDate = await showDatePicker(
-                            context: context,
-                            initialDate: DateTime.now(),
-                            firstDate: DateTime.now(),
-                            lastDate: currentDate.add(const Duration(days: 30)),
-                          );
-
-                          if (selectedDate == null) {
-                            return;
-                          }
-
-                          setState(() {
-                            date = selectedDate.day;
-                            month = selectedDate.month;
-                          });
-                        },
-                        child: Text(
-                          '${date.toString().padLeft(2, '0')}/${month.toString().padLeft(2, '0')}',
                           style: const TextStyle(
                             color: textColor,
                             fontSize: 20,

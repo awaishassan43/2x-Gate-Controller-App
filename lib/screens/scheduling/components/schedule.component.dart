@@ -59,7 +59,7 @@ class ScheduleComponent extends StatelessWidget {
                   Row(
                     children: [
                       Text(
-                        'Scheduled for: ${formatTime(is24Hours, schedule.hours, schedule.minutes)}',
+                        formatTime(is24Hours, schedule.hours, schedule.minutes),
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
@@ -79,33 +79,11 @@ class ScheduleComponent extends StatelessWidget {
                       ]
                     ],
                   ),
-                  const SizedBox(height: 3.5),
-                  RichText(
-                    text: TextSpan(
-                      style: const TextStyle(
-                        color: textColor,
-                      ),
-                      children: [
-                        const TextSpan(
-                          text: "Starting from: ",
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        TextSpan(
-                          text: '${leftPad(schedule.date)}/${leftPad(schedule.month)}',
-                          style: const TextStyle(
-                            fontSize: 13,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
                   Text(
                     schedule.repeat ? getDays() : "Once",
                     style: const TextStyle(
                       color: textColor,
+                      fontSize: 13,
                     ),
                   ),
                 ],

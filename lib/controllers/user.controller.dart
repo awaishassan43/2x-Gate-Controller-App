@@ -66,6 +66,7 @@ class UserController extends ChangeNotifier {
       /// this reference is used to retreive the list of the devices that the user has access to
       /// or has provided access to other users
       devices = FirebaseDatabase.instance.ref('deviceAccess');
+      FirebaseDatabase.instance.setPersistenceEnabled(true);
 
       initialized = true;
     }
