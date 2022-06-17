@@ -136,118 +136,104 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            SwitchListTile(
-              value: isEnabled,
-              onChanged: (value) {
-                setState(() {
-                  isEnabled = value;
-                });
-              },
-              title: const CustomHeading(heading: "Switch"),
+            Card(
+              child: SwitchListTile(
+                value: isEnabled,
+                onChanged: (value) {
+                  setState(() {
+                    isEnabled = value;
+                  });
+                },
+                title: const CustomHeading(heading: "Switch"),
+              ),
             ),
-            /**
-             * Seperator
-             */
-            Container(
-              margin: const EdgeInsets.all(20),
-              height: 1.5,
-              color: Colors.grey.withOpacity(0.4),
-            ),
-            /**
-             * End of seperator
-             */
+            Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(5.0),
+              ),
+              child: ListTile(
+                onTap: () async {
+                  final TimeOfDay? selectedTime = await showTimePicker(
+                    context: context,
+                    initialTime: TimeOfDay(hour: hours, minute: minutes),
+                  );
 
-            Stack(
-              children: [
-                Column(
-                  children: [
-                    ListTile(
-                      title: const CustomHeading(heading: "Schedule Time"),
-                      trailing: MaterialButton(
-                        color: backgroundColor,
-                        onPressed: () async {
-                          final TimeOfDay? selectedTime = await showTimePicker(
-                            context: context,
-                            initialTime: TimeOfDay(hour: hours, minute: minutes),
-                          );
+                  if (selectedTime == null) {
+                    return;
+                  }
 
-                          if (selectedTime == null) {
-                            return;
-                          }
-
-                          setState(() {
-                            hours = selectedTime.hour;
-                            minutes = selectedTime.minute;
-                          });
-                        },
-                        child: Text(
-                          formatTime(is24Hours, hours, minutes),
-                          style: const TextStyle(
-                            color: textColor,
-                            fontSize: 20,
-                          ),
-                        ),
-                      ),
-                    ),
-                    ListTile(
-                      title: const CustomHeading(heading: "Action"),
-                      trailing: DropdownButton<String>(
-                        value: actionToPerform,
-                        items: commands.map((e) => DropdownMenuItem(child: Text(e), value: e)).toList(),
-                        onChanged: (item) {
-                          if (item == null) {
-                            return;
-                          }
-
-                          setState(() {
-                            actionToPerform = item;
-                          });
-                        },
-                      ),
-                    ),
-                    SwitchListTile(
-                      value: repeat,
-                      enableFeedback: isEnabled,
-                      onChanged: (value) {
-                        setState(() {
-                          repeat = value;
-                        });
-                      },
-                      title: const CustomHeading(heading: "Repeat"),
-                    ),
-                    AnimatedCrossFade(
-                      firstChild: Container(),
-                      secondChild: Card(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10.0),
-                        ),
-                        elevation: 5,
-                        child: Column(
-                          children: days.entries
-                              .map((entry) => DaySelector(
-                                    day: entry.key,
-                                    isSelected: entry.value,
-                                    onSelected: onDayClicked,
-                                  ))
-                              .toList(),
-                        ),
-                      ),
-                      crossFadeState: repeat ? CrossFadeState.showSecond : CrossFadeState.showFirst,
-                      duration: const Duration(milliseconds: 250),
-                    ),
-                  ],
-                ),
-                if (!isEnabled)
-                  Positioned(
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    child: Container(
-                      color: Colors.grey.withOpacity(0.2),
-                    ),
+                  setState(() {
+                    hours = selectedTime.hour;
+                    minutes = selectedTime.minute;
+                  });
+                },
+                title: const CustomHeading(heading: "Schedule Time"),
+                trailing: Text(
+                  formatTime(is24Hours, hours, minutes),
+                  style: const TextStyle(
+                    color: textColor,
+                    fontSize: 20,
                   ),
-              ],
+                ),
+              ),
+            ),
+            Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(5.0),
+              ),
+              child: ListTile(
+                title: const CustomHeading(heading: "Action"),
+                trailing: DropdownButton<String>(
+                  borderRadius: BorderRadius.circular(5),
+                  underline: Container(),
+                  value: actionToPerform,
+                  items: commands.map((e) => DropdownMenuItem(child: Text(e), value: e)).toList(),
+                  onChanged: (item) {
+                    if (item == null) {
+                      return;
+                    }
+
+                    setState(() {
+                      actionToPerform = item;
+                    });
+                  },
+                ),
+              ),
+            ),
+            Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(5.0),
+              ),
+              child: SwitchListTile(
+                value: repeat,
+                enableFeedback: isEnabled,
+                onChanged: (value) {
+                  setState(() {
+                    repeat = value;
+                  });
+                },
+                title: const CustomHeading(heading: "Repeat"),
+              ),
+            ),
+            AnimatedCrossFade(
+              firstChild: Container(),
+              secondChild: Card(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5.0),
+                ),
+                elevation: 5,
+                child: Column(
+                  children: days.entries
+                      .map((entry) => DaySelector(
+                            day: entry.key,
+                            isSelected: entry.value,
+                            onSelected: onDayClicked,
+                          ))
+                      .toList(),
+                ),
+              ),
+              crossFadeState: repeat ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+              duration: const Duration(milliseconds: 250),
             ),
             const SizedBox(height: 20),
             CustomButton(

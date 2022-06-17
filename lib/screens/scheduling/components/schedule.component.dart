@@ -27,29 +27,17 @@ class ScheduleComponent extends StatelessWidget {
     final bool is24Hours = Provider.of<UserController>(context, listen: false).profile!.is24Hours;
 
     return Card(
-      margin: const EdgeInsets.all(0),
+      margin: const EdgeInsets.only(bottom: 7.5),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(0),
+        borderRadius: BorderRadius.circular(5),
       ),
+      elevation: 2.5,
       child: MaterialButton(
         padding: const EdgeInsets.all(10),
         onPressed: onClick,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Container(
-              height: 50,
-              width: 50,
-              decoration: BoxDecoration(
-                color: Colors.grey.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(50),
-              ),
-              child: const Center(
-                child: Icon(
-                  Icons.timer,
-                ),
-              ),
-            ),
             const SizedBox(width: 15),
             Expanded(
               child: Column(
@@ -62,7 +50,7 @@ class ScheduleComponent extends StatelessWidget {
                         formatTime(is24Hours, schedule.hours, schedule.minutes),
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                          fontSize: 17.5,
                           color: textColor,
                         ),
                       ),
@@ -79,11 +67,20 @@ class ScheduleComponent extends StatelessWidget {
                       ]
                     ],
                   ),
+                  const SizedBox(height: 3.5),
                   Text(
                     schedule.repeat ? getDays() : "Once",
                     style: const TextStyle(
                       color: textColor,
                       fontSize: 13,
+                    ),
+                  ),
+                  const SizedBox(height: 1.5),
+                  Text(
+                    "Switch: ${schedule.actionToPerform}",
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: textColor,
                     ),
                   ),
                 ],
