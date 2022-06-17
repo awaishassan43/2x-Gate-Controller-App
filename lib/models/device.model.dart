@@ -230,6 +230,7 @@ class _RelaySettings {
 }
 
 class Schedule {
+  int index;
   bool repeat;
   int hours;
   int minutes;
@@ -238,6 +239,7 @@ class Schedule {
   String actionToPerform;
 
   Schedule({
+    required this.index,
     required this.repeat,
     required this.hours,
     required this.minutes,
@@ -247,6 +249,7 @@ class Schedule {
   });
 
   factory Schedule.fromJson(Map<String, dynamic> json) => Schedule(
+        index: json['index'],
         repeat: json['repeat'],
         days: (json['days']).cast<String, bool>(),
         hours: json['hours'],
@@ -256,6 +259,7 @@ class Schedule {
       );
 
   Map<String, dynamic> toJson() => {
+        "index": index,
         "repeat": repeat,
         "days": days,
         "hours": hours,

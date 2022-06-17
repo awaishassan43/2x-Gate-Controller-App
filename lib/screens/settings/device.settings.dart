@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:iot/enum/access.enum.dart';
 import 'package:iot/screens/settings/subscreens/editor.screen.dart';
@@ -129,6 +130,14 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
       controller.devices[widget.deviceID]!.updateWithJSON(deviceSettings: deviceSettings);
 
       await controller.updateDevice(widget.deviceID, "deviceSettings");
+
+      /**
+       * the lastSentNightAlertTime basically runs a check at the cloud function side
+       * checking when was the last notification sent... if it is within 24 hours range, then don't resend it
+       * In case if we're changing the value of night alert, then delete the value of previouslySentNightAlert
+       * because we want to reset the value every time the night alert value changes
+       */
+      await FirebaseDatabase.instance.ref('deviceSettings/${widget.deviceID}/lastSentNightAlertTime').remove();
     } on FirebaseException catch (e) {
       showMessage(context, e.message ?? "Something went wrong while trying to update settings");
     } catch (e) {

@@ -138,11 +138,12 @@ module.exports = functions.pubsub.topic('device-events').onPublish(async (messag
     const deviceTime = deviceDate.getTime();
 
     // Night alert needs to run only once after 24 hours... at the user selected time
-    const lastSentNightAlertNotification = deviceSettings.lastSentNightAlertNotification;
-    const lastSentTimeInHours = new Date(lastSentNightAlertNotification).getHours();
+    const lastSent = deviceSettings.lastSentNightAlertTime;
+    let lastSentTimeInHours;
 
-    const currentDate = new Date();
-    const currentTime = currentDate.getHours();
+    if (lastSent) {
+      lastSentTimeInHours = new Date(lastSent).getHours();
+    }
 
     console.log("Device state: ", {
       initialStateForRelay1,
@@ -157,7 +158,7 @@ module.exports = functions.pubsub.topic('device-events').onPublish(async (messag
     const hasStateChangedForRelay1 = initialStateForRelay1 !== newStateForRelay1;
     const hasStateChangedForRelay2 = initialStateForRelay2 !== newStateForRelay2;
     const hasTemperatureExceededAlertValue = temperatureAlert !== null && currentTemperature > temperatureAlert;
-    const isDoorOpenAtNight = isNightAlertEnabled && (newStateForRelay1 || newStateForRelay2) && currentTime > 18;
+    const isDoorOpenAtNight = nightAlertTime && (newStateForRelay1 || newStateForRelay2) && nightAlertTime > deviceTime && ((lastSentTimeInHours !== undefined && lastSentTimeInHours !== null && lastSentTimeInHours > 24) || !lastSentTimeInHours);
 
     console.log("Has state changed: ", {
       hasStateChangedForRelay1,
@@ -210,6 +211,8 @@ module.exports = functions.pubsub.topic('device-events').onPublish(async (messag
     const tokensList = usersDataList.map((user) => user.fcmToken);
     console.log("Will send notifications to following tokens: ", tokensList);
 
+    const currentDate = new Date();
+
     /**
      * Check for each case
      */
@@ -235,7 +238,7 @@ module.exports = functions.pubsub.topic('device-events').onPublish(async (messag
       });
     }
 
-    if (nightAlertTime && (newStateForRelay1 || newStateForRelay2) && (nightAlertTime > deviceTime) && lastSentTimeInHours > 20) {
+    if (isDoorOpenAtNight) {
       console.log("Sending fcm for night alert");
       admin.messaging().sendMulticast({
         tokens: tokensList,
@@ -243,7 +246,7 @@ module.exports = functions.pubsub.topic('device-events').onPublish(async (messag
       });
     }
 
-    if (temperatureAlert !== null && currentTemperature > temperatureAlert) {
+    if (hasTemperatureExceededAlertValue) {
       console.log("Sending fcm for temperature alert");
 
       /**

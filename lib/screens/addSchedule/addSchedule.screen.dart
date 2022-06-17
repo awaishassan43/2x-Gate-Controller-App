@@ -14,11 +14,13 @@ class AddScheduleScreen extends StatefulWidget {
   final String relayID;
   final String deviceID;
   final int? scheduleIndex;
+  final int length;
 
   const AddScheduleScreen({
     Key? key,
     required this.relayID,
     required this.deviceID,
+    required this.length,
     this.scheduleIndex,
   }) : super(key: key);
 
@@ -85,8 +87,16 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
        * Creating the mapped data .... using mappedData because it simplifies the relayID usage... because in case of class manipulation,
        * using the relayID is a bit difficult...
        */
-      final Schedule newSchedule =
-          Schedule(enabled: isEnabled, repeat: repeat, days: days, hours: hours, minutes: minutes, actionToPerform: actionToPerform);
+      final Schedule newSchedule = Schedule(
+        index: widget.scheduleIndex != null ? widget.scheduleIndex! : widget.length,
+        enabled: isEnabled,
+        repeat: repeat,
+        days: days,
+        hours: hours,
+        minutes: minutes,
+        actionToPerform: actionToPerform,
+      );
+
       final Map<String, dynamic> mappedSchedule = newSchedule.toJson();
 
       /**

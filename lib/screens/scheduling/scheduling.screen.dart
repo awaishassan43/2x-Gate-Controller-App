@@ -81,58 +81,58 @@ class _SchedulingScreenState extends State<SchedulingScreen> {
         padding: const EdgeInsets.all(20.0),
         child: Stack(
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                /**
-                 * TOP Section
-                 */
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Selector<DeviceController, List<Schedule>?>(
-                        selector: (context, controller) => widget.relayID == "Relay1"
-                            ? controller.devices[widget.deviceID]!.deviceSettings.value.relay1.schedules
-                            : controller.devices[widget.deviceID]!.deviceSettings.value.relay2.schedules,
-                        builder: (context, schedules, _) {
-                          return Column(
-                            children: (schedules ?? [])
-                                .asMap()
-                                .entries
-                                .map((entry) => ScheduleComponent(
-                                      schedule: entry.value,
-                                      onClick: () {
-                                        Navigator.pushNamed(context, Screen.addSchedule, arguments: {
-                                          "scheduleIndex": entry.key,
-                                          "relayID": widget.relayID,
-                                          "deviceID": widget.deviceID,
-                                        });
-                                      },
-                                      onDelete: () => deleteSchedule(entry.key),
-                                    ))
-                                .toList(),
-                          );
-                        }),
-                  ),
-                ),
-                /**
-                 * END of TOP section
-                 */
+            Selector<DeviceController, List<Schedule>?>(
+              selector: (context, controller) => widget.relayID == "Relay1"
+                  ? controller.devices[widget.deviceID]!.deviceSettings.value.relay1.schedules
+                  : controller.devices[widget.deviceID]!.deviceSettings.value.relay2.schedules,
+              builder: (context, schedules, _) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: Column(
+                          children: (schedules ?? [])
+                              .asMap()
+                              .entries
+                              .map((entry) => ScheduleComponent(
+                                    schedule: entry.value,
+                                    onClick: () {
+                                      Navigator.pushNamed(context, Screen.addSchedule, arguments: {
+                                        "scheduleIndex": entry.key,
+                                        "relayID": widget.relayID,
+                                        "schedulesLength": (schedules ?? []).length,
+                                        "deviceID": widget.deviceID,
+                                      });
+                                    },
+                                    onDelete: () => deleteSchedule(entry.key),
+                                  ))
+                              .toList(),
+                        ),
+                      ),
+                    ),
+                    /**
+                     * END of TOP section
+                     */
 
-                /**
-                 * Bottom button
-                 */
-                CustomButton(
-                  text: "Add New Schedule",
-                  onPressed: () => Navigator.pushNamed(
-                    context,
-                    Screen.addSchedule,
-                    arguments: {
-                      "relayID": widget.relayID,
-                      "deviceID": widget.deviceID,
-                    },
-                  ),
-                ),
-              ],
+                    /**
+                     * Bottom button
+                     */
+                    CustomButton(
+                      text: "Add New Schedule",
+                      onPressed: () => Navigator.pushNamed(
+                        context,
+                        Screen.addSchedule,
+                        arguments: {
+                          "relayID": widget.relayID,
+                          "deviceID": widget.deviceID,
+                          "schedulesLength": (schedules ?? []).length,
+                        },
+                      ),
+                    ),
+                  ],
+                );
+              },
             ),
             if (isLoading) const Loader(),
           ],
