@@ -32,6 +32,10 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
   late Map<String, bool> days;
   late int hours;
   late int minutes;
+  late String actionToPerform;
+
+  /// List of avaiable commands and the selected command
+  final List<String> commands = ["OPEN", "CLOSE"];
 
   @override
   void initState() {
@@ -52,6 +56,7 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
     days = schedule?.days != null ? schedule!.days : createDayMap();
     hours = schedule?.hours != null ? schedule!.hours : DateTime.now().hour;
     minutes = schedule?.minutes != null ? schedule!.minutes : DateTime.now().minute;
+    actionToPerform = schedule?.actionToPerform != null ? schedule!.actionToPerform : commands[0];
   }
 
   void onDayClicked(String day, bool isSelected) {
@@ -80,7 +85,8 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
        * Creating the mapped data .... using mappedData because it simplifies the relayID usage... because in case of class manipulation,
        * using the relayID is a bit difficult...
        */
-      final Schedule newSchedule = Schedule(enabled: isEnabled, repeat: repeat, days: days, hours: hours, minutes: minutes);
+      final Schedule newSchedule =
+          Schedule(enabled: isEnabled, repeat: repeat, days: days, hours: hours, minutes: minutes, actionToPerform: actionToPerform);
       final Map<String, dynamic> mappedSchedule = newSchedule.toJson();
 
       /**
@@ -171,6 +177,22 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
                             fontSize: 20,
                           ),
                         ),
+                      ),
+                    ),
+                    ListTile(
+                      title: const CustomHeading(heading: "Action"),
+                      trailing: DropdownButton<String>(
+                        value: actionToPerform,
+                        items: commands.map((e) => DropdownMenuItem(child: Text(e), value: e)).toList(),
+                        onChanged: (item) {
+                          if (item == null) {
+                            return;
+                          }
+
+                          setState(() {
+                            actionToPerform = item;
+                          });
+                        },
                       ),
                     ),
                     SwitchListTile(

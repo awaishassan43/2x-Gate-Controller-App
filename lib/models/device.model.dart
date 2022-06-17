@@ -235,6 +235,7 @@ class Schedule {
   int minutes;
   Map<String, bool> days;
   bool enabled;
+  String actionToPerform;
 
   Schedule({
     required this.repeat,
@@ -242,6 +243,7 @@ class Schedule {
     required this.minutes,
     required this.days,
     required this.enabled,
+    required this.actionToPerform,
   });
 
   factory Schedule.fromJson(Map<String, dynamic> json) => Schedule(
@@ -250,6 +252,7 @@ class Schedule {
         hours: json['hours'],
         minutes: json['minutes'],
         enabled: json['enabled'],
+        actionToPerform: json['actionToPerform'],
       );
 
   Map<String, dynamic> toJson() => {
@@ -258,6 +261,7 @@ class Schedule {
         "hours": hours,
         "minutes": minutes,
         "enabled": enabled,
+        "actionToPerform": actionToPerform,
       };
 }
 

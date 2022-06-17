@@ -137,7 +137,9 @@ module.exports = functions.pubsub.topic('device-events').onPublish(async (messag
 
     const deviceTime = deviceDate.getTime();
 
-    // Night alert needs to run only once after 
+    // Night alert needs to run only once after 24 hours... at the user selected time
+    const lastSentNightAlertNotification = deviceSettings.lastSentNightAlertNotification;
+    const lastSentTimeInHours = new Date(lastSentNightAlertNotification).getHours();
 
     const currentDate = new Date();
     const currentTime = currentDate.getHours();
@@ -219,6 +221,8 @@ module.exports = functions.pubsub.topic('device-events').onPublish(async (messag
           body: `${deviceSettings.value.Relay1.Name} was ${newStateForRelay1 === 1 ? 'opened' : 'closed'} on ${currentDate.toString()}`,
         }
       });
+
+      await deviceSettingsRef.child('lastSent')
     }
 
     if (hasStateChangedForRelay2) {
@@ -228,6 +232,14 @@ module.exports = functions.pubsub.topic('device-events').onPublish(async (messag
         notification: {
           body: `${deviceSettings.value.Relay2.Name} was ${newStateForRelay2 === 1 ? 'opened' : 'closed'} on ${currentDate.toString()}`,
         }
+      });
+    }
+
+    if (nightAlertTime && (newStateForRelay1 || newStateForRelay2) && (nightAlertTime > deviceTime) && lastSentTimeInHours > 20) {
+      console.log("Sending fcm for night alert");
+      admin.messaging().sendMulticast({
+        tokens: tokensList,
+        notification: `Night Alert: Gate ${newStateForRelay1 ? deviceSettings.value.Relay1.Name : newStateForRelay2 ? deviceSettings.value.Relay2.Name : "One of the gates"} is still open`,
       });
     }
 
