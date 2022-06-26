@@ -137,7 +137,9 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
        * In case if we're changing the value of night alert, then delete the value of previouslySentNightAlert
        * because we want to reset the value every time the night alert value changes
        */
-      await FirebaseDatabase.instance.ref('deviceSettings/${widget.deviceID}/lastSentNightAlertTime').remove();
+      if (key == "nightAlert") {
+        await FirebaseDatabase.instance.ref('deviceSettings/${widget.deviceID}/lastSentNightAlertTime').remove();
+      }
     } on FirebaseException catch (e) {
       showMessage(context, e.message ?? "Something went wrong while trying to update settings");
     } catch (e) {
