@@ -56,8 +56,8 @@ Map<String, dynamic> objectToMap(Object? value) {
   return mappedValue;
 }
 
-String getDeviceURL(String ssid, String password) {
-  return 'http://$deviceIP/ssid?ssid=$ssid&password=$password&offset=${DateTime.now().timeZoneOffset}';
+String getDeviceURL(String ssid, String password, String timezone) {
+  return 'http://$deviceIP/ssid?ssid=$ssid&password=$password&offset=$timezone';
 }
 
 Uri getCloudURL(String id) {
@@ -238,9 +238,9 @@ Future<String?> getConnectedWiFi() async {
   return connectedSSID;
 }
 
-Future<String> sendCredentialsToDevice(String ssid, String password) async {
+Future<String> sendCredentialsToDevice(String ssid, String password, timezone) async {
   try {
-    final Uri url = Uri.parse(getDeviceURL(ssid, password));
+    final Uri url = Uri.parse(getDeviceURL(ssid, password, timezone));
     final http.Response response = await http.post(url).timeout(
       const Duration(milliseconds: 15000),
       onTimeout: () {

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:iot/util/constants.util.dart';
 import 'package:provider/provider.dart';
 import 'package:wifi_scan/wifi_scan.dart';
+import 'package:dropdown_search/dropdown_search.dart';
 
 import '../../components/loader.component.dart';
 import '../../controllers/device.controller.dart';
@@ -29,8 +30,10 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
   ConnectivityStatus status = ConnectivityStatus.none;
   String? initialSSID;
 
+  MapEntry<String, String>? selectedTimeZone;
+
   // true means no need to rerun the prepare function
-  bool initialSetupDone = false;
+  bool initialSetupDone = true;
 
   // true means credentials have been sent... so no need to run
   bool credentialsSent = false;
@@ -49,7 +52,7 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
   @override
   void initState() {
     super.initState();
-    prepare(context);
+    // prepare(context);
   }
 
   Future<void> prepare(BuildContext context) async {
@@ -110,6 +113,8 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
         throw "Provided SSID is null";
       } else if (password == null) {
         throw "Provided password is null";
+      } else if (selectedTimeZone == null) {
+        throw "Please select a timzone for the device";
       }
 
       debugPrint("Provided SSID: " + ssid + " and password: " + password);
@@ -133,7 +138,7 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
         });
 
         // Send the request to the device to get the device id
-        final String? id = await sendCredentialsToDevice(ssid, password);
+        final String? id = await sendCredentialsToDevice(ssid, password, selectedTimeZone!.key);
 
         // Check if the device id was received successfully, and in case of success update the state
         if (id == null) {
@@ -211,7 +216,7 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
     if (!initialSetupDone) {
       return "Retry device connection";
     } else if (!credentialsSent) {
-      return "Resd wifi credentials";
+      return "Resend wifi credentials";
     } else if (!internetReconnected) {
       return "Manually connect to internet and retry";
     } else {
@@ -263,7 +268,25 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
                     const SizedBox(height: 20),
                     ...!deviceRegistered
                         ? [
-                            if (initialSetupDone && !credentialsSent && selectedSSID == null)
+                            if (initialSetupDone && !credentialsSent && selectedSSID == null) ...[
+                              DropdownSearch<MapEntry<String, String>>(
+                                mode: Mode.BOTTOM_SHEET,
+                                showSearchBox: true,
+                                items: timezones.entries.toList(),
+                                selectedItem: selectedTimeZone,
+                                dropdownSearchDecoration: const InputDecoration(
+                                  hintText: "Select a timezone for the device",
+                                  labelText: "Timezones",
+                                ),
+                                itemAsString: (item) {
+                                  return "${item!.key} (${item.value})";
+                                },
+                                onChanged: (item) {
+                                  setState(() {
+                                    selectedTimeZone = item;
+                                  });
+                                },
+                              ),
                               StreamBuilder<List<WiFiAccessPoint>>(
                                 stream: WiFiScan.instance.onScannedResultsAvailable,
                                 builder: (context, snapshot) => Column(
@@ -275,6 +298,7 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
                                       : [],
                                 ),
                               ),
+                            ],
                             if (addError != null)
                               Column(
                                 children: [
