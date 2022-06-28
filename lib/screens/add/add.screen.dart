@@ -33,7 +33,7 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
   MapEntry<String, String>? selectedTimeZone;
 
   // true means no need to rerun the prepare function
-  bool initialSetupDone = true;
+  bool initialSetupDone = false;
 
   // true means credentials have been sent... so no need to run
   bool credentialsSent = false;
@@ -52,7 +52,7 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
   @override
   void initState() {
     super.initState();
-    // prepare(context);
+    prepare(context);
   }
 
   Future<void> prepare(BuildContext context) async {
@@ -138,7 +138,7 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
         });
 
         // Send the request to the device to get the device id
-        final String? id = await sendCredentialsToDevice(ssid, password, selectedTimeZone!.key);
+        final String? id = await sendCredentialsToDevice(ssid, password, selectedTimeZone!.value);
 
         // Check if the device id was received successfully, and in case of success update the state
         if (id == null) {
@@ -276,7 +276,6 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
                                 selectedItem: selectedTimeZone,
                                 dropdownSearchDecoration: const InputDecoration(
                                   hintText: "Select a timezone for the device",
-                                  labelText: "Timezones",
                                 ),
                                 itemAsString: (item) {
                                   return "${item!.key} (${item.value})";
